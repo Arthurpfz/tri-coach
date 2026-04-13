@@ -305,37 +305,14 @@
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "98431817-3c44-4cd2-9a08-d9ab407b9ff5",
-              "name": "Monday_date",
-              "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        1248,
-        144
-      ],
-      "id": "6e76967c-6f75-4daf-b504-4e158bd9d11a",
-      "name": "Calculate Monday"
-    },
-    {
-      "parameters": {
         "promptType": "define",
-        "text": "=You are an expert Ironman Coach. You are supportive, data-driven, but flexible.\n\nCONTEXT:\n- Date: {{ $today.toFormat('cccc, yyyy-MM-dd') }}\n- Athlete: {{ $('Loop Over Items').item.json[\"Name\"] }}\n\nTHE INPUTS:\n1. THE PLAN (Full Week):\n{{ JSON.stringify({\n  \"Monday\": $json[\"Monday\"],\n  \"Tuesday\": $json[\"Tuesday\"],\n  \"Wednesday\": $json[\"Wednesday\"],\n  \"Thursday\": $json[\"Thursday\"],\n  \"Friday\": $json[\"Friday\"],\n  \"Saturday\": $json[\"Saturday\"],\n  \"Sunday\": $json[\"Sunday\"]\n}) }}\n\n\n2. THE ACTUALS (Strava Data for Today):\n{{ JSON.stringify($('Get Activities').item.json) }}\n\nINSTRUCTIONS:\nAnalyze the \"Actuals\" against the \"Plan\" using this logic flow:\n\n1. CHECK FOR DIRECT MATCH:\n   - Does the Activity Type matches Today's Plan? (e.g., Run vs Run).\n   - If YES: specific feedback on pace/heart rate/duration.\n\n2. CHECK FOR LOGICAL SWAP (If Step 1 fails):\n   - Is today's actual workout found elsewhere in this week's plan (tomorrow or yesterday)?\n   - If YES: Acknowledge the swap (e.g., \"Good call moving the Long Ride to today\").\n\n3. CHECK FOR \"ROGUE\" ACTIVITY (The Guardrail):\n   - If the activity is completely different from anything planned (e.g., a Hike on a Swim day, or a hard session on a Rest Day), DO NOT try to \"map\" it.\n   - ACTION: Acknowledge the effort but flag it as off-plan. Be curious, not angry.\n   - Example: \"I see you went for a Hike instead of the Swim. Hope the legs are feeling good, but let's watch the fatigue.\"\n\n4. CHECK FOR MISSED SESSION:\n   - If Actuals are empty and today was a training day: check if yesterday was huge (maybe they needed rest?). Be gentle.\n\nOUTPUT FORMAT:\n- Draft a WhatsApp message to the athlete.\n- Tone: \"Coach\" (Short, punchy, human).\n- Be analytics\n- Length: Max 4 sentences.\n- NO PREAMBLE. Just the message.",
+        "text": "=You are an expert Ironman Coach. You are supportive, data-driven, and analyze each session ON ITS OWN MERITS.\n\nIMPORTANT: Do NOT compare this session to any planned/scheduled workout. Do NOT comment on whether the session matches what was 'supposed' to happen today. The athlete adjusts training on the fly and wants pure session analysis.\n\nCONTEXT:\n- Date: {{ $today.toFormat('cccc, yyyy-MM-dd') }}\n- Athlete: {{ $('Loop Over Items').item.json[\"Name\"] }}\n\nTODAY'S SESSION (Strava data):\n{{ JSON.stringify($('Get Activities').item.json) }}\n\nINSTRUCTIONS:\n- If a session exists: give specific feedback on type, duration, pace, heart rate, effort.\n- If no session today: keep it short and supportive — acknowledge a rest day without guilt-tripping.\n\nDO NOT:\n- Mention any planned/scheduled workout\n- Say things like 'instead of', 'as planned', 'off-plan', 'should have been'\n- Grade the session against any schedule\n- Comment on whether this was the 'right' session for today\n\nOUTPUT FORMAT:\n- WhatsApp message to the athlete.\n- Tone: \"Coach\" (short, punchy, human).\n- Be analytical with the numbers.\n- Length: Max 4 sentences.\n- NO PREAMBLE. Just the message.",
         "batching": {}
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.8,
       "position": [
-        1664,
+        1248,
         144
       ],
       "id": "ed1f1aa6-7a3e-4b72-a909-2a4e03d6ba15",
@@ -358,41 +335,6 @@
         "openRouterApi": {
           "id": "nhbNqmgyP4cAeQ6B",
           "name": "OpenRouter account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "search",
-        "base": {
-          "__rl": true,
-          "value": "appw0Xd3T54okfaXa",
-          "mode": "list",
-          "cachedResultName": "Tri Coach MVP",
-          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
-        },
-        "table": {
-          "__rl": true,
-          "value": "tblJ0UHyJ1drXv97F",
-          "mode": "list",
-          "cachedResultName": "Weekly Plans",
-          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblJ0UHyJ1drXv97F"
-        },
-        "filterByFormula": "=AND(\n  {Athlete} = '{{ $('Loop Over Items').item.json.id }}',\n  DATETIME_FORMAT({Week Start Date}, 'YYYY-MM-DD') = '{{ $json.Monday_date }}'\n)",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [
-        1456,
-        144
-      ],
-      "id": "bebdb21a-9ade-47b0-a9c0-fcb238af2020",
-      "name": "Search plan",
-      "credentials": {
-        "airtableTokenApi": {
-          "id": "JMbdFoTWoGU3avK9",
-          "name": "Airtable Personal Access Token account"
         }
       }
     },
@@ -494,18 +436,7 @@
       "main": [
         [
           {
-            "node": "Calculate Monday",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Calculate Monday": {
-      "main": [
-        [
-          {
-            "node": "Search plan",
+            "node": "Basic LLM Chain",
             "type": "main",
             "index": 0
           }
@@ -518,17 +449,6 @@
           {
             "node": "Basic LLM Chain",
             "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Search plan": {
-      "main": [
-        [
-          {
-            "node": "Basic LLM Chain",
-            "type": "main",
             "index": 0
           }
         ]
