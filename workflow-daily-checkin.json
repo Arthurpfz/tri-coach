@@ -1,0 +1,1177 @@
+{
+  "updatedAt": "2026-01-18T19:03:38.359Z",
+  "createdAt": "2026-01-03T13:12:30.844Z",
+  "id": "Q2KE0XGsc8NWLY8V",
+  "name": "Coach Tri - Daily Checkin",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 20,
+              "triggerAtMinute": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -528,
+        -16
+      ],
+      "id": "f614ea18-16a0-4232-87aa-bb522878f42b",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw0Xd3T54okfaXa",
+          "mode": "list",
+          "cachedResultName": "Tri Coach MVP",
+          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblK8jxVIxuFi9H8Z",
+          "mode": "list",
+          "cachedResultName": "Users",
+          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblK8jxVIxuFi9H8Z"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -320,
+        -16
+      ],
+      "id": "53bdc9b9-d873-4b27-9136-d09329a365d9",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JMbdFoTWoGU3avK9",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -112,
+        -16
+      ],
+      "id": "39b1818a-13ec-4ceb-bd01-76270f021619",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "28a3e08b-d49d-4005-a6d0-1bf69f9abeb4",
+              "leftValue": "={{ $json['Token Expires At'] }}",
+              "rightValue": "={{ $now.plus({ minutes: 30 }).toSeconds() }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        320
+      ],
+      "id": "c7544c7d-0c7b-464f-8f8f-b738773baf2a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.strava.com/api/v3/oauth/token",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "client_id",
+              "value": "193431"
+            },
+            {
+              "name": "client_secret",
+              "value": "STRAVA_CLIENT_SECRET_REDACTED"
+            },
+            {
+              "name": "grant_type",
+              "value": "refresh_token"
+            },
+            {
+              "name": "refresh_token",
+              "value": "={{ $json['Strava Refresh Token'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        272,
+        -32
+      ],
+      "id": "1b59b094-c496-48f6-b0ea-632f79885c78",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appw0Xd3T54okfaXa",
+          "mode": "list",
+          "cachedResultName": "Tri Coach MVP",
+          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblK8jxVIxuFi9H8Z",
+          "mode": "list",
+          "cachedResultName": "Users",
+          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblK8jxVIxuFi9H8Z"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Items').item.json.id }}",
+            "Token Expires At": "={{ $json.expires_at }}",
+            "Last Activity Sync": 0,
+            "Strava Access Token": "={{ $json.access_token }}",
+            "Strava Refresh Token": "={{ $json.refresh_token }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Strava Refresh Token",
+              "displayName": "Strava Refresh Token",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Strava Access Token",
+              "displayName": "Strava Access Token",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Token Expires At",
+              "displayName": "Token Expires At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Activity Sync",
+              "displayName": "Last Activity Sync",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        640,
+        -32
+      ],
+      "id": "d1292095-c361-45a3-8478-8badb7d71638",
+      "name": "Update record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JMbdFoTWoGU3avK9",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.strava.com/api/v3/athlete/activities",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "after",
+              "value": "={{ $today.setZone('Europe/Berlin').toSeconds() }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('HTTP Request').item.json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1040,
+        144
+      ],
+      "id": "ee318474-0fbe-416e-8cff-89a3f0e9b035",
+      "name": "Get Activities",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "98431817-3c44-4cd2-9a08-d9ab407b9ff5",
+              "name": "Monday_date",
+              "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1248,
+        144
+      ],
+      "id": "6e76967c-6f75-4daf-b504-4e158bd9d11a",
+      "name": "Calculate Monday"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert Ironman Coach. You are supportive, data-driven, but flexible.\n\nCONTEXT:\n- Date: {{ $today.toFormat('cccc, yyyy-MM-dd') }}\n- Athlete: {{ $('Loop Over Items').item.json[\"Name\"] }}\n\nTHE INPUTS:\n1. THE PLAN (Full Week):\n{{ JSON.stringify({\n  \"Monday\": $json[\"Monday\"],\n  \"Tuesday\": $json[\"Tuesday\"],\n  \"Wednesday\": $json[\"Wednesday\"],\n  \"Thursday\": $json[\"Thursday\"],\n  \"Friday\": $json[\"Friday\"],\n  \"Saturday\": $json[\"Saturday\"],\n  \"Sunday\": $json[\"Sunday\"]\n}) }}\n\n\n2. THE ACTUALS (Strava Data for Today):\n{{ JSON.stringify($('Get Activities').item.json) }}\n\nINSTRUCTIONS:\nAnalyze the \"Actuals\" against the \"Plan\" using this logic flow:\n\n1. CHECK FOR DIRECT MATCH:\n   - Does the Activity Type matches Today's Plan? (e.g., Run vs Run).\n   - If YES: specific feedback on pace/heart rate/duration.\n\n2. CHECK FOR LOGICAL SWAP (If Step 1 fails):\n   - Is today's actual workout found elsewhere in this week's plan (tomorrow or yesterday)?\n   - If YES: Acknowledge the swap (e.g., \"Good call moving the Long Ride to today\").\n\n3. CHECK FOR \"ROGUE\" ACTIVITY (The Guardrail):\n   - If the activity is completely different from anything planned (e.g., a Hike on a Swim day, or a hard session on a Rest Day), DO NOT try to \"map\" it.\n   - ACTION: Acknowledge the effort but flag it as off-plan. Be curious, not angry.\n   - Example: \"I see you went for a Hike instead of the Swim. Hope the legs are feeling good, but let's watch the fatigue.\"\n\n4. CHECK FOR MISSED SESSION:\n   - If Actuals are empty and today was a training day: check if yesterday was huge (maybe they needed rest?). Be gentle.\n\nOUTPUT FORMAT:\n- Draft a WhatsApp message to the athlete.\n- Tone: \"Coach\" (Short, punchy, human).\n- Be analytics\n- Length: Max 4 sentences.\n- NO PREAMBLE. Just the message.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        1664,
+        144
+      ],
+      "id": "ed1f1aa6-7a3e-4b72-a909-2a4e03d6ba15",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-3.5-sonnet",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        352
+      ],
+      "id": "1d1948ed-81c6-428f-8695-e3653ed5f094",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "nhbNqmgyP4cAeQ6B",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw0Xd3T54okfaXa",
+          "mode": "list",
+          "cachedResultName": "Tri Coach MVP",
+          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblJ0UHyJ1drXv97F",
+          "mode": "list",
+          "cachedResultName": "Weekly Plans",
+          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblJ0UHyJ1drXv97F"
+        },
+        "filterByFormula": "=AND(\n  {Athlete} = '{{ $('Loop Over Items').item.json.id }}',\n  DATETIME_FORMAT({Week Start Date}, 'YYYY-MM-DD') = '{{ $json.Monday_date }}'\n)",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1456,
+        144
+      ],
+      "id": "bebdb21a-9ade-47b0-a9c0-fcb238af2020",
+      "name": "Search plan",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JMbdFoTWoGU3avK9",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "TELEGRAM_CHAT_ID_REDACTED",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2016,
+        144
+      ],
+      "id": "88d328fa-43e4-4ab5-a197-9997a1d3beb3",
+      "name": "Send a text message",
+      "webhookId": "4268bc93-9dc8-4d0b-9e35-184a19f2659a",
+      "credentials": {
+        "telegramApi": {
+          "id": "9IpAp35yJmIQJpeA",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update record": {
+      "main": [
+        [
+          {
+            "node": "Get Activities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Activities": {
+      "main": [
+        [
+          {
+            "node": "Calculate Monday",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Monday": {
+      "main": [
+        [
+          {
+            "node": "Search plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search plan": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "08cda30e-ee3e-44ba-8e56-96a8371ca951",
+  "activeVersionId": "32386d34-22aa-422b-9c09-fe9c8e6859f6",
+  "versionCounter": 21,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-01-03T13:12:30.848Z",
+      "createdAt": "2026-01-03T13:12:30.848Z",
+      "role": "workflow:owner",
+      "workflowId": "Q2KE0XGsc8NWLY8V",
+      "projectId": "51zk01zmzcv1m5vw",
+      "project": {
+        "updatedAt": "2026-01-03T12:23:57.574Z",
+        "createdAt": "2026-01-03T12:23:52.619Z",
+        "id": "51zk01zmzcv1m5vw",
+        "name": "arthur pfalzgraf <arthur.pfalzgraf@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e",
+        "projectRelations": [
+          {
+            "updatedAt": "2026-01-03T12:23:52.620Z",
+            "createdAt": "2026-01-03T12:23:52.620Z",
+            "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e",
+            "projectId": "51zk01zmzcv1m5vw",
+            "user": {
+              "updatedAt": "2026-01-24T10:20:22.000Z",
+              "createdAt": "2026-01-03T12:23:50.969Z",
+              "id": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e",
+              "email": "arthur.pfalzgraf@gmail.com",
+              "firstName": "arthur",
+              "lastName": "pfalzgraf",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "lUcAtn2oxCPkNkJ1",
+                "userActivatedAt": 1767553640139,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1768763018630
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2026-01-23",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-01-07T20:13:20.000Z",
+    "createdAt": "2026-01-07T20:13:17.232Z",
+    "versionId": "32386d34-22aa-422b-9c09-fe9c8e6859f6",
+    "workflowId": "Q2KE0XGsc8NWLY8V",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 20,
+                "triggerAtMinute": 5
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -528,
+          -16
+        ],
+        "id": "f614ea18-16a0-4232-87aa-bb522878f42b",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "operation": "search",
+          "base": {
+            "__rl": true,
+            "value": "appw0Xd3T54okfaXa",
+            "mode": "list",
+            "cachedResultName": "Tri Coach MVP",
+            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
+          },
+          "table": {
+            "__rl": true,
+            "value": "tblK8jxVIxuFi9H8Z",
+            "mode": "list",
+            "cachedResultName": "Users",
+            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblK8jxVIxuFi9H8Z"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2.1,
+        "position": [
+          -320,
+          -16
+        ],
+        "id": "53bdc9b9-d873-4b27-9136-d09329a365d9",
+        "name": "Search records",
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "JMbdFoTWoGU3avK9",
+            "name": "Airtable Personal Access Token account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          -112,
+          -16
+        ],
+        "id": "39b1818a-13ec-4ceb-bd01-76270f021619",
+        "name": "Loop Over Items"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "28a3e08b-d49d-4005-a6d0-1bf69f9abeb4",
+                "leftValue": "={{ $json['Token Expires At'] }}",
+                "rightValue": "={{ $now.plus({ minutes: 30 }).toSeconds() }}",
+                "operator": {
+                  "type": "number",
+                  "operation": "lt"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          672,
+          320
+        ],
+        "id": "c7544c7d-0c7b-464f-8f8f-b738773baf2a",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://www.strava.com/api/v3/oauth/token",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "client_id",
+                "value": "193431"
+              },
+              {
+                "name": "client_secret",
+                "value": "STRAVA_CLIENT_SECRET_REDACTED"
+              },
+              {
+                "name": "grant_type",
+                "value": "refresh_token"
+              },
+              {
+                "name": "refresh_token",
+                "value": "={{ $json['Strava Refresh Token'] }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          272,
+          -32
+        ],
+        "id": "1b59b094-c496-48f6-b0ea-632f79885c78",
+        "name": "HTTP Request"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "base": {
+            "__rl": true,
+            "value": "appw0Xd3T54okfaXa",
+            "mode": "list",
+            "cachedResultName": "Tri Coach MVP",
+            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
+          },
+          "table": {
+            "__rl": true,
+            "value": "tblK8jxVIxuFi9H8Z",
+            "mode": "list",
+            "cachedResultName": "Users",
+            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblK8jxVIxuFi9H8Z"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "id": "={{ $('Loop Over Items').item.json.id }}",
+              "Token Expires At": "={{ $json.expires_at }}",
+              "Last Activity Sync": 0,
+              "Strava Access Token": "={{ $json.access_token }}",
+              "Strava Refresh Token": "={{ $json.refresh_token }}"
+            },
+            "matchingColumns": [
+              "id"
+            ],
+            "schema": [
+              {
+                "id": "id",
+                "displayName": "id",
+                "required": false,
+                "defaultMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": true,
+                "removed": false
+              },
+              {
+                "id": "Name",
+                "displayName": "Name",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Phone",
+                "displayName": "Phone",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Strava Refresh Token",
+                "displayName": "Strava Refresh Token",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Strava Access Token",
+                "displayName": "Strava Access Token",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Token Expires At",
+                "displayName": "Token Expires At",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Last Activity Sync",
+                "displayName": "Last Activity Sync",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "number",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2.1,
+        "position": [
+          640,
+          -32
+        ],
+        "id": "d1292095-c361-45a3-8478-8badb7d71638",
+        "name": "Update record",
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "JMbdFoTWoGU3avK9",
+            "name": "Airtable Personal Access Token account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "url": "https://www.strava.com/api/v3/athlete/activities",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "after",
+                "value": "={{ $today.setZone('Europe/Berlin').toSeconds() }}"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('Loop Over Items').item.json['Strava Access Token'] }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          1040,
+          144
+        ],
+        "id": "ee318474-0fbe-416e-8cff-89a3f0e9b035",
+        "name": "Get Activities",
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "98431817-3c44-4cd2-9a08-d9ab407b9ff5",
+                "name": "Monday_date",
+                "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1248,
+          144
+        ],
+        "id": "6e76967c-6f75-4daf-b504-4e158bd9d11a",
+        "name": "Calculate Monday"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=You are an expert Ironman Coach. You are supportive, data-driven, but flexible.\n\nCONTEXT:\n- Date: {{ $today.toFormat('cccc, yyyy-MM-dd') }}\n- Athlete: {{ $('Loop Over Items').item.json[\"Name\"] }}\n\nTHE INPUTS:\n1. THE PLAN (Full Week):\n{{ JSON.stringify({\n  \"Monday\": $json[\"Monday\"],\n  \"Tuesday\": $json[\"Tuesday\"],\n  \"Wednesday\": $json[\"Wednesday\"],\n  \"Thursday\": $json[\"Thursday\"],\n  \"Friday\": $json[\"Friday\"],\n  \"Saturday\": $json[\"Saturday\"],\n  \"Sunday\": $json[\"Sunday\"]\n}) }}\n\n\n2. THE ACTUALS (Strava Data for Today):\n{{ JSON.stringify($('Get Activities').item.json) }}\n\nINSTRUCTIONS:\nAnalyze the \"Actuals\" against the \"Plan\" using this logic flow:\n\n1. CHECK FOR DIRECT MATCH:\n   - Does the Activity Type matches Today's Plan? (e.g., Run vs Run).\n   - If YES: specific feedback on pace/heart rate/duration.\n\n2. CHECK FOR LOGICAL SWAP (If Step 1 fails):\n   - Is today's actual workout found elsewhere in this week's plan (tomorrow or yesterday)?\n   - If YES: Acknowledge the swap (e.g., \"Good call moving the Long Ride to today\").\n\n3. CHECK FOR \"ROGUE\" ACTIVITY (The Guardrail):\n   - If the activity is completely different from anything planned (e.g., a Hike on a Swim day, or a hard session on a Rest Day), DO NOT try to \"map\" it.\n   - ACTION: Acknowledge the effort but flag it as off-plan. Be curious, not angry.\n   - Example: \"I see you went for a Hike instead of the Swim. Hope the legs are feeling good, but let's watch the fatigue.\"\n\n4. CHECK FOR MISSED SESSION:\n   - If Actuals are empty and today was a training day: check if yesterday was huge (maybe they needed rest?). Be gentle.\n\nOUTPUT FORMAT:\n- Draft a WhatsApp message to the athlete.\n- Tone: \"Coach\" (Short, punchy, human).\n- Be analytics\n- Length: Max 4 sentences.\n- NO PREAMBLE. Just the message.",
+          "batching": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.8,
+        "position": [
+          1664,
+          144
+        ],
+        "id": "ed1f1aa6-7a3e-4b72-a909-2a4e03d6ba15",
+        "name": "Basic LLM Chain"
+      },
+      {
+        "parameters": {
+          "model": "anthropic/claude-3.5-sonnet",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+        "typeVersion": 1,
+        "position": [
+          1664,
+          352
+        ],
+        "id": "1d1948ed-81c6-428f-8695-e3653ed5f094",
+        "name": "OpenRouter Chat Model",
+        "credentials": {
+          "openRouterApi": {
+            "id": "nhbNqmgyP4cAeQ6B",
+            "name": "OpenRouter account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "search",
+          "base": {
+            "__rl": true,
+            "value": "appw0Xd3T54okfaXa",
+            "mode": "list",
+            "cachedResultName": "Tri Coach MVP",
+            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
+          },
+          "table": {
+            "__rl": true,
+            "value": "tblJ0UHyJ1drXv97F",
+            "mode": "list",
+            "cachedResultName": "Weekly Plans",
+            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblJ0UHyJ1drXv97F"
+          },
+          "filterByFormula": "=AND(\n  {Athlete} = '{{ $('Loop Over Items').item.json.id }}',\n  DATETIME_FORMAT({Week Start Date}, 'YYYY-MM-DD') = '{{ $json.Monday_date }}'\n)",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2.1,
+        "position": [
+          1456,
+          144
+        ],
+        "id": "bebdb21a-9ade-47b0-a9c0-fcb238af2020",
+        "name": "Search plan",
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "JMbdFoTWoGU3avK9",
+            "name": "Airtable Personal Access Token account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "TELEGRAM_CHAT_ID_REDACTED",
+          "text": "={{ $json.text }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          2016,
+          144
+        ],
+        "id": "88d328fa-43e4-4ab5-a197-9997a1d3beb3",
+        "name": "Send a text message",
+        "webhookId": "4268bc93-9dc8-4d0b-9e35-184a19f2659a",
+        "credentials": {
+          "telegramApi": {
+            "id": "9IpAp35yJmIQJpeA",
+            "name": "Telegram account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Search records",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Search records": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Over Items": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Search records",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [],
+          []
+        ]
+      },
+      "HTTP Request": {
+        "main": [
+          [
+            {
+              "node": "Update record",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update record": {
+        "main": [
+          [
+            {
+              "node": "Get Activities",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Activities": {
+        "main": [
+          [
+            {
+              "node": "Calculate Monday",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Calculate Monday": {
+        "main": [
+          [
+            {
+              "node": "Search plan",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenRouter Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Search plan": {
+        "main": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Basic LLM Chain": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "arthur pfalzgraf",
+    "name": "Version 32386d34",
+    "description": "",
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-01-07T20:13:20.925Z",
+        "id": 6,
+        "workflowId": "Q2KE0XGsc8NWLY8V",
+        "versionId": "32386d34-22aa-422b-9c09-fe9c8e6859f6",
+        "event": "activated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      }
+    ]
+  }
+}

@@ -1,0 +1,843 @@
+{
+  "updatedAt": "2026-01-18T19:04:09.353Z",
+  "createdAt": "2026-01-03T21:42:38.058Z",
+  "id": "lUcAtn2oxCPkNkJ1",
+  "name": "Coach Tri - Sunday Planner",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtHour": 20,
+              "triggerAtMinute": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9559b075-1d4d-499b-bf54-17c7e3e54541",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw0Xd3T54okfaXa",
+          "mode": "list",
+          "cachedResultName": "Tri Coach MVP",
+          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblK8jxVIxuFi9H8Z",
+          "mode": "list",
+          "cachedResultName": "Users",
+          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblK8jxVIxuFi9H8Z"
+        },
+        "filterByFormula": "Name = \"Arthur Pfalzgraf\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "40fd91b0-e028-43f3-b85a-a13429bc0de1",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JMbdFoTWoGU3avK9",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert Ironman Coach creating personalized weekly training plans.\n\n=== ATHLETE PROFILE ===\n- Name: {{ $json.Name }}\n- Race: {{ $json['Race Name'] }} ({{ $json['Race Date'] }})\n- Current Phase: {{ $json['Training Phase'] }}\n- Fitness Profile: {{ $json['Fitness Profile'] }}\n\n=== ATHLETE CONSTRAINTS ===\n{{ $json.Constraints }}\n\n=== INSTRUCTIONS ===\n\n1. **Constraints are non-negotiable.** If constraints conflict with coaching best practices, constraints win. Always.\n\n2. **Label every session** with exactly one of:\n   - KEY: Priority session, do not skip, contains structured work\n   - OPTIONAL (Easy): Can skip freely, Zone 2 only, 30-50min\n   - OPTIONAL (Intensity): Can skip, short intervals allowed, 30-40min max\n   - REST: No training\n\n3. **Optional session rules:**\n   - Max 1x OPTIONAL (Intensity) per week\n   - OPTIONAL (Intensity) never scheduled the day before a KEY session\n   - OPTIONAL (Easy) is always Zone 2, no exceptions\n\n4. **Phase-appropriate focus:**\n   - Base 1-2: Aerobic endurance, consistency, technique (80-90% Zone 2)\n   - Build 1-2: Introduce intensity, sport-specific work (70-80% Zone 2)\n   - Peak: Race simulation, sharpening\n   - Taper: Reduce volume, maintain some intensity\n\n5. **Use exact values from Fitness Profile:**\n   - HR zones: Use exact bpm ranges provided\n   - Paces: Use exact min/km or min/100m provided\n   - Power: Use exact watts and %FTP provided\n   - CSS: Use exact swim pace provided\n\n6. **Session structure:**\n   - KEY sessions: Include warm-up, main set with specific targets, cool-down\n   - OPTIONAL sessions: Simple structure, clear intensity guidance\n   - Always specify: duration, intensity (HR/power/pace), and focus\n\n=== OUTPUT FORMAT ===\nReturn JSON only. No markdown, no explanations, no extra text.\n\n{\n  \"week_of\": \"YYYY-MM-DD\",\n  \"phase\": \"Current training phase\",\n  \"focus\": \"1-2 sentence focus for this week\",\n  \"total_hours\": \"Estimated range (e.g., 5-6h)\",\n  \"key_sessions\": 3,\n  \"monday\": \"REST or OPTIONAL (Easy/Intensity): description\",\n  \"tuesday\": \"KEY: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"wednesday\": \"KEY: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"thursday\": \"REST or OPTIONAL (Easy/Intensity): description\",\n  \"friday\": \"KEY: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"saturday\": \"KEY or OPTIONAL: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"sunday\": \"REST or OPTIONAL (Easy): description\"\n}\n\n=== EXAMPLE SESSION FORMATS ===\n- \"KEY: Swim: 55min. WU: 10min easy. MS: 6x200m @ CSS (2:05/100m) w/ 30s rest. CD: 5min easy.\"\n- \"KEY: Bike: 60min Zwift. WU: 15min Z2. MS: 4x8min sweet spot (235-248W) w/ 3min recovery. CD: 10min easy.\"\n- \"OPTIONAL (Easy): Run: 40min Zone 2 (114-149bpm) treadmill. Relaxed form, conversational pace.\"\n- \"OPTIONAL (Intensity): Run: 35min. WU: 15min Z2. MS: 6x30s strides w/ 90s recovery. CD: 10min easy.\"\n- \"REST\"\n\nGenerate the training plan for NEXT WEEK (starting Monday)",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        496,
+        16
+      ],
+      "id": "70dbba47-5cce-4e10-ada8-d927fe63ac21",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-3.7-sonnet",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        496,
+        192
+      ],
+      "id": "54315f91-0483-4651-aa0f-4a4e9e074eb8",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "nhbNqmgyP4cAeQ6B",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "216f1e90-0857-4019-b358-4bb3340da422",
+              "name": "=plan",
+              "value": "={{ JSON.parse($('Basic LLM Chain').item.json.text.replace(/```json/g, \"\").replace(/```/g, \"\").trim()) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        848,
+        16
+      ],
+      "id": "9b9d70f0-9de7-4ca6-9bb3-5b8a62c0febe",
+      "name": "Parse Json"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appw0Xd3T54okfaXa",
+          "mode": "list",
+          "cachedResultName": "Tri Coach MVP",
+          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblJ0UHyJ1drXv97F",
+          "mode": "list",
+          "cachedResultName": "Weekly Plans",
+          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblJ0UHyJ1drXv97F"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Week Start Date": "={{ $today.endOf('week').plus({ days: 1 }).toFormat('yyyy-MM-dd') }}",
+            "Athlete": "={{ $('Search records').item.json.id }}",
+            "Monday": "={{ JSON.parse($('Parse Json').item.json.plan).monday }}",
+            "Tuesday": "={{ JSON.parse($('Parse Json').item.json.plan).tuesday }}",
+            "Wednesday": "={{ JSON.parse($('Parse Json').item.json.plan).wednesday }} ",
+            "Thursday": "={{ JSON.parse($('Parse Json').item.json.plan).thursday }}",
+            "Friday": "={{ JSON.parse($('Parse Json').item.json.plan).friday }}",
+            "Saturday": "={{ JSON.parse($('Parse Json').item.json.plan).saturday }}",
+            "Sunday": "={{ JSON.parse($('Parse Json').item.json.plan).sunday }}",
+            "Focus": "={{ JSON.parse($('Parse Json').item.json.plan).focus}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Week Start Date",
+              "displayName": "Week Start Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Athlete",
+              "displayName": "Athlete",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Focus",
+              "displayName": "Focus",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Monday",
+              "displayName": "Monday",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tuesday",
+              "displayName": "Tuesday",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Wednesday",
+              "displayName": "Wednesday",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Thursday",
+              "displayName": "Thursday",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Friday",
+              "displayName": "Friday",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Saturday",
+              "displayName": "Saturday",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Sunday",
+              "displayName": "Sunday",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1056,
+        16
+      ],
+      "id": "08185412-4a3b-4ba6-a15f-35c62e3db4ca",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JMbdFoTWoGU3avK9",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "TELEGRAM_CHAT_ID_REDACTED",
+        "text": "=📅 *Training Plan | {{ $today.endOf('week').plus({ days: 1 }).toFormat('MMM d, yyyy') }}*\n\n🎯 *Focus:*\n{{ JSON.parse($('Parse Json').item.json.plan).focus }}\n\nMonday:\n{{ JSON.parse($('Parse Json').item.json.plan).monday }}\n\nTuesday:\n{{ JSON.parse($('Parse Json').item.json.plan).tuesday }}\n\nWednesday:\n{{ JSON.parse($('Parse Json').item.json.plan).wednesday }}\n\nThursday:\n{{ JSON.parse($('Parse Json').item.json.plan).thursday }}\n\nFriday:\n{{ JSON.parse($('Parse Json').item.json.plan).friday }}\n\nSaturday:\n{{ JSON.parse($('Parse Json').item.json.plan).saturday }}\n\nSunday:\n{{ JSON.parse($('Parse Json').item.json.plan).sunday }}\n\n_Go crush it! 🚀_",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1056,
+        192
+      ],
+      "id": "497d4be5-0335-4c74-8999-3de620a0d2e7",
+      "name": "Send a text message",
+      "webhookId": "a95cc0ad-f835-4d7f-a950-cb2fe7292beb",
+      "credentials": {
+        "telegramApi": {
+          "id": "9IpAp35yJmIQJpeA",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Parse Json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Json": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "8ee4c71c-9584-4765-aa0e-a95b910598f3",
+  "activeVersionId": "ca59f26f-c598-4238-b3e0-03aa467b9c3b",
+  "versionCounter": 18,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-01-03T21:42:38.062Z",
+      "createdAt": "2026-01-03T21:42:38.062Z",
+      "role": "workflow:owner",
+      "workflowId": "lUcAtn2oxCPkNkJ1",
+      "projectId": "51zk01zmzcv1m5vw",
+      "project": {
+        "updatedAt": "2026-01-03T12:23:57.574Z",
+        "createdAt": "2026-01-03T12:23:52.619Z",
+        "id": "51zk01zmzcv1m5vw",
+        "name": "arthur pfalzgraf <arthur.pfalzgraf@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e",
+        "projectRelations": [
+          {
+            "updatedAt": "2026-01-03T12:23:52.620Z",
+            "createdAt": "2026-01-03T12:23:52.620Z",
+            "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e",
+            "projectId": "51zk01zmzcv1m5vw",
+            "user": {
+              "updatedAt": "2026-01-24T10:20:22.000Z",
+              "createdAt": "2026-01-03T12:23:50.969Z",
+              "id": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e",
+              "email": "arthur.pfalzgraf@gmail.com",
+              "firstName": "arthur",
+              "lastName": "pfalzgraf",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "lUcAtn2oxCPkNkJ1",
+                "userActivatedAt": 1767553640139,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1768763018630
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2026-01-23",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-01-05T18:44:38.000Z",
+    "createdAt": "2026-01-05T18:44:36.124Z",
+    "versionId": "ca59f26f-c598-4238-b3e0-03aa467b9c3b",
+    "workflowId": "lUcAtn2oxCPkNkJ1",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "triggerAtHour": 20,
+                "triggerAtMinute": 7
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          0,
+          0
+        ],
+        "id": "9559b075-1d4d-499b-bf54-17c7e3e54541",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "operation": "search",
+          "base": {
+            "__rl": true,
+            "value": "appw0Xd3T54okfaXa",
+            "mode": "list",
+            "cachedResultName": "Tri Coach MVP",
+            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
+          },
+          "table": {
+            "__rl": true,
+            "value": "tblK8jxVIxuFi9H8Z",
+            "mode": "list",
+            "cachedResultName": "Users",
+            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblK8jxVIxuFi9H8Z"
+          },
+          "filterByFormula": "Name = \"Arthur Pfalzgraf\"",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2.1,
+        "position": [
+          208,
+          0
+        ],
+        "id": "40fd91b0-e028-43f3-b85a-a13429bc0de1",
+        "name": "Search records",
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "JMbdFoTWoGU3avK9",
+            "name": "Airtable Personal Access Token account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=You are an expert Ironman Coach creating personalized weekly training plans.\n\n=== ATHLETE PROFILE ===\n- Name: {{ $json.Name }}\n- Race: {{ $json['Race Name'] }} ({{ $json['Race Date'] }})\n- Current Phase: {{ $json['Training Phase'] }}\n- Fitness Profile: {{ $json['Fitness Profile'] }}\n\n=== ATHLETE CONSTRAINTS ===\n{{ $json.Constraints }}\n\n=== INSTRUCTIONS ===\n\n1. **Constraints are non-negotiable.** If constraints conflict with coaching best practices, constraints win. Always.\n\n2. **Label every session** with exactly one of:\n   - KEY: Priority session, do not skip, contains structured work\n   - OPTIONAL (Easy): Can skip freely, Zone 2 only, 30-50min\n   - OPTIONAL (Intensity): Can skip, short intervals allowed, 30-40min max\n   - REST: No training\n\n3. **Optional session rules:**\n   - Max 1x OPTIONAL (Intensity) per week\n   - OPTIONAL (Intensity) never scheduled the day before a KEY session\n   - OPTIONAL (Easy) is always Zone 2, no exceptions\n\n4. **Phase-appropriate focus:**\n   - Base 1-2: Aerobic endurance, consistency, technique (80-90% Zone 2)\n   - Build 1-2: Introduce intensity, sport-specific work (70-80% Zone 2)\n   - Peak: Race simulation, sharpening\n   - Taper: Reduce volume, maintain some intensity\n\n5. **Use exact values from Fitness Profile:**\n   - HR zones: Use exact bpm ranges provided\n   - Paces: Use exact min/km or min/100m provided\n   - Power: Use exact watts and %FTP provided\n   - CSS: Use exact swim pace provided\n\n6. **Session structure:**\n   - KEY sessions: Include warm-up, main set with specific targets, cool-down\n   - OPTIONAL sessions: Simple structure, clear intensity guidance\n   - Always specify: duration, intensity (HR/power/pace), and focus\n\n=== OUTPUT FORMAT ===\nReturn JSON only. No markdown, no explanations, no extra text.\n\n{\n  \"week_of\": \"YYYY-MM-DD\",\n  \"phase\": \"Current training phase\",\n  \"focus\": \"1-2 sentence focus for this week\",\n  \"total_hours\": \"Estimated range (e.g., 5-6h)\",\n  \"key_sessions\": 3,\n  \"monday\": \"REST or OPTIONAL (Easy/Intensity): description\",\n  \"tuesday\": \"KEY: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"wednesday\": \"KEY: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"thursday\": \"REST or OPTIONAL (Easy/Intensity): description\",\n  \"friday\": \"KEY: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"saturday\": \"KEY or OPTIONAL: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"sunday\": \"REST or OPTIONAL (Easy): description\"\n}\n\n=== EXAMPLE SESSION FORMATS ===\n- \"KEY: Swim: 55min. WU: 10min easy. MS: 6x200m @ CSS (2:05/100m) w/ 30s rest. CD: 5min easy.\"\n- \"KEY: Bike: 60min Zwift. WU: 15min Z2. MS: 4x8min sweet spot (235-248W) w/ 3min recovery. CD: 10min easy.\"\n- \"OPTIONAL (Easy): Run: 40min Zone 2 (114-149bpm) treadmill. Relaxed form, conversational pace.\"\n- \"OPTIONAL (Intensity): Run: 35min. WU: 15min Z2. MS: 6x30s strides w/ 90s recovery. CD: 10min easy.\"\n- \"REST\"\n\nGenerate the training plan for NEXT WEEK (starting Monday)",
+          "batching": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.8,
+        "position": [
+          496,
+          16
+        ],
+        "id": "70dbba47-5cce-4e10-ada8-d927fe63ac21",
+        "name": "Basic LLM Chain"
+      },
+      {
+        "parameters": {
+          "model": "anthropic/claude-3.7-sonnet",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+        "typeVersion": 1,
+        "position": [
+          496,
+          192
+        ],
+        "id": "54315f91-0483-4651-aa0f-4a4e9e074eb8",
+        "name": "OpenRouter Chat Model",
+        "credentials": {
+          "openRouterApi": {
+            "id": "nhbNqmgyP4cAeQ6B",
+            "name": "OpenRouter account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "216f1e90-0857-4019-b358-4bb3340da422",
+                "name": "=plan",
+                "value": "={{ JSON.parse($('Basic LLM Chain').item.json.text.replace(/```json/g, \"\").replace(/```/g, \"\").trim()) }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          848,
+          16
+        ],
+        "id": "9b9d70f0-9de7-4ca6-9bb3-5b8a62c0febe",
+        "name": "Parse Json"
+      },
+      {
+        "parameters": {
+          "operation": "create",
+          "base": {
+            "__rl": true,
+            "value": "appw0Xd3T54okfaXa",
+            "mode": "list",
+            "cachedResultName": "Tri Coach MVP",
+            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
+          },
+          "table": {
+            "__rl": true,
+            "value": "tblJ0UHyJ1drXv97F",
+            "mode": "list",
+            "cachedResultName": "Weekly Plans",
+            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblJ0UHyJ1drXv97F"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "Week Start Date": "={{ $today.endOf('week').plus({ days: 1 }).toFormat('yyyy-MM-dd') }}",
+              "Athlete": "={{ $('Search records').item.json.id }}",
+              "Monday": "={{ JSON.parse($('Parse Json').item.json.plan).monday }}",
+              "Tuesday": "={{ JSON.parse($('Parse Json').item.json.plan).tuesday }}",
+              "Wednesday": "={{ JSON.parse($('Parse Json').item.json.plan).wednesday }} ",
+              "Thursday": "={{ JSON.parse($('Parse Json').item.json.plan).thursday }}",
+              "Friday": "={{ JSON.parse($('Parse Json').item.json.plan).friday }}",
+              "Saturday": "={{ JSON.parse($('Parse Json').item.json.plan).saturday }}",
+              "Sunday": "={{ JSON.parse($('Parse Json').item.json.plan).sunday }}",
+              "Focus": "={{ JSON.parse($('Parse Json').item.json.plan).focus}}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "Week Start Date",
+                "displayName": "Week Start Date",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "dateTime",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Athlete",
+                "displayName": "Athlete",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Focus",
+                "displayName": "Focus",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Monday",
+                "displayName": "Monday",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Tuesday",
+                "displayName": "Tuesday",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Wednesday",
+                "displayName": "Wednesday",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Thursday",
+                "displayName": "Thursday",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Friday",
+                "displayName": "Friday",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Saturday",
+                "displayName": "Saturday",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              },
+              {
+                "id": "Sunday",
+                "displayName": "Sunday",
+                "required": false,
+                "defaultMatch": false,
+                "canBeUsedToMatch": true,
+                "display": true,
+                "type": "string",
+                "readOnly": false,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {
+            "typecast": true
+          }
+        },
+        "type": "n8n-nodes-base.airtable",
+        "typeVersion": 2.1,
+        "position": [
+          1056,
+          16
+        ],
+        "id": "08185412-4a3b-4ba6-a15f-35c62e3db4ca",
+        "name": "Create a record",
+        "credentials": {
+          "airtableTokenApi": {
+            "id": "JMbdFoTWoGU3avK9",
+            "name": "Airtable Personal Access Token account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "TELEGRAM_CHAT_ID_REDACTED",
+          "text": "=📅 *Training Plan | {{ $today.endOf('week').plus({ days: 1 }).toFormat('MMM d, yyyy') }}*\n\n🎯 *Focus:*\n{{ JSON.parse($('Parse Json').item.json.plan).focus }}\n\nMonday:\n{{ JSON.parse($('Parse Json').item.json.plan).monday }}\n\nTuesday:\n{{ JSON.parse($('Parse Json').item.json.plan).tuesday }}\n\nWednesday:\n{{ JSON.parse($('Parse Json').item.json.plan).wednesday }}\n\nThursday:\n{{ JSON.parse($('Parse Json').item.json.plan).thursday }}\n\nFriday:\n{{ JSON.parse($('Parse Json').item.json.plan).friday }}\n\nSaturday:\n{{ JSON.parse($('Parse Json').item.json.plan).saturday }}\n\nSunday:\n{{ JSON.parse($('Parse Json').item.json.plan).sunday }}\n\n_Go crush it! 🚀_",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1056,
+          192
+        ],
+        "id": "497d4be5-0335-4c74-8999-3de620a0d2e7",
+        "name": "Send a text message",
+        "webhookId": "a95cc0ad-f835-4d7f-a950-cb2fe7292beb",
+        "credentials": {
+          "telegramApi": {
+            "id": "9IpAp35yJmIQJpeA",
+            "name": "Telegram account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Search records",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenRouter Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Search records": {
+        "main": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Basic LLM Chain": {
+        "main": [
+          [
+            {
+              "node": "Parse Json",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Json": {
+        "main": [
+          [
+            {
+              "node": "Create a record",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create a record": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "authors": "arthur pfalzgraf",
+    "name": "Version ca59f26f",
+    "description": "",
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-01-05T18:44:38.423Z",
+        "id": 5,
+        "workflowId": "lUcAtn2oxCPkNkJ1",
+        "versionId": "ca59f26f-c598-4238-b3e0-03aa467b9c3b",
+        "event": "activated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      }
+    ]
+  }
+}

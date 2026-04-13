@@ -1,0 +1,407 @@
+{
+  "name": "SANDBOX - Daily Checkin v2 (Intervals.icu)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 20,
+              "triggerAtMinute": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [-520, 240],
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw0Xd3T54okfaXa",
+          "mode": "list",
+          "cachedResultName": "Tri Coach MVP"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblK8jxVIxuFi9H8Z",
+          "mode": "list",
+          "cachedResultName": "Users"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [-320, 240],
+      "id": "search-users",
+      "name": "Search Users",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JMbdFoTWoGU3avK9",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [-120, 240],
+      "id": "loop-users",
+      "name": "Loop Over Users"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://intervals.icu/api/v1/athlete/{{ $json['Intervals.icu Athlete ID'] }}/activities",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "oldest",
+              "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "newest",
+              "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [80, 240],
+      "id": "get-activities",
+      "name": "Get Activities",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "JBZzr0E5U1GSy6OQ",
+          "name": "Intervals.icu API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-activities-exist",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [280, 240],
+      "id": "check-activities",
+      "name": "Check Activities Exist"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [480, 160],
+      "id": "loop-activities",
+      "name": "Loop Over Activities"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://intervals.icu/api/v1/activity/{{ $('Loop Over Activities').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [680, 160],
+      "id": "get-activity-details",
+      "name": "Get Activity Details",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "JBZzr0E5U1GSy6OQ",
+          "name": "Intervals.icu API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://intervals.icu/api/v1/activity/{{ $('Loop Over Activities').item.json.id }}/streams.json?types=watts,heartrate,cadence,time,velocity_smooth",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [680, 360],
+      "id": "get-streams",
+      "name": "Get Streams",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "JBZzr0E5U1GSy6OQ",
+          "name": "Intervals.icu API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://intervals.icu/api/v1/activity/{{ $('Loop Over Activities').item.json.id }}/intervals",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [680, 560],
+      "id": "get-intervals",
+      "name": "Get Intervals",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "JBZzr0E5U1GSy6OQ",
+          "name": "Intervals.icu API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://intervals.icu/api/v1/athlete/{{ $('Loop Over Users').item.json['Intervals.icu Athlete ID'] }}/wellness/{{ $today.toFormat('yyyy-MM-dd') }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [680, 760],
+      "id": "get-wellness",
+      "name": "Get Wellness",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "JBZzr0E5U1GSy6OQ",
+          "name": "Intervals.icu API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "mergeByPosition": {},
+        "combineBy": {
+          "values": {
+            "combineMode": "mergeByPosition"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [920, 360],
+      "id": "merge-data",
+      "name": "Merge API Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge all data from the 4 parallel API calls\nconst activity = $('Get Activity Details').first().json;\nconst streamsRaw = $('Get Streams').first().json;\nconst intervalsRaw = $('Get Intervals').first().json;\nconst wellness = $('Get Wellness').first().json;\nconst user = $('Loop Over Users').item.json;\n\nconst type = (activity.type || '').toLowerCase();\nconst isSwim = type.includes('swim');\nconst isRun = type.includes('run');\nconst isBike = type.includes('ride') || type.includes('bike') || type.includes('cycling') || type.includes('virtualride');\n\n// --- Parse streams into arrays ---\nconst streams = {};\nif (Array.isArray(streamsRaw)) {\n  for (const s of streamsRaw) {\n    if (s.type && s.data) streams[s.type] = s.data;\n  }\n} else if (streamsRaw && typeof streamsRaw === 'object') {\n  // Sometimes returned as object with arrays directly\n  for (const [key, val] of Object.entries(streamsRaw)) {\n    if (Array.isArray(val)) streams[key] = val;\n    else if (val && val.data) streams[key] = val.data;\n  }\n}\n\n// --- Compute cardiac drift ---\nlet cardiacDrift = null;\nconst hr = streams.heartrate;\nif (hr && hr.length > 20) {\n  const quarter = Math.floor(hr.length / 4);\n  const firstQ = hr.slice(0, quarter).filter(v => v > 0);\n  const lastQ = hr.slice(-quarter).filter(v => v > 0);\n  if (firstQ.length > 0 && lastQ.length > 0) {\n    const avgFirst = firstQ.reduce((a, b) => a + b, 0) / firstQ.length;\n    const avgLast = lastQ.reduce((a, b) => a + b, 0) / lastQ.length;\n    cardiacDrift = ((avgLast - avgFirst) / avgFirst * 100).toFixed(1);\n  }\n}\n\n// --- Compute power decoupling (first half vs second half) ---\nlet powerDecoupling = null;\nconst watts = streams.watts;\nif (watts && hr && watts.length > 20) {\n  const mid = Math.floor(watts.length / 2);\n  const pw1 = watts.slice(0, mid).filter(v => v > 0);\n  const pw2 = watts.slice(mid).filter(v => v > 0);\n  const hr1 = hr.slice(0, mid).filter(v => v > 0);\n  const hr2 = hr.slice(mid).filter(v => v > 0);\n  if (pw1.length && pw2.length && hr1.length && hr2.length) {\n    const ef1 = (pw1.reduce((a, b) => a + b, 0) / pw1.length) / (hr1.reduce((a, b) => a + b, 0) / hr1.length);\n    const ef2 = (pw2.reduce((a, b) => a + b, 0) / pw2.length) / (hr2.reduce((a, b) => a + b, 0) / hr2.length);\n    powerDecoupling = ((ef1 - ef2) / ef1 * 100).toFixed(1);\n  }\n}\n\n// --- Compute pace/speed decoupling for run/swim ---\nlet paceDecoupling = null;\nconst speed = streams.velocity_smooth;\nif (speed && hr && speed.length > 20 && !isBike) {\n  const mid = Math.floor(speed.length / 2);\n  const sp1 = speed.slice(0, mid).filter(v => v > 0);\n  const sp2 = speed.slice(mid).filter(v => v > 0);\n  const hr1 = hr.slice(0, mid).filter(v => v > 0);\n  const hr2 = hr.slice(mid).filter(v => v > 0);\n  if (sp1.length && sp2.length && hr1.length && hr2.length) {\n    const ef1 = (sp1.reduce((a, b) => a + b, 0) / sp1.length) / (hr1.reduce((a, b) => a + b, 0) / hr1.length);\n    const ef2 = (sp2.reduce((a, b) => a + b, 0) / sp2.length) / (hr2.reduce((a, b) => a + b, 0) / hr2.length);\n    paceDecoupling = ((ef1 - ef2) / ef1 * 100).toFixed(1);\n  }\n}\n\n// --- Format pace correctly per sport ---\nlet paceStr = null;\nif (activity.average_speed && activity.average_speed > 0) {\n  if (isSwim) {\n    // Swim: pace per 100m\n    const secsPer100 = 100 / activity.average_speed;\n    const mins = Math.floor(secsPer100 / 60);\n    const secs = Math.round(secsPer100 % 60);\n    paceStr = `${mins}:${String(secs).padStart(2, '0')}/100m`;\n  } else if (isRun) {\n    // Run: pace per km\n    const secsPerKm = 1000 / activity.average_speed;\n    const mins = Math.floor(secsPerKm / 60);\n    const secs = Math.round(secsPerKm % 60);\n    paceStr = `${mins}:${String(secs).padStart(2, '0')}/km`;\n  } else if (isBike) {\n    paceStr = `${(activity.average_speed * 3.6).toFixed(1)} km/h`;\n  }\n}\n\n// --- Format intervals ---\nlet intervalsSummary = [];\nconst intervals = intervalsRaw?.icu_intervals || [];\nconst workIntervals = intervals.filter(i => i.type === 'WORK');\nif (workIntervals.length > 0) {\n  const powers = workIntervals.map(i => i.average_watts).filter(Boolean);\n  const hrs = workIntervals.map(i => i.average_heartrate).filter(Boolean);\n  const paces = workIntervals.map(i => i.average_speed).filter(Boolean);\n\n  for (const [idx, interval] of workIntervals.entries()) {\n    let line = `Rep ${idx + 1}: ${Math.round(interval.elapsed_time / 60 * 10) / 10}min`;\n    if (interval.distance) line += `, ${(interval.distance / (isSwim ? 1 : 1000)).toFixed(isSwim ? 0 : 2)}${isSwim ? 'm' : 'km'}`;\n    if (interval.average_watts) line += `, ${Math.round(interval.average_watts)}W`;\n    if (interval.average_heartrate) line += `, ${Math.round(interval.average_heartrate)}bpm`;\n    if (interval.average_speed && isSwim) {\n      const p = 100 / interval.average_speed;\n      line += `, ${Math.floor(p/60)}:${String(Math.round(p%60)).padStart(2,'0')}/100m`;\n    } else if (interval.average_speed && isRun) {\n      const p = 1000 / interval.average_speed;\n      line += `, ${Math.floor(p/60)}:${String(Math.round(p%60)).padStart(2,'0')}/km`;\n    }\n    if (interval.decoupling != null) line += `, decoupling: ${(interval.decoupling * 100).toFixed(1)}%`;\n    intervalsSummary.push(line);\n  }\n\n  // Consistency stats\n  if (powers.length > 1) {\n    const avg = powers.reduce((a, b) => a + b, 0) / powers.length;\n    const stddev = Math.sqrt(powers.map(p => (p - avg) ** 2).reduce((a, b) => a + b, 0) / powers.length);\n    const cv = (stddev / avg * 100).toFixed(1);\n    intervalsSummary.push(`Power consistency: avg ${Math.round(avg)}W, CV ${cv}%`);\n  }\n  if (paces.length > 1 && (isSwim || isRun)) {\n    const div = isSwim ? 100 : 1000;\n    const paceSecs = paces.map(s => div / s);\n    const avg = paceSecs.reduce((a, b) => a + b, 0) / paceSecs.length;\n    const stddev = Math.sqrt(paceSecs.map(p => (p - avg) ** 2).reduce((a, b) => a + b, 0) / paceSecs.length);\n    const cv = (stddev / avg * 100).toFixed(1);\n    intervalsSummary.push(`Pace consistency: CV ${cv}%`);\n  }\n}\n\n// --- Cadence ---\nlet cadenceStr = null;\nif (activity.average_cadence || activity.avg_run_cadence) {\n  if (isRun) {\n    const spm = Math.round((activity.avg_run_cadence || activity.average_cadence) * 2);\n    cadenceStr = `${spm} spm`;\n  } else if (isBike) {\n    cadenceStr = `${Math.round(activity.average_cadence)} rpm`;\n  } else if (isSwim) {\n    cadenceStr = `${Math.round(activity.average_cadence)} strokes/min`;\n  }\n}\n\n// --- Cadence variability from streams ---\nlet cadenceCV = null;\nconst cadStream = streams.cadence;\nif (cadStream && cadStream.length > 20) {\n  const nonZero = cadStream.filter(v => v > 0);\n  if (nonZero.length > 10) {\n    const avg = nonZero.reduce((a, b) => a + b, 0) / nonZero.length;\n    const stddev = Math.sqrt(nonZero.map(c => (c - avg) ** 2).reduce((a, b) => a + b, 0) / nonZero.length);\n    cadenceCV = (stddev / avg * 100).toFixed(1);\n  }\n}\n\n// --- Build output ---\nconst sport = isSwim ? 'Swim' : isRun ? 'Run' : isBike ? 'Bike' : activity.type;\n\nconst result = {\n  sport,\n  activityName: activity.name,\n  device: activity.device_name,\n  durationMin: Math.round(activity.moving_time / 60),\n  elapsedMin: Math.round(activity.elapsed_time / 60),\n  distanceKm: activity.distance ? (activity.distance / 1000).toFixed(2) : null,\n  distanceM: activity.distance ? Math.round(activity.distance) : null,\n  pace: paceStr,\n  cadence: cadenceStr,\n  cadenceCV: cadenceCV ? `${cadenceCV}%` : null,\n\n  // Power (bike mainly)\n  avgPower: activity.avg_watts ? Math.round(activity.avg_watts) : null,\n  normalizedPower: activity.weighted_avg_watts ? Math.round(activity.weighted_avg_watts) : null,\n  maxPower: activity.max_watts ? Math.round(activity.max_watts) : null,\n  variabilityIndex: activity.variability_index ? activity.variability_index.toFixed(2) : null,\n\n  // HR\n  avgHR: activity.average_heartrate ? Math.round(activity.average_heartrate) : null,\n  maxHR: activity.max_heartrate ? Math.round(activity.max_heartrate) : null,\n  hrZoneMins: activity.icu_hr_zone_times ? activity.icu_hr_zone_times.map(t => Math.round(t / 60)) : null,\n\n  // Computed metrics\n  cardiacDrift: cardiacDrift ? `${cardiacDrift}%` : null,\n  powerDecoupling: powerDecoupling ? `${powerDecoupling}%` : null,\n  paceDecoupling: paceDecoupling ? `${paceDecoupling}%` : null,\n\n  // Training load\n  tss: activity.icu_training_load ? Math.round(activity.icu_training_load) : null,\n  intensityFactor: activity.intensity ? activity.intensity.toFixed(2) : null,\n  trimp: activity.trimp ? Math.round(activity.trimp) : null,\n\n  // Intervals\n  intervalCount: workIntervals.length,\n  intervals: intervalsSummary.length > 0 ? intervalsSummary : null,\n\n  // Wellness context\n  ctl: wellness?.ctl ? Math.round(wellness.ctl) : null,\n  atl: wellness?.atl ? Math.round(wellness.atl) : null,\n  tsb: (wellness?.ctl != null && wellness?.atl != null) ? Math.round(wellness.ctl - wellness.atl) : null,\n  restingHR: wellness?.restingHR || null,\n  sleepHours: wellness?.sleepSecs ? (wellness.sleepSecs / 3600).toFixed(1) : null,\n  soreness: wellness?.soreness || null,\n  fatigue: wellness?.fatigue || null,\n  mood: wellness?.mood || null,\n  hrv: wellness?.hrv || null\n};\n\nreturn [{ json: result }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 360],
+      "id": "process-data",
+      "name": "Process & Compute Metrics"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "calc-monday",
+              "name": "Monday_date",
+              "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1320, 360],
+      "id": "calculate-monday",
+      "name": "Calculate Monday"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw0Xd3T54okfaXa",
+          "mode": "list",
+          "cachedResultName": "Tri Coach MVP"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblJ0UHyJ1drXv97F",
+          "mode": "list",
+          "cachedResultName": "Weekly Plans"
+        },
+        "filterByFormula": "=AND(\n  {Athlete} = '{{ $('Loop Over Users').item.json.id }}',\n  DATETIME_FORMAT({Week Start Date}, 'YYYY-MM-DD') = '{{ $json.Monday_date }}'\n)",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1520, 360],
+      "id": "search-plan",
+      "name": "Search Plan",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JMbdFoTWoGU3avK9",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an elite triathlon coach analyzing today's workout. Your athlete trains seriously and expects precise, data-driven feedback.\n\nCONTEXT:\n- Date: {{ $today.toFormat('cccc, yyyy-MM-dd') }}\n- Athlete: {{ $('Loop Over Users').item.json.Name }}\n- Training Phase: {{ $('Loop Over Users').item.json['Training Phase'] }}\n- Fitness Profile: {{ $('Loop Over Users').item.json['Fitness Profile'] }}\n\nPLANNED SESSION:\n{{ $('Search Plan').item.json[$today.toFormat('cccc')] || 'No plan found for today' }}\n\nACTUAL EXECUTION:\nSport: {{ $('Process & Compute Metrics').item.json.sport }}\nActivity: {{ $('Process & Compute Metrics').item.json.activityName }}\nDevice: {{ $('Process & Compute Metrics').item.json.device }}\nDuration: {{ $('Process & Compute Metrics').item.json.durationMin }}min moving ({{ $('Process & Compute Metrics').item.json.elapsedMin }}min elapsed)\n{{ $('Process & Compute Metrics').item.json.sport === 'Swim' ? 'Distance: ' + $('Process & Compute Metrics').item.json.distanceM + 'm' : 'Distance: ' + $('Process & Compute Metrics').item.json.distanceKm + 'km' }}\nPace: {{ $('Process & Compute Metrics').item.json.pace || 'N/A' }}\nCadence: {{ $('Process & Compute Metrics').item.json.cadence || 'N/A' }}{{ $('Process & Compute Metrics').item.json.cadenceCV ? ' (variability: ' + $('Process & Compute Metrics').item.json.cadenceCV + ')' : '' }}\n\n{{ $('Process & Compute Metrics').item.json.avgPower ? '=== POWER ===\\nAverage: ' + $('Process & Compute Metrics').item.json.avgPower + 'W\\nNormalized: ' + $('Process & Compute Metrics').item.json.normalizedPower + 'W\\nMax: ' + $('Process & Compute Metrics').item.json.maxPower + 'W\\nVariability Index: ' + $('Process & Compute Metrics').item.json.variabilityIndex : '' }}\n\n{{ $('Process & Compute Metrics').item.json.avgHR ? '=== HEART RATE ===\\nAverage: ' + $('Process & Compute Metrics').item.json.avgHR + 'bpm\\nMax: ' + $('Process & Compute Metrics').item.json.maxHR + 'bpm\\nZone distribution (Z1→Z5+): ' + ($('Process & Compute Metrics').item.json.hrZoneMins ? $('Process & Compute Metrics').item.json.hrZoneMins.join(', ') + ' min' : 'N/A') : '' }}\n\n=== COMPUTED METRICS ===\nCardiac Drift: {{ $('Process & Compute Metrics').item.json.cardiacDrift || 'N/A' }}\n{{ $('Process & Compute Metrics').item.json.powerDecoupling ? 'Power Decoupling: ' + $('Process & Compute Metrics').item.json.powerDecoupling : '' }}\n{{ $('Process & Compute Metrics').item.json.paceDecoupling ? 'Pace Decoupling: ' + $('Process & Compute Metrics').item.json.paceDecoupling : '' }}\n\n=== TRAINING LOAD ===\nTSS: {{ $('Process & Compute Metrics').item.json.tss || 'N/A' }}\nIntensity Factor: {{ $('Process & Compute Metrics').item.json.intensityFactor || 'N/A' }}\n\n{{ $('Process & Compute Metrics').item.json.intervals ? '=== INTERVALS (' + $('Process & Compute Metrics').item.json.intervalCount + ' work reps) ===\\n' + $('Process & Compute Metrics').item.json.intervals.join('\\n') : '' }}\n\n{{ $('Process & Compute Metrics').item.json.ctl ? '=== FITNESS CONTEXT ===\\nCTL (fitness): ' + $('Process & Compute Metrics').item.json.ctl + '\\nATL (fatigue): ' + $('Process & Compute Metrics').item.json.atl + '\\nTSB (form): ' + $('Process & Compute Metrics').item.json.tsb + ($('Process & Compute Metrics').item.json.hrv ? '\\nHRV: ' + $('Process & Compute Metrics').item.json.hrv : '') + ($('Process & Compute Metrics').item.json.sleepHours ? '\\nSleep: ' + $('Process & Compute Metrics').item.json.sleepHours + 'h' : '') + ($('Process & Compute Metrics').item.json.restingHR ? '\\nResting HR: ' + $('Process & Compute Metrics').item.json.restingHR + 'bpm' : '') : '' }}\n\n=== INSTRUCTIONS ===\nAll metrics above are pre-computed from real time-series data. Trust them — do NOT invent or estimate numbers not provided.\n\nWrite 6-10 sentences:\n1. Was the planned session executed? Grade it honestly.\n2. 2-3 technical insights using the ACTUAL numbers above. Reference pace in the correct unit ({{ $('Process & Compute Metrics').item.json.sport === 'Swim' ? '/100m' : $('Process & Compute Metrics').item.json.sport === 'Run' ? '/km' : 'km/h' }}).\n3. What went well (be specific).\n4. One area to improve (actionable, not generic).\n5. Context: how this fits the training phase and current fitness/fatigue.\n6. What to do tomorrow based on fatigue state.\n\nRules:\n- ONLY reference numbers that appear above. Never fabricate metrics.\n- If a metric shows N/A, skip it — don't guess.\n- Be direct and coaching-focused. No fluff.\n- Tone: demanding but supportive coach.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [1720, 360],
+      "id": "llm-chain",
+      "name": "V2 Analysis"
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-3.7-sonnet",
+        "options": {
+          "maxTokens": 1000,
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [1720, 560],
+      "id": "openrouter-model",
+      "name": "Claude 3.7 Sonnet",
+      "credentials": {
+        "openRouterApi": {
+          "id": "nhbNqmgyP4cAeQ6B",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "TELEGRAM_CHAT_ID_REDACTED",
+        "text": "=🧪 [SANDBOX v2]\n\n{{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1920, 360],
+      "id": "send-telegram",
+      "name": "Send Telegram",
+      "credentials": {
+        "telegramApi": {
+          "id": "9IpAp35yJmIQJpeA",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [[{ "node": "Search Users", "type": "main", "index": 0 }]]
+    },
+    "Search Users": {
+      "main": [[{ "node": "Loop Over Users", "type": "main", "index": 0 }]]
+    },
+    "Loop Over Users": {
+      "main": [
+        [{ "node": "Get Activities", "type": "main", "index": 0 }],
+        [{ "node": "Search Users", "type": "main", "index": 0 }]
+      ]
+    },
+    "Get Activities": {
+      "main": [[{ "node": "Check Activities Exist", "type": "main", "index": 0 }]]
+    },
+    "Check Activities Exist": {
+      "main": [[{ "node": "Loop Over Activities", "type": "main", "index": 0 }]]
+    },
+    "Loop Over Activities": {
+      "main": [
+        [{ "node": "Get Activity Details", "type": "main", "index": 0 },
+         { "node": "Get Streams", "type": "main", "index": 0 },
+         { "node": "Get Intervals", "type": "main", "index": 0 },
+         { "node": "Get Wellness", "type": "main", "index": 0 }],
+        [{ "node": "Get Activities", "type": "main", "index": 0 }]
+      ]
+    },
+    "Get Activity Details": {
+      "main": [[{ "node": "Process & Compute Metrics", "type": "main", "index": 0 }]]
+    },
+    "Get Streams": {
+      "main": [[{ "node": "Process & Compute Metrics", "type": "main", "index": 0 }]]
+    },
+    "Get Intervals": {
+      "main": [[{ "node": "Process & Compute Metrics", "type": "main", "index": 0 }]]
+    },
+    "Get Wellness": {
+      "main": [[{ "node": "Process & Compute Metrics", "type": "main", "index": 0 }]]
+    },
+    "Process & Compute Metrics": {
+      "main": [[{ "node": "Calculate Monday", "type": "main", "index": 0 }]]
+    },
+    "Calculate Monday": {
+      "main": [[{ "node": "Search Plan", "type": "main", "index": 0 }]]
+    },
+    "Search Plan": {
+      "main": [[{ "node": "V2 Analysis", "type": "main", "index": 0 }]]
+    },
+    "V2 Analysis": {
+      "main": [[{ "node": "Send Telegram", "type": "main", "index": 0 }]]
+    },
+    "Claude 3.7 Sonnet": {
+      "ai_languageModel": [[{ "node": "V2 Analysis", "type": "ai_languageModel", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
