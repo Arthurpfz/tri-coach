@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Map selection: "WATOPIA", "RICHMOND", "LONDON", "NEWYORK", "INNSBRUCK", "SCOTLAND", "FRANCE", "PARIS" -->
+<!-- Date/times are "ISO 8601" format in UTC (i.e. GMT) (eg. 2016-09-14T10:26-10 where "-10" is the time zone and can be omitted) (See: https://en.wikipedia.org/wiki/ISO_8601) -->
+<!-- Note: The entries do not have to be in chronological order -->
+<MapSchedule>
+    <appointments>     
+                            <!-- NOV -->
+        <appointment map="FRANCE" start="2025-11-01T00:01-04" />   
+        <appointment map="SCOTLAND" start="2025-11-03T00:01-04" />
+        <appointment map="MAKURIISLANDS" start="2025-11-05T00:01-04" />
+        <appointment map="INNSBRUCK" start="2025-11-07T00:01-04" />
+        <appointment map="RICHMOND" start="2025-11-08T00:01-04" />
+        <appointment map="LONDON" start="2025-11-10T00:01-04" />
+        <appointment map="FRANCE" start="2025-11-12T00:01-04" />
+        <appointment map="MAKURIISLANDS" start="2025-11-14T00:01-04" />
+        <appointment map="SCOTLAND" start="2025-11-16T00:01-04" />
+        <appointment map="INNSBRUCK" start="2025-11-18T00:01-04" />
+        <appointment map="RICHMOND" start="2025-11-19T00:01-04" />
+        <appointment map="LONDON" start="2025-11-21T00:01-04" />           
+        <appointment map="FRANCE" start="2025-11-23T00:01-04" />
+        <appointment map="RICHMOND" start="2025-11-25T00:01-04" />    
+        <appointment map="MAKURIISLANDS" start="2025-11-27T00:01-04" />    
+        <appointment map="SCOTLAND" start="2025-11-29T00:01-04" />    
+                            <!-- DECEMBER -->
+        <appointment map="INNSBRUCK" start="2025-12-01T00:01-04" />   
+        <appointment map="RICHMOND" start="2025-12-02T00:01-04" />
+        <appointment map="LONDON" start="2025-12-04T00:01-04" />
+        <appointment map="FRANCE" start="2025-12-06T00:01-04" />
+        <appointment map="SCOTLAND" start="2025-12-08T00:01-04" />
+        <appointment map="MAKURIISLANDS" start="2025-12-10T00:01-04" />
+        <appointment map="INNSBRUCK" start="2025-12-12T00:01-04" />
+        <appointment map="RICHMOND" start="2025-12-13T00:01-04" />
+        <appointment map="LONDON" start="2025-12-15T00:01-04" />
+        <appointment map="FRANCE" start="2025-12-17T00:01-04" />
+        <appointment map="MAKURIISLANDS" start="2025-12-19T00:01-04" />
+        <appointment map="SCOTLAND" start="2025-12-21T00:01-04" />           
+        <appointment map="FRANCE" start="2025-12-23T00:01-04" />
+        <appointment map="RICHMOND" start="2025-12-25T00:01-04" />    
+        <appointment map="INNSBRUCK" start="2025-12-27T00:01-04" />    
+        <appointment map="MAKURIISLANDS" start="2025-12-28T00:01-04" />
+        <appointment map="SCOTLAND" start="2025-12-30T00:01-04" />   
+                            <!-- JANUARY -->
+        <appointment map="FRANCE" start="2026-01-01T00:01-04" />   
+        <appointment map="LONDON" start="2026-01-03T00:01-04" />
+        <appointment map="RICHMOND" start="2026-01-05T00:01-04" />
+        <appointment map="INNSBRUCK" start="2026-01-07T00:01-04" />
+        <appointment map="SCOTLAND" start="2026-01-08T00:01-04" />
+        <appointment map="MAKURIISLANDS" start="2026-01-10T00:01-04" />
+        <appointment map="FRANCE" start="2026-01-12T00:01-04" />
+        <appointment map="RICHMOND" start="2026-01-14T00:01-04" />
+        <appointment map="INNSBRUCK" start="2026-01-16T00:01-04" />
+        <appointment map="SCOTLAND" start="2026-01-17T00:01-04" />
+        <appointment map="MAKURIISLANDS" start="2026-01-19T00:01-04" />
+        <appointment map="LONDON" start="2026-01-21T00:01-04" />           
+        <appointment map="RICHMOND" start="2026-01-23T00:01-04" />
+        <appointment map="INNSBRUCK" start="2026-01-25T00:01-04" />    
+        <appointment map="FRANCE" start="2026-01-26T00:01-04" />    
+        <appointment map="SCOTLAND" start="2026-01-28T00:01-04" />
+        <appointment map="MAKURIISLANDS" start="2026-01-30T00:01-04" />   
+    </appointments>
+    <VERSION>1</VERSION>
+</MapSchedule>

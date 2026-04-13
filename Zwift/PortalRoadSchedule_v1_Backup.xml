@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Current worlds that support portal road placement:
+			0 = Watopia
+			10 = France
+-->
+<PortalRoads>
+    <PortalRoadMetadataCollections>
+        <PortalRoadMetadata name="Ski Lift Climb" id="10000" distanceCentimeters="863391.1250000000" elevCentimeters="68939.4140625000"/>
+        <PortalRoadMetadata name="Climb to Hollywood Sign" id="10001" distanceCentimeters="803772.0625000000" elevCentimeters="47779.4023437500"/>
+        <PortalRoadMetadata name="Eazy Rider" id="10002" distanceCentimeters="132117.9062500000" elevCentimeters="2188.17"/>
+        <PortalRoadMetadata name="Cote de Pike" id="10003" distanceCentimeters="218083.1562500000" elevCentimeters="21595.3691406250"/>
+        <PortalRoadMetadata name="Col d&apos;Aspin" id="10004" distanceCentimeters="1353582.2500000000" elevCentimeters="81151.2421875000"/>
+        <PortalRoadMetadata name="Col des Aravis" id="10005" distanceCentimeters="519923.7500000000" elevCentimeters="28011.6308593750"/>
+        <PortalRoadMetadata name="Puy de Dome" id="10006" distanceCentimeters="1298933.6250000000" elevCentimeters="91354.1796875000"/>
+        <PortalRoadMetadata name="Cote de Domancy" id="10007" distanceCentimeters="297847.5312500000" elevCentimeters="24057.1230468750"/>
+        <PortalRoadMetadata name="Col du Platzerwasel" id="10008" distanceCentimeters="785299.5625000000" elevCentimeters="59693.2343750000"/>
+        <PortalRoadMetadata name="Cote de Trebiac" id="10009" distanceCentimeters="459264.2187500000" elevCentimeters="20742.3691406250"/>
+        <PortalRoadMetadata name="Col du Tourmalet" id="10010" distanceCentimeters="1711817.5000000000" elevCentimeters="121698.0703125000"/>
+        <PortalRoadMetadata name="Bealach na Ba" id="10011" distanceCentimeters="899236.1250000000" elevCentimeters="63269.0078125000"/>
+        <PortalRoadMetadata name="Crow Road" id="10012" distanceCentimeters="695663.1250000000" elevCentimeters="25146.2929687500"/>
+        <PortalRoadMetadata name="Coll d&apos;Ordino" id="10013" distanceCentimeters="1032059.6875000000" elevCentimeters="50531.3867187500"/>
+        <PortalRoadMetadata name="La Laguna Negra" id="10014" distanceCentimeters="906204.6250000000" elevCentimeters="50992.7578125000"/>
+        <PortalRoadMetadata name="Col de la Madone" id="10015" distanceCentimeters="1591436.7500000000" elevCentimeters="89840.9765625000"/>
+        <PortalRoadMetadata name="Sa Calobra" id="10016" distanceCentimeters="1076702.8750000000" elevCentimeters="65862.4843750000"/>
+        <PortalRoadMetadata name="Rocacorba" id="10017" distanceCentimeters="1183119.6250000000" elevCentimeters="75621.8984375000"/>
+        <PortalRoadMetadata name="Old La Honda" id="10018" distanceCentimeters="557394.0000000000" elevCentimeters="39538.8046875000"/>
+        <PortalRoadMetadata name="La Super Planche des Belles Filles" id="10019" distanceCentimeters="859359.6250000000" elevCentimeters="60297.0625000000"/>
+        <PortalRoadMetadata name="Old Willunga Hill" id="10020" distanceCentimeters="398637.8125000000" elevCentimeters="25216.2343750000"/>
+        <PortalRoadMetadata name="Cheddar Gorge" id="10021" distanceCentimeters="468530.1250000000" elevCentimeters="17106.9707031250"/>
+        <PortalRoadMetadata name="Cipressa" id="10022" distanceCentimeters="643264.0000000000" elevCentimeters="22806.9609375000"/>
+        <PortalRoadMetadata name="Col du Rosier" id="10023" distanceCentimeters="498915.6250000000" elevCentimeters="22263.1191406250"/>
+        <PortalRoadMetadata name="Passo dello Stelvio" id="10024" distanceCentimeters="2336206.0000000000" elevCentimeters="159615.6093750000"/>
+        <PortalRoadMetadata name="Col de la Couillole" id="10025" distanceCentimeters="1809316.3750000000" elevCentimeters="120230.8828125000"/>
+        <PortalRoadMetadata name="Mt Fuji" id="10026" distanceCentimeters="2535069.0000000000" elevCentimeters="120858.2656250000"/>
+        <PortalRoadMetadata name="Pla d&apos;Adet" id="10027" distanceCentimeters="1211657.7500000000" elevCentimeters="84770.6875000000"/>
+        <PortalRoadMetadata name="Pas de Peyrol/Puy Mary" id="10028" distanceCentimeters="1025940.8125000000" elevCentimeters="60328.9609375000"/>
+        <PortalRoadMetadata name="Côte des Forche" id="10029" distanceCentimeters="299650.1875000000" elevCentimeters="14835.1328125000"/>
+        <PortalRoadMetadata name="Isola 2000" id="10030" distanceCentimeters="1889089.3750000000" elevCentimeters="114569.6406250000"/>
+        <PortalRoadMetadata name="La Turbie + Col d&apos;Eze" id="10031" distanceCentimeters="1594093.8750000000" elevCentimeters="61606.7421875000"/>
+        <PortalRoadMetadata name="Col du Galibier (Lautaret)" id="10032" distanceCentimeters="1035559.8750000000" elevCentimeters="53930.1484375000"/>
+        <PortalRoadMetadata name="Col de Peyresourde (Avajan)" id="10033" distanceCentimeters="830451.5000000000" elevCentimeters="55901.5156250000"/>
+        <PortalRoadMetadata name="Montée du Chinaillon" id="10034" distanceCentimeters="811526.6875000000" elevCentimeters="35379.8710937500"/>
+        <PortalRoadMetadata name="Lagos de Covadonga" id="10035" distanceCentimeters="1452976.0000000000" elevCentimeters="97633.4687500000"/>
+        <PortalRoadMetadata name="Mt. Hamilton" id="10036" distanceCentimeters="3129840.5000000000" elevCentimeters="125914.3750000000"/>
+        <PortalRoadMetadata name="Trollstigen" id="10037" distanceCentimeters="1244672.7500000000" elevCentimeters="78443.4375000000"/>
+        <PortalRoadMetadata name="Gotthard Pass" id="10038" distanceCentimeters="1442196.0000000000" elevCentimeters="90930.6718750000"/>
+        <PortalRoadMetadata name="Norton Summit" id="10039" distanceCentimeters="866602.6875000000" elevCentimeters="36360.2031250000"/>
+        <PortalRoadMetadata name="Hardknott Pass" id="10040" distanceCentimeters="269157.6250000000" elevCentimeters="30640.7050781250"/>
+        <PortalRoadMetadata name="Poggio" id="10041" distanceCentimeters="431199.5625000000" elevCentimeters="13635.3134765625"/>
+        <PortalRoadMetadata name="Oude Kwaremont" id="10042" distanceCentimeters="150988.1093750000" elevCentimeters="6376.9541015625"/>
+        <PortalRoadMetadata name="Cauberg" id="10043" distanceCentimeters="80620.8125000000" elevCentimeters="5779.4667968750"/>
+        <PortalRoadMetadata name="Côte de la Redoute" id="10044" distanceCentimeters="154292.8437500000" elevCentimeters="15314.8291015625"/>
+        <PortalRoadMetadata name="Mûr De Bretagne" id="10045" distanceCentimeters="197122.5781250000" elevCentimeters="12882.7382812500"/>
+        <PortalRoadMetadata name="Hautacam" id="10046" distanceCentimeters="1269734.5000000000" elevCentimeters="102302.6015625000"/>
+        <PortalRoadMetadata name="Col de la Croix Saint-Robert" id="10047" distanceCentimeters="573219.7500000000" elevCentimeters="34552.8203125000"/>
+        <PortalRoadMetadata name="Col de la Madeleine" id="10048" distanceCentimeters="1430862.5000000000" elevCentimeters="111083.4921875000"/>
+    </PortalRoadMetadataCollections>
+    <PortalRoadSchedule>
+        <appointments>                     
+            <!-- November -->
+            <appointment road="10025" world="10" portal_of_month="true" portal="0"  start="2025-11-01T00:01-04"/>
+            <appointment road="10009" world="1" portal="0"  start="2025-11-01T00:01-04"/>
+            <appointment road="10023" world="1" portal="0"  start="2025-11-04T00:01-04"/>
+            <appointment road="10046" world="1" portal="0"  start="2025-11-07T00:01-04"/>
+            <appointment road="10013" world="1" portal="0"  start="2025-11-10T00:01-04"/>
+            <appointment road="10007" world="1" portal="0"  start="2025-11-13T00:01-04"/>
+            <appointment road="10005" world="1" portal="0"  start="2025-11-16T00:01-04"/>
+            <appointment road="10015" world="1" portal="0"  start="2025-11-19T00:01-04"/>
+            <appointment road="10008" world="1" portal="0"  start="2025-11-22T00:01-04"/>
+            <appointment road="10022" world="1" portal="0"  start="2025-11-25T00:01-04"/>
+            <appointment road="10040" world="1" portal="0"  start="2025-11-28T00:01-04"/>
+            <!-- December -->
+            <appointment road="10011" world="10" portal_of_month="true" portal="0"  start="2025-12-01T00:01-04"/>
+            <appointment road="10021" world="1" portal="0"  start="2025-12-01T00:01-04"/>
+            <appointment road="10036" world="1" portal="0"  start="2025-12-04T00:01-04"/>
+            <appointment road="10020" world="1" portal="0"  start="2025-12-07T00:01-04"/>
+            <appointment road="10019" world="1" portal="0"  start="2025-12-23T00:01-04"/>
+            <appointment road="10038" world="1" portal="0"  start="2025-12-26T00:01-04"/>
+            <appointment road="10007" world="1" portal="0"  start="2025-12-29T00:01-04"/>
+            <!-- January -->
+            <appointment road="10046" world="10" portal_of_month="true" portal="0"  start="2026-01-01T00:01-04"/>
+            <appointment road="10006" world="1" portal="0"  start="2026-01-01T00:01-04"/>
+            <appointment road="10035" world="1" portal="0"  start="2026-01-04T00:01-04"/>
+            <appointment road="10033" world="1" portal="0"  start="2026-01-07T00:01-04"/>
+            <appointment road="10010" world="1" portal="0"  start="2026-01-10T00:01-04"/>
+            <appointment road="10009" world="1" portal="0"  start="2026-01-13T00:01-04"/>
+            <appointment road="10039" world="1" portal="0"  start="2026-01-16T00:01-04"/>
+            <appointment road="10032" world="1" portal="0"  start="2026-01-19T00:01-04"/>
+            <appointment road="10017" world="1" portal="0"  start="2026-01-22T00:01-04"/>
+            <appointment road="10012" world="1" portal="0"  start="2026-01-25T00:01-04"/>
+            <appointment road="10027" world="1" portal="0"  start="2026-01-29T00:01-04"/>
+        </appointments>
+        <VERSION>1</VERSION>
+    </PortalRoadSchedule>
+</PortalRoads>

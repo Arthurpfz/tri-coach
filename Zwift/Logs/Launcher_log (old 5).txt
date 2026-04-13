@@ -1,0 +1,1018 @@
+[19:03:15 2026-01-07] Launcher: Starting Sentry.
+[19:03:15 2026-01-07] Launcher: Initializing Mac Timer.
+[19:03:15 2026-01-07] Launcher: Checking for launcher version number.
+[19:03:15 2026-01-07] Launcher: Checking for VerCur Override
+[19:03:15 2026-01-07] Downloader::InternetConnected() returns TRUE![19:03:15 2026-01-07] Launcher: Established Internet Connection
+[19:03:15 2026-01-07] Launcher: Prefs file found.
+[19:03:15 2026-01-07] Launcher: Zwift Login URL set as https://launcher.zwift.com/launcher/realms/zwift/protocol/openid-connect/auth?client_id=Game_Launcher&redirect_uri=http%3A%2F%2Fzwift%2F&login=true&response_type=code
+[19:03:15 2026-01-07] Launcher: Setting for VerCur Override
+[19:03:15 2026-01-07] [Info] CNL: 3.68.0
+[19:03:15 2026-01-07] [Info] Machine ID: 2-7E7ABFF0-943B-5DBF-A6CD-DC1605DE57AF
+[19:03:17 2026-01-07] Launcher: Using Exp VerCur ZwiftMac_ver_cur.157262.xml
+[19:03:18 2026-01-07] Launcher: Webview loaded some URL.
+[19:03:18 2026-01-07] Launcher: Webview loaded some URL.
+[19:03:18 2026-01-07] Launcher: Starting Update Check
+[19:03:18 2026-01-07] Launcher: Resetting Patcher
+[19:03:18 2026-01-07] Downloader::InternetConnected() returns TRUE![19:03:19 2026-01-07] Launcher: Using Exp VerCur ZwiftMac_ver_cur.157262.xml
+[19:03:19 2026-01-07] Launcher: Calling Update Process Check
+[19:03:19 2026-01-07] Patcher: Patcher Version Number: "1.3.1".
+[19:03:19 2026-01-07] Patcher: Local download path set to "/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/".
+[19:03:19 2026-01-07] Patcher: Server URL path set to "http://cdn.zwift.com/gameassets/Zwift_Updates_Root/".
+[19:03:19 2026-01-07] Patcher: Local update path set to "/Users/arthurpfalzgraf/Library/Application Support/Zwift/".
+[19:03:19 2026-01-07] Patcher: Kicking download of "ZwiftMac_ver_cur.157262.xml"...
+[19:03:19 2026-01-07] Downloader::Download filename=ZwiftMac_ver_cur.157262.xml, length=0[19:03:19 2026-01-07] Patcher: Kicking download of "LauncherMac_ver_cur.xml"...
+[19:03:19 2026-01-07] Downloader::Download filename=LauncherMac_ver_cur.xml, length=0[19:03:19 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/ZwiftMac_ver_cur.157262.xml
+[19:03:19 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/LauncherMac_ver_cur.xml
+[19:03:19 2026-01-07] Downloader: "ZwiftMac_ver_cur.157262.xml" downloaded successfully (manifest checksum not provided, i.e. -1).
+[19:03:19 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/ZwiftMac_ver_cur.157262.xml success=1[19:03:19 2026-01-07] Downloader: "LauncherMac_ver_cur.xml" downloaded successfully (manifest checksum not provided, i.e. -1).
+[19:03:19 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/LauncherMac_ver_cur.xml success=1[19:03:19 2026-01-07] Patcher: Completed downloading server XML version files (Game & Launcher).
+[19:03:19 2026-01-07] Patcher: Fetching version attribute from file: "/Users/arthurpfalzgraf/Library/Application Support/Zwift/ZwiftMac_ver_cur.157245.xml"
+[19:03:19 2026-01-07] Patcher: Local version is "1.0.157245".
+[19:03:19 2026-01-07] Patcher: Server version is "1.0.157262".
+[19:03:19 2026-01-07] Patcher: Local manifest is "ZwiftMac_1.0.157245_e3214bbb_manifest.xml".
+[19:03:19 2026-01-07] Patcher: Server manifest is "ZwiftMac_1.0.157262_4f73bc9a_manifest.xml".
+[19:03:19 2026-01-07] Patcher: Server manifest file checksum is "-482651808".
+[19:03:19 2026-01-07] Patcher: Server ver_cur checksum is "-1269370276".
+[19:03:19 2026-01-07] Patcher: Local Launcher version is "1.1.14".
+[19:03:19 2026-01-07] Patcher: Server Launcher version is "1.0.5".
+[19:03:19 2026-01-07] Patcher: Launcher URL for updating self is "http://cdn.zwift.com/app/MacUpdate/".
+[19:03:19 2026-01-07] Patcher: Update available (1.0.157245 != 1.0.157262) false 
+[19:03:19 2026-01-07] Downloader::ForgetCompleted path=ZwiftMac_ver_cur.157262.xml[19:03:19 2026-01-07] Downloader::ForgetCompleted path=LauncherMac_ver_cur.xml[19:03:19 2026-01-07] Launcher: Calling Update Launcher Check
+[19:03:19 2026-01-07] Launcher: Calling Update Process Available
+[19:03:19 2026-01-07] Launcher: Update Found
+[19:03:19 2026-01-07] Launcher: Starting Pre Update
+[19:03:19 2026-01-07] Launcher: PreUpdate Create
+[19:03:19 2026-01-07] Launcher: PreUpdate Start
+[19:03:19 2026-01-07] Patcher: Kicking download of "ZwiftMac_1.0.157262_4f73bc9a_manifest.xml"...
+[19:03:19 2026-01-07] Downloader::Download filename=ZwiftMac_1.0.157262_4f73bc9a_manifest.xml, length=0[19:03:19 2026-01-07] Launcher: Webview loaded some URL.
+[19:03:19 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/ZwiftMac_1.0.157262_4f73bc9a_manifest.xml
+[19:03:20 2026-01-07] Launcher: Webview loaded some URL.
+[19:03:20 2026-01-07] Downloader: "ZwiftMac_1.0.157262_4f73bc9a_manifest.xml" downloaded successfully (manifest checksum not provided, i.e. -1).
+[19:03:20 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/ZwiftMac_1.0.157262_4f73bc9a_manifest.xml success=1[19:03:20 2026-01-07] Patcher: "ZwiftMac_1.0.157262_4f73bc9a_manifest.xml" was downloaded successfully.
+[19:03:20 2026-01-07] Patcher: Parsing local "ZwiftMac_1.0.157245_e3214bbb_manifest.xml"...
+[19:03:20 2026-01-07] Patcher: Parsing server "ZwiftMac_1.0.157262_4f73bc9a_manifest.xml"...
+[19:03:20 2026-01-07] Patcher: Root server folder containing files to download is "Zwift_1.0.157262_4f73bc9a"
+[19:03:20 2026-01-07] Patcher: Preparing for software update...
+[19:03:20 2026-01-07] Patcher:	 "ZwiftApp" out of date -- adding to missing files list.
+[19:03:20 2026-01-07] Patcher:	 "ZwiftAppSilicon" out of date -- adding to missing files list.
+[19:03:20 2026-01-07] Patcher:	 "assets\global.wad" out of date -- adding to missing files list.
+[19:03:20 2026-01-07] Patcher:	 "assets\Humans\Accessories\Accessories.wad" out of date -- adding to missing files list.
+[19:03:20 2026-01-07] Patcher:	 "assets\Worlds\world1\data_1.wad" out of date -- adding to missing files list.
+[19:03:20 2026-01-07] Patcher:	 "assets\Worlds\world10\data_1.wad" out of date -- adding to missing files list.
+[19:03:20 2026-01-07] Patcher:	 "assets\Worlds\world13\data_1.wad" out of date -- adding to missing files list.
+[19:03:20 2026-01-07] Patcher:	 "assets\Worlds\world2\data_1.wad" out of date -- adding to missing files list.
+[19:03:20 2026-01-07] Patcher:	 "assets\Worlds\world3\data_1.wad" out of date -- adding to missing files list.
+[19:03:20 2026-01-07] Patcher:	 "assets\Worlds\world4\data_1.wad" out of date -- adding to missing files list.
+[19:03:20 2026-01-07] Patcher:	 "assets\Worlds\world5\data_1.wad" out of date -- adding to missing files list.
+[19:03:20 2026-01-07] Patcher:	 "assets\Worlds\world7\data_1.wad" out of date -- adding to missing files list.
+[19:03:20 2026-01-07] Patcher:	 "assets\Worlds\world9\data_1.wad" out of date -- adding to missing files list.
+[19:03:20 2026-01-07] Launcher: Webview loaded some URL.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\cars\BobTheSprinterVanTDZ2026.gde" server file missing locally -- adding to missing files list.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\cars\Textures\BobSprinterVanTDZ2026D.ztx" server file missing locally -- adding to missing files list.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\CelebrationBalloons\TDZScottyInflatable2026.gde" server file missing locally -- adding to missing files list.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\CelebrationBalloons\Textures\TDZScottyInflatable2026.ztx" server file missing locally -- adding to missing files list.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\CelebrationBalloons\Textures\UCIScottyInflatableBranded2023.ztx" server file missing locally -- adding to missing files list.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\Road\RoadDecals\TourDeZwift202601D.ztx" server file missing locally -- adding to missing files list.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\Road\RoadDecals\TourDeZwift202601N.ztx" server file missing locally -- adding to missing files list.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\Road\RoadDecals\TourDeZwift202602D.ztx" server file missing locally -- adding to missing files list.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\Road\RoadDecals\TourDeZwift202602N.ztx" server file missing locally -- adding to missing files list.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\Structures\blimp.gde" out of date -- adding to missing files list.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\Structures\blimpfan.gde" out of date -- adding to missing files list.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\Structures\TourDeZwiftBlimp2026.ztx" server file missing locally -- adding to missing files list.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\Structures\EventArches\TourDeZwiftInflatable2026.ztx" server file missing locally -- adding to missing files list.
+[19:03:21 2026-01-07] Patcher:	 "data\Environment\Structures\EventArches\TourDeZwiftTierX2026.ztx" server file missing locally -- adding to missing files list.
+[19:03:22 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\Barriers\TourDeZwift202601.gde" server file missing locally -- adding to missing files list.
+[19:03:22 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\Barriers\TourDeZwift202602.gde" server file missing locally -- adding to missing files list.
+[19:03:22 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\Barriers\TourDeZwift202603.gde" server file missing locally -- adding to missing files list.
+[19:03:22 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\Barriers\TourDeZwift202604.gde" server file missing locally -- adding to missing files list.
+[19:03:22 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\Barriers\ZwiftBarrier01.gde" server file missing locally -- adding to missing files list.
+[19:03:22 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\Barriers\ZwiftBarrier02.gde" server file missing locally -- adding to missing files list.
+[19:03:22 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\Barriers\ZwiftBarrier03.gde" server file missing locally -- adding to missing files list.
+[19:03:22 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\Barriers\Textures\TourDeZwift2026.ztx" server file missing locally -- adding to missing files list.
+[19:03:22 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\Barriers\Textures\ZwiftBarrier01.ztx" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag01.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag02.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag03.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag04.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag05.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag06.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag07.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag08.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\RoadFlags\Textures\TourDeZwift2026.ztx" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Environment\Structures\RoadSide\UCI_Barriers\InflatableEnd02.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\Accessories\Glasses\OakleySphaeraGlasses2026.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\Accessories\Glasses\Textures\OakleySphaeraGlasses2026D.ztx" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\Accessories\Hats\RunningCapTourDeZwift2026.gde" out of date -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\Accessories\Helmets\OakleyVeloStelvio2026.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\Accessories\Helmets\Textures\OakleyVeloStelvio2026D.ztx" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\Accessories\Helmets\Textures\OakleyVeloStelvio2026N.ztx" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\CrowdClusterGeneric\GenericCrowd01.gde" out of date -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\CrowdClusterGeneric\GenericCrowd02.gde" out of date -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\CrowdClusterGeneric\GenericCrowd03.gde" out of date -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\CrowdClusterGeneric\TDZCrowd01.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\CrowdClusterGeneric\TDZCrowd02.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\CrowdClusterGeneric\TDZCrowd03.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\CrowdClusterGeneric\ZwiftGamesCrowd01.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\CrowdClusterGeneric\ZwiftGamesCrowd02.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\CrowdClusterGeneric\ZwiftGamesCrowd03.gde" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\CrowdClusterGeneric\Textures\GenericCrowdDFM.ztx" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\CrowdClusterGeneric\Textures\GenericCrowdNMM.ztx" server file missing locally -- adding to missing files list.
+[19:03:23 2026-01-07] Patcher:	 "data\Humans\CrowdClusterGeneric\Textures\TDZ2026CrowdDFM.ztx" server file missing locally -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\CrowdMascotGuy\CrowdMascotGuyTDZ2026.gde" server file missing locally -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\CrowdMascotGuy\Textures\mascotClothTDZ2026.ztx" server file missing locally -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\Jerseys\Clubs\ZwiftUnited2025.ztx" server file missing locally -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\RoboPacer\RoboPacer.gde" out of date -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\RoboPacer\Textures\RPBody_DM_A.ztx" out of date -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\RoboPacer\Textures\RPBody_DM_B.ztx" out of date -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\RoboPacer\Textures\RPBody_DM_C.ztx" out of date -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\RoboPacer\Textures\RPBody_DM_D.ztx" out of date -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\RoboPacer\Textures\RPBody_DM_TDZ_2026.ztx" server file missing locally -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\RoboPacer\Textures\RPBody_NM.ztx" out of date -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\RoboPacer\Textures\RPLimbs_DM_A.ztx" out of date -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\RoboPacer\Textures\RPLimbs_DM_B.ztx" out of date -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\RoboPacer\Textures\RPLimbs_DM_C.ztx" out of date -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\RoboPacer\Textures\RPLimbs_DM_D.ztx" out of date -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\RoboPacer\Textures\RPLimbs_DM_TDZ_2026.ztx" server file missing locally -- adding to missing files list.
+[19:03:24 2026-01-07] Patcher:	 "data\Humans\RoboPacer\Textures\RPLimbs_NM.ztx" out of date -- adding to missing files list.
+[19:03:25 2026-01-07] Patcher:	 "data\Pickups\RideOn\RideOnTourDeZwift2026.gde" server file missing locally -- adding to missing files list.
+[19:03:25 2026-01-07] Patcher:	 "data\UI\icons\Icon_SensorRelay.ztx" server file missing locally -- adding to missing files list.
+[19:03:25 2026-01-07] Patcher:	 "data\UI\WhiteOrangeTheme\Customization\Glasses\Glasses_OakleySphaera2026.ztx" server file missing locally -- adding to missing files list.
+[19:03:25 2026-01-07] Patcher:	 "data\UI\WhiteOrangeTheme\Customization\Glasses\Glasses_OakleyVeloKato2025.ztx" out of date -- adding to missing files list.
+[19:03:25 2026-01-07] Patcher:	 "data\UI\WhiteOrangeTheme\Customization\Helmets\OakleyVeloStelvio2026_thumb.ztx" server file missing locally -- adding to missing files list.
+[19:03:27 2026-01-07] Patcher:	 "data\UI\WhiteOrangeTheme\JerseyIcons\ZwiftUnited2025_thumb.ztx" server file missing locally -- adding to missing files list.
+[19:03:28 2026-01-07] Patcher:	 "data\Environment\Structures\blimp.ztx" Local file not on server -- adding to extraneous files list.
+[19:03:33 2026-01-07] Launcher: Webview loaded some URL.
+[19:03:33 2026-01-07] Launcher: Found Zwift Scheme.
+[19:03:33 2026-01-07] Launcher: Access Code Received.
+[19:03:34 2026-01-07] Patcher: Kicking download of missing local files from server...
+[19:03:34 2026-01-07] Downloader::Download filename=ZwiftApp, length=45588576[19:03:34 2026-01-07] Downloader::Download filename=ZwiftAppSilicon, length=41620768[19:03:34 2026-01-07] Downloader::Download filename=assets\global.wad, length=15561963[19:03:34 2026-01-07] Downloader::Download filename=assets\Humans\Accessories\Accessories.wad, length=809077[19:03:34 2026-01-07] Downloader::Download filename=assets\Worlds\world1\data_1.wad, length=28150811[19:03:34 2026-01-07] Downloader::Download filename=assets\Worlds\world10\data_1.wad, length=7228943[19:03:34 2026-01-07] Downloader::Download filename=assets\Worlds\world13\data_1.wad, length=2092406[19:03:34 2026-01-07] Downloader::Download filename=assets\Worlds\world2\data_1.wad, length=2366388[19:03:34 2026-01-07] Downloader::Download filename=assets\Worlds\world3\data_1.wad, length=5167345[19:03:34 2026-01-07] Downloader::Download filename=assets\Worlds\world4\data_1.wad, length=7856721[19:03:34 2026-01-07] Downloader::Download filename=assets\Worlds\world5\data_1.wad, length=1918578[19:03:34 2026-01-07] Downloader::Download filename=assets\Worlds\world7\data_1.wad, length=2354406[19:03:34 2026-01-07] Downloader::Download filename=assets\Worlds\world9\data_1.wad, length=11764682[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\cars\BobTheSprinterVanTDZ2026.gde, length=304243[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\cars\Textures\BobSprinterVanTDZ2026D.ztx, length=367982[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\CelebrationBalloons\TDZScottyInflatable2026.gde, length=779721[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\CelebrationBalloons\Textures\TDZScottyInflatable2026.ztx, length=106068[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\CelebrationBalloons\Textures\UCIScottyInflatableBranded2023.ztx, length=1521294[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Road\RoadDecals\TourDeZwift202601D.ztx, length=528016[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Road\RoadDecals\TourDeZwift202601N.ztx, length=271434[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Road\RoadDecals\TourDeZwift202602D.ztx, length=474770[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Road\RoadDecals\TourDeZwift202602N.ztx, length=402932[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\blimp.gde, length=936935[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\blimpfan.gde, length=81409[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\TourDeZwiftBlimp2026.ztx, length=31537[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\EventArches\TourDeZwiftInflatable2026.ztx, length=163774[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\EventArches\TourDeZwiftTierX2026.ztx, length=101245[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\Barriers\TourDeZwift202601.gde, length=11671[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\Barriers\TourDeZwift202602.gde, length=11671[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\Barriers\TourDeZwift202603.gde, length=11671[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\Barriers\TourDeZwift202604.gde, length=11671[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\Barriers\ZwiftBarrier01.gde, length=11670[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\Barriers\ZwiftBarrier02.gde, length=11670[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\Barriers\ZwiftBarrier03.gde, length=11670[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\Barriers\Textures\TourDeZwift2026.ztx, length=57215[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\Barriers\Textures\ZwiftBarrier01.ztx, length=36500[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag01.gde, length=27364[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag02.gde, length=27484[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag03.gde, length=27484[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag04.gde, length=27484[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag05.gde, length=27484[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag06.gde, length=27484[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag07.gde, length=27484[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag08.gde, length=27484[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\RoadFlags\Textures\TourDeZwift2026.ztx, length=113435[19:03:34 2026-01-07] Downloader::Download filename=data\Environment\Structures\RoadSide\UCI_Barriers\InflatableEnd02.gde, length=5810[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\Accessories\Glasses\OakleySphaeraGlasses2026.gde, length=170099[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\Accessories\Glasses\Textures\OakleySphaeraGlasses2026D.ztx, length=139860[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\Accessories\Hats\RunningCapTourDeZwift2026.gde, length=21923[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\Accessories\Helmets\OakleyVeloStelvio2026.gde, length=340827[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\Accessories\Helmets\Textures\OakleyVeloStelvio2026D.ztx, length=97230[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\Accessories\Helmets\Textures\OakleyVeloStelvio2026N.ztx, length=75926[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdClusterGeneric\GenericCrowd01.gde, length=2000808[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdClusterGeneric\GenericCrowd02.gde, length=2040232[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdClusterGeneric\GenericCrowd03.gde, length=2115544[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdClusterGeneric\TDZCrowd01.gde, length=2000568[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdClusterGeneric\TDZCrowd02.gde, length=2039992[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdClusterGeneric\TDZCrowd03.gde, length=2115544[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdClusterGeneric\ZwiftGamesCrowd01.gde, length=2000808[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdClusterGeneric\ZwiftGamesCrowd02.gde, length=2039992[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdClusterGeneric\ZwiftGamesCrowd03.gde, length=2115784[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdClusterGeneric\Textures\GenericCrowdDFM.ztx, length=433278[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdClusterGeneric\Textures\GenericCrowdNMM.ztx, length=326162[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdClusterGeneric\Textures\TDZ2026CrowdDFM.ztx, length=448162[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdMascotGuy\CrowdMascotGuyTDZ2026.gde, length=115160[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\CrowdMascotGuy\Textures\mascotClothTDZ2026.ztx, length=20837[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\Jerseys\Clubs\ZwiftUnited2025.ztx, length=136150[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\RoboPacer\RoboPacer.gde, length=1641000[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\RoboPacer\Textures\RPBody_DM_A.ztx, length=342922[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\RoboPacer\Textures\RPBody_DM_B.ztx, length=343992[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\RoboPacer\Textures\RPBody_DM_C.ztx, length=351655[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\RoboPacer\Textures\RPBody_DM_D.ztx, length=355462[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\RoboPacer\Textures\RPBody_DM_TDZ_2026.ztx, length=344966[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\RoboPacer\Textures\RPBody_NM.ztx, length=1077188[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\RoboPacer\Textures\RPLimbs_DM_A.ztx, length=338341[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\RoboPacer\Textures\RPLimbs_DM_B.ztx, length=341663[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\RoboPacer\Textures\RPLimbs_DM_C.ztx, length=340288[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\RoboPacer\Textures\RPLimbs_DM_D.ztx, length=341996[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\RoboPacer\Textures\RPLimbs_DM_TDZ_2026.ztx, length=368354[19:03:34 2026-01-07] Downloader::Download filename=data\Humans\RoboPacer\Textures\RPLimbs_NM.ztx, length=906176[19:03:34 2026-01-07] Downloader::Download filename=data\Pickups\RideOn\RideOnTourDeZwift2026.gde, length=24965[19:03:34 2026-01-07] Downloader::Download filename=data\UI\icons\Icon_SensorRelay.ztx, length=8095[19:03:34 2026-01-07] Downloader::Download filename=data\UI\WhiteOrangeTheme\Customization\Glasses\Glasses_OakleySphaera2026.ztx, length=7750[19:03:34 2026-01-07] Downloader::Download filename=data\UI\WhiteOrangeTheme\Customization\Glasses\Glasses_OakleyVeloKato2025.ztx, length=10544[19:03:34 2026-01-07] Downloader::Download filename=data\UI\WhiteOrangeTheme\Customization\Helmets\OakleyVeloStelvio2026_thumb.ztx, length=15619[19:03:34 2026-01-07] Downloader::Download filename=data\UI\WhiteOrangeTheme\JerseyIcons\ZwiftUnited2025_thumb.ztx, length=4943[19:03:34 2026-01-07] Launcher: PreUpdate End
+[19:03:34 2026-01-07] Launcher: DownloadUpdate Create
+[19:03:34 2026-01-07] Launcher: DownloadUpdate Start
+[19:03:34 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/ZwiftApp
+[19:03:34 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/ZwiftAppSilicon
+[19:03:34 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/global.wad
+[19:03:34 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Humans/Accessories/Accessories.wad
+[19:03:34 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world1/data_1.wad
+[19:03:34 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world10/data_1.wad
+[19:03:35 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world13/data_1.wad
+[19:03:35 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world2/data_1.wad
+[19:03:35 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world3/data_1.wad
+[19:03:35 2026-01-07] Downloader: "assets\Humans\Accessories\Accessories.wad" downloaded successfully (local checksum=542812560, manifest checksum=542812560).
+[19:03:35 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Humans/Accessories/Accessories.wad success=1[19:03:35 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world4/data_1.wad
+[19:03:35 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world5/data_1.wad
+[19:03:38 2026-01-07] Downloader: "assets\Worlds\world5\data_1.wad" downloaded successfully (local checksum=357713396, manifest checksum=357713396).
+[19:03:38 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world5/data_1.wad success=1[19:03:38 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world7/data_1.wad
+[19:03:39 2026-01-07] Downloader: "assets\Worlds\world7\data_1.wad" downloaded successfully (local checksum=-1859359851, manifest checksum=-1859359851).
+[19:03:39 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world7/data_1.wad success=1[19:03:39 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world9/data_1.wad
+[19:03:39 2026-01-07] Downloader: "assets\Worlds\world2\data_1.wad" downloaded successfully (local checksum=-168750764, manifest checksum=-168750764).
+[19:03:39 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world2/data_1.wad success=1[19:03:39 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/cars/BobTheSprinterVanTDZ2026.gde
+[19:03:40 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/cars/Textures/BobSprinterVanTDZ2026D.ztx
+[19:03:41 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/CelebrationBalloons/TDZScottyInflatable2026.gde
+[19:03:41 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/CelebrationBalloons/Textures/TDZScottyInflatable2026.ztx
+[19:03:41 2026-01-07] Downloader: "data\Environment\cars\BobTheSprinterVanTDZ2026.gde" downloaded successfully (local checksum=681192013, manifest checksum=681192013).
+[19:03:41 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/cars/BobTheSprinterVanTDZ2026.gde success=1[19:03:41 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/CelebrationBalloons/Textures/UCIScottyInflatableBranded2023.ztx
+[19:03:41 2026-01-07] Downloader: "assets\Worlds\world13\data_1.wad" downloaded successfully (local checksum=-2079680797, manifest checksum=-2079680797).
+[19:03:41 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world13/data_1.wad success=1[19:03:41 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Road/RoadDecals/TourDeZwift202601D.ztx
+[19:03:42 2026-01-07] Downloader: "data\Environment\CelebrationBalloons\Textures\TDZScottyInflatable2026.ztx" downloaded successfully (local checksum=-1073477986, manifest checksum=-1073477986).
+[19:03:42 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/CelebrationBalloons/Textures/TDZScottyInflatable2026.ztx success=1[19:03:42 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Road/RoadDecals/TourDeZwift202601N.ztx
+[19:03:42 2026-01-07] Downloader: "assets\Worlds\world9\data_1.wad" downloaded successfully (local checksum=1654653780, manifest checksum=1654653780).
+[19:03:42 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world9/data_1.wad success=1[19:03:42 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Road/RoadDecals/TourDeZwift202602D.ztx
+[19:03:42 2026-01-07] Downloader: "data\Environment\Road\RoadDecals\TourDeZwift202601N.ztx" downloaded successfully (local checksum=2084443144, manifest checksum=2084443144).
+[19:03:42 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Road/RoadDecals/TourDeZwift202601N.ztx success=1[19:03:42 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Road/RoadDecals/TourDeZwift202602N.ztx
+[19:03:42 2026-01-07] Downloader: "data\Environment\Road\RoadDecals\TourDeZwift202602D.ztx" downloaded successfully (local checksum=658944781, manifest checksum=658944781).
+[19:03:42 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Road/RoadDecals/TourDeZwift202602D.ztx success=1[19:03:42 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/blimp.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Road\RoadDecals\TourDeZwift202602N.ztx" downloaded successfully (local checksum=1068662951, manifest checksum=1068662951).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Road/RoadDecals/TourDeZwift202602N.ztx success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/blimpfan.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\blimp.gde" downloaded successfully (local checksum=-674975196, manifest checksum=-674975196).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/blimp.gde success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/TourDeZwiftBlimp2026.ztx
+[19:03:43 2026-01-07] Downloader: "data\Environment\CelebrationBalloons\TDZScottyInflatable2026.gde" downloaded successfully (local checksum=-136732124, manifest checksum=-136732124).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/CelebrationBalloons/TDZScottyInflatable2026.gde success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/EventArches/TourDeZwiftInflatable2026.ztx
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\blimpfan.gde" downloaded successfully (local checksum=-1920725548, manifest checksum=-1920725548).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/blimpfan.gde success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/EventArches/TourDeZwiftTierX2026.ztx
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\TourDeZwiftBlimp2026.ztx" downloaded successfully (local checksum=296014318, manifest checksum=296014318).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/TourDeZwiftBlimp2026.ztx success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/TourDeZwift202601.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Road\RoadDecals\TourDeZwift202601D.ztx" downloaded successfully (local checksum=1754445827, manifest checksum=1754445827).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Road/RoadDecals/TourDeZwift202601D.ztx success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/TourDeZwift202602.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\EventArches\TourDeZwiftTierX2026.ztx" downloaded successfully (local checksum=840810887, manifest checksum=840810887).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/EventArches/TourDeZwiftTierX2026.ztx success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/TourDeZwift202603.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\Barriers\TourDeZwift202601.gde" downloaded successfully (local checksum=-1823162376, manifest checksum=-1823162376).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/TourDeZwift202601.gde success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/TourDeZwift202604.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\Barriers\TourDeZwift202602.gde" downloaded successfully (local checksum=989662060, manifest checksum=989662060).
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\Barriers\TourDeZwift202603.gde" downloaded successfully (local checksum=158102150, manifest checksum=158102150).
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\Barriers\TourDeZwift202604.gde" downloaded successfully (local checksum=1570281264, manifest checksum=1570281264).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/TourDeZwift202602.gde success=1[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/TourDeZwift202603.gde success=1[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/TourDeZwift202604.gde success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/ZwiftBarrier01.gde
+[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/ZwiftBarrier02.gde
+[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/ZwiftBarrier03.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\Barriers\ZwiftBarrier02.gde" downloaded successfully (local checksum=2123974150, manifest checksum=2123974150).
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\Barriers\ZwiftBarrier03.gde" downloaded successfully (local checksum=819060939, manifest checksum=819060939).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/ZwiftBarrier02.gde success=1[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/ZwiftBarrier03.gde success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/Textures/TourDeZwift2026.ztx
+[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/Textures/ZwiftBarrier01.ztx
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\EventArches\TourDeZwiftInflatable2026.ztx" downloaded successfully (local checksum=1319444386, manifest checksum=1319444386).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/EventArches/TourDeZwiftInflatable2026.ztx success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag01.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\Barriers\ZwiftBarrier01.gde" downloaded successfully (local checksum=-1754837371, manifest checksum=-1754837371).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/ZwiftBarrier01.gde success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag02.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\Barriers\Textures\TourDeZwift2026.ztx" downloaded successfully (local checksum=-1081902419, manifest checksum=-1081902419).
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\Barriers\Textures\ZwiftBarrier01.ztx" downloaded successfully (local checksum=171367170, manifest checksum=171367170).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/Textures/TourDeZwift2026.ztx success=1[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/Barriers/Textures/ZwiftBarrier01.ztx success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag03.gde
+[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag04.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag01.gde" downloaded successfully (local checksum=392769540, manifest checksum=392769540).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag01.gde success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag05.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\cars\Textures\BobSprinterVanTDZ2026D.ztx" downloaded successfully (local checksum=2132836707, manifest checksum=2132836707).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/cars/Textures/BobSprinterVanTDZ2026D.ztx success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag06.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag02.gde" downloaded successfully (local checksum=-662750375, manifest checksum=-662750375).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag02.gde success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag07.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag03.gde" downloaded successfully (local checksum=-1304037353, manifest checksum=-1304037353).
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag04.gde" downloaded successfully (local checksum=-1297794015, manifest checksum=-1297794015).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag03.gde success=1[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag04.gde success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag08.gde
+[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/Textures/TourDeZwift2026.ztx
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag05.gde" downloaded successfully (local checksum=1611725594, manifest checksum=1611725594).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag05.gde success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/UCI_Barriers/InflatableEnd02.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag08.gde" downloaded successfully (local checksum=258274894, manifest checksum=258274894).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag08.gde success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Accessories/Glasses/OakleySphaeraGlasses2026.gde
+[19:03:43 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\UCI_Barriers\InflatableEnd02.gde" downloaded successfully (local checksum=1003715119, manifest checksum=1003715119).
+[19:03:43 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/UCI_Barriers/InflatableEnd02.gde success=1[19:03:43 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Accessories/Glasses/Textures/OakleySphaeraGlasses2026D.ztx
+[19:03:44 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\RoadFlags\Textures\TourDeZwift2026.ztx" downloaded successfully (local checksum=-789752301, manifest checksum=-789752301).
+[19:03:44 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/Textures/TourDeZwift2026.ztx success=1[19:03:44 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Accessories/Hats/RunningCapTourDeZwift2026.gde
+[19:03:44 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag07.gde" downloaded successfully (local checksum=954690756, manifest checksum=954690756).
+[19:03:44 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag07.gde success=1[19:03:44 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Accessories/Helmets/OakleyVeloStelvio2026.gde
+[19:03:44 2026-01-07] Downloader: "data\Environment\Structures\RoadSide\RoadFlags\TourDeZwift2026Flag06.gde" downloaded successfully (local checksum=-1918967188, manifest checksum=-1918967188).
+[19:03:44 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag06.gde success=1[19:03:44 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Accessories/Helmets/Textures/OakleyVeloStelvio2026D.ztx
+[19:03:44 2026-01-07] Downloader: "data\Humans\Accessories\Hats\RunningCapTourDeZwift2026.gde" downloaded successfully (local checksum=627755581, manifest checksum=627755581).
+[19:03:44 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Accessories/Hats/RunningCapTourDeZwift2026.gde success=1[19:03:44 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Accessories/Helmets/Textures/OakleyVeloStelvio2026N.ztx
+[19:03:44 2026-01-07] Downloader: "data\Humans\Accessories\Glasses\OakleySphaeraGlasses2026.gde" downloaded successfully (local checksum=1113560070, manifest checksum=1113560070).
+[19:03:44 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Accessories/Glasses/OakleySphaeraGlasses2026.gde success=1[19:03:44 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/GenericCrowd01.gde
+[19:03:44 2026-01-07] Downloader: "data\Humans\Accessories\Helmets\Textures\OakleyVeloStelvio2026N.ztx" downloaded successfully (local checksum=1509072175, manifest checksum=1509072175).
+[19:03:44 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Accessories/Helmets/Textures/OakleyVeloStelvio2026N.ztx success=1[19:03:44 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/GenericCrowd02.gde
+[19:03:44 2026-01-07] Downloader: "data\Environment\CelebrationBalloons\Textures\UCIScottyInflatableBranded2023.ztx" downloaded successfully (local checksum=1527660588, manifest checksum=1527660588).
+[19:03:44 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Environment/CelebrationBalloons/Textures/UCIScottyInflatableBranded2023.ztx success=1[19:03:44 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/GenericCrowd03.gde
+[19:03:44 2026-01-07] Downloader: "data\Humans\Accessories\Glasses\Textures\OakleySphaeraGlasses2026D.ztx" downloaded successfully (local checksum=-1147113482, manifest checksum=-1147113482).
+[19:03:44 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Accessories/Glasses/Textures/OakleySphaeraGlasses2026D.ztx success=1[19:03:44 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/TDZCrowd01.gde
+[19:03:44 2026-01-07] Downloader: "data\Humans\Accessories\Helmets\Textures\OakleyVeloStelvio2026D.ztx" downloaded successfully (local checksum=1224919950, manifest checksum=1224919950).
+[19:03:44 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Accessories/Helmets/Textures/OakleyVeloStelvio2026D.ztx success=1[19:03:44 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/TDZCrowd02.gde
+[19:03:45 2026-01-07] Downloader: "data\Humans\Accessories\Helmets\OakleyVeloStelvio2026.gde" downloaded successfully (local checksum=162571058, manifest checksum=162571058).
+[19:03:45 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Accessories/Helmets/OakleyVeloStelvio2026.gde success=1[19:03:45 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/TDZCrowd03.gde
+[19:03:46 2026-01-07] Downloader: "data\Humans\CrowdClusterGeneric\GenericCrowd02.gde" downloaded successfully (local checksum=659208409, manifest checksum=659208409).
+[19:03:46 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/GenericCrowd02.gde success=1[19:03:46 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/ZwiftGamesCrowd01.gde
+[19:03:46 2026-01-07] Downloader: "data\Humans\CrowdClusterGeneric\GenericCrowd01.gde" downloaded successfully (local checksum=-1766065264, manifest checksum=-1766065264).
+[19:03:46 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/GenericCrowd01.gde success=1[19:03:46 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/ZwiftGamesCrowd02.gde
+[19:03:47 2026-01-07] Downloader: "assets\Worlds\world3\data_1.wad" downloaded successfully (local checksum=848949448, manifest checksum=848949448).
+[19:03:47 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world3/data_1.wad success=1[19:03:47 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/ZwiftGamesCrowd03.gde
+[19:03:48 2026-01-07] Downloader: "data\Humans\CrowdClusterGeneric\TDZCrowd01.gde" downloaded successfully (local checksum=-61106566, manifest checksum=-61106566).
+[19:03:48 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/TDZCrowd01.gde success=1[19:03:48 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/Textures/GenericCrowdDFM.ztx
+[19:03:48 2026-01-07] Downloader: "data\Humans\CrowdClusterGeneric\GenericCrowd03.gde" downloaded successfully (local checksum=-746440103, manifest checksum=-746440103).
+[19:03:48 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/GenericCrowd03.gde success=1[19:03:48 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/Textures/GenericCrowdNMM.ztx
+[19:03:48 2026-01-07] Downloader: "data\Humans\CrowdClusterGeneric\ZwiftGamesCrowd01.gde" downloaded successfully (local checksum=-941080324, manifest checksum=-941080324).
+[19:03:48 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/ZwiftGamesCrowd01.gde success=1[19:03:48 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/Textures/TDZ2026CrowdDFM.ztx
+[19:03:49 2026-01-07] Downloader: "data\Humans\CrowdClusterGeneric\Textures\GenericCrowdDFM.ztx" downloaded successfully (local checksum=-967295724, manifest checksum=-967295724).
+[19:03:49 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/Textures/GenericCrowdDFM.ztx success=1[19:03:49 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdMascotGuy/CrowdMascotGuyTDZ2026.gde
+[19:03:49 2026-01-07] Downloader: "data\Humans\CrowdClusterGeneric\ZwiftGamesCrowd02.gde" downloaded successfully (local checksum=551240894, manifest checksum=551240894).
+[19:03:49 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/ZwiftGamesCrowd02.gde success=1[19:03:49 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdMascotGuy/Textures/mascotClothTDZ2026.ztx
+[19:03:49 2026-01-07] Downloader: "data\Humans\CrowdMascotGuy\Textures\mascotClothTDZ2026.ztx" downloaded successfully (local checksum=-220102791, manifest checksum=-220102791).
+[19:03:49 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdMascotGuy/Textures/mascotClothTDZ2026.ztx success=1[19:03:49 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Jerseys/Clubs/ZwiftUnited2025.ztx
+[19:03:49 2026-01-07] Downloader: "data\Humans\CrowdClusterGeneric\Textures\TDZ2026CrowdDFM.ztx" downloaded successfully (local checksum=-1943874910, manifest checksum=-1943874910).
+[19:03:49 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/Textures/TDZ2026CrowdDFM.ztx success=1[19:03:49 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/RoboPacer.gde
+[19:03:49 2026-01-07] Downloader: "data\Humans\CrowdMascotGuy\CrowdMascotGuyTDZ2026.gde" downloaded successfully (local checksum=2146342859, manifest checksum=2146342859).
+[19:03:49 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdMascotGuy/CrowdMascotGuyTDZ2026.gde success=1[19:03:49 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPBody_DM_A.ztx
+[19:03:49 2026-01-07] Downloader: "data\Humans\CrowdClusterGeneric\Textures\GenericCrowdNMM.ztx" downloaded successfully (local checksum=1592047599, manifest checksum=1592047599).
+[19:03:49 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/Textures/GenericCrowdNMM.ztx success=1[19:03:49 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPBody_DM_B.ztx
+[19:03:49 2026-01-07] Downloader: "data\Humans\Jerseys\Clubs\ZwiftUnited2025.ztx" downloaded successfully (local checksum=-1119047639, manifest checksum=-1119047639).
+[19:03:49 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/Jerseys/Clubs/ZwiftUnited2025.ztx success=1[19:03:49 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPBody_DM_C.ztx
+[19:03:49 2026-01-07] Downloader: "data\Humans\RoboPacer\Textures\RPBody_DM_A.ztx" downloaded successfully (local checksum=-1165897526, manifest checksum=-1165897526).
+[19:03:49 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPBody_DM_A.ztx success=1[19:03:49 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPBody_DM_D.ztx
+[19:03:50 2026-01-07] Downloader: "data\Humans\RoboPacer\Textures\RPBody_DM_B.ztx" downloaded successfully (local checksum=-900318208, manifest checksum=-900318208).
+[19:03:50 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPBody_DM_B.ztx success=1[19:03:50 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPBody_DM_TDZ_2026.ztx
+[19:03:50 2026-01-07] Downloader: "data\Humans\RoboPacer\Textures\RPBody_DM_D.ztx" downloaded successfully (local checksum=858211413, manifest checksum=858211413).
+[19:03:50 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPBody_DM_D.ztx success=1[19:03:50 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPBody_NM.ztx
+[19:03:50 2026-01-07] Downloader: "data\Humans\RoboPacer\Textures\RPBody_DM_C.ztx" downloaded successfully (local checksum=-1643064964, manifest checksum=-1643064964).
+[19:03:50 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPBody_DM_C.ztx success=1[19:03:50 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPLimbs_DM_A.ztx
+[19:03:51 2026-01-07] Downloader: "data\Humans\RoboPacer\Textures\RPBody_DM_TDZ_2026.ztx" downloaded successfully (local checksum=62728669, manifest checksum=62728669).
+[19:03:51 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPBody_DM_TDZ_2026.ztx success=1[19:03:51 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPLimbs_DM_B.ztx
+[19:03:51 2026-01-07] Downloader: "data\Humans\RoboPacer\RoboPacer.gde" downloaded successfully (local checksum=-1239757307, manifest checksum=-1239757307).
+[19:03:51 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/RoboPacer.gde success=1[19:03:51 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPLimbs_DM_C.ztx
+[19:03:51 2026-01-07] Downloader: "data\Humans\RoboPacer\Textures\RPLimbs_DM_A.ztx" downloaded successfully (local checksum=1039156840, manifest checksum=1039156840).
+[19:03:51 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPLimbs_DM_A.ztx success=1[19:03:51 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPLimbs_DM_D.ztx
+[19:03:51 2026-01-07] Downloader: "data\Humans\CrowdClusterGeneric\TDZCrowd02.gde" downloaded successfully (local checksum=-1069136340, manifest checksum=-1069136340).
+[19:03:51 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/TDZCrowd02.gde success=1[19:03:51 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPLimbs_DM_TDZ_2026.ztx
+[19:03:51 2026-01-07] Downloader: "assets\Worlds\world4\data_1.wad" downloaded successfully (local checksum=-339670566, manifest checksum=-339670566).
+[19:03:51 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world4/data_1.wad success=1[19:03:51 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPLimbs_NM.ztx
+[19:03:52 2026-01-07] Downloader: "data\Humans\RoboPacer\Textures\RPLimbs_DM_C.ztx" downloaded successfully (local checksum=681949357, manifest checksum=681949357).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPLimbs_DM_C.ztx success=1[19:03:52 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Pickups/RideOn/RideOnTourDeZwift2026.gde
+[19:03:52 2026-01-07] Downloader: "data\Humans\CrowdClusterGeneric\ZwiftGamesCrowd03.gde" downloaded successfully (local checksum=1534573131, manifest checksum=1534573131).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/ZwiftGamesCrowd03.gde success=1[19:03:52 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/UI/icons/Icon_SensorRelay.ztx
+[19:03:52 2026-01-07] Downloader: "data\UI\icons\Icon_SensorRelay.ztx" downloaded successfully (local checksum=-1286172118, manifest checksum=-1286172118).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/UI/icons/Icon_SensorRelay.ztx success=1[19:03:52 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/UI/WhiteOrangeTheme/Customization/Glasses/Glasses_OakleySphaera2026.ztx
+[19:03:52 2026-01-07] Downloader: "data\Pickups\RideOn\RideOnTourDeZwift2026.gde" downloaded successfully (local checksum=280022395, manifest checksum=280022395).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Pickups/RideOn/RideOnTourDeZwift2026.gde success=1[19:03:52 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/UI/WhiteOrangeTheme/Customization/Glasses/Glasses_OakleyVeloKato2025.ztx
+[19:03:52 2026-01-07] Downloader: "data\Humans\RoboPacer\Textures\RPLimbs_DM_B.ztx" downloaded successfully (local checksum=-862847910, manifest checksum=-862847910).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPLimbs_DM_B.ztx success=1[19:03:52 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/UI/WhiteOrangeTheme/Customization/Helmets/OakleyVeloStelvio2026_thumb.ztx
+[19:03:52 2026-01-07] Downloader: "data\UI\WhiteOrangeTheme\Customization\Glasses\Glasses_OakleySphaera2026.ztx" downloaded successfully (local checksum=-1251810699, manifest checksum=-1251810699).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/UI/WhiteOrangeTheme/Customization/Glasses/Glasses_OakleySphaera2026.ztx success=1[19:03:52 2026-01-07] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/UI/WhiteOrangeTheme/JerseyIcons/ZwiftUnited2025_thumb.ztx
+[19:03:52 2026-01-07] Downloader: "data\UI\WhiteOrangeTheme\Customization\Glasses\Glasses_OakleyVeloKato2025.ztx" downloaded successfully (local checksum=-647832116, manifest checksum=-647832116).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/UI/WhiteOrangeTheme/Customization/Glasses/Glasses_OakleyVeloKato2025.ztx success=1[19:03:52 2026-01-07] Downloader: "data\UI\WhiteOrangeTheme\Customization\Helmets\OakleyVeloStelvio2026_thumb.ztx" downloaded successfully (local checksum=2014948314, manifest checksum=2014948314).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/UI/WhiteOrangeTheme/Customization/Helmets/OakleyVeloStelvio2026_thumb.ztx success=1[19:03:52 2026-01-07] Downloader: "data\UI\WhiteOrangeTheme\JerseyIcons\ZwiftUnited2025_thumb.ztx" downloaded successfully (local checksum=310148759, manifest checksum=310148759).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/UI/WhiteOrangeTheme/JerseyIcons/ZwiftUnited2025_thumb.ztx success=1[19:03:52 2026-01-07] Downloader: "assets\Worlds\world10\data_1.wad" downloaded successfully (local checksum=-1275202997, manifest checksum=-1275202997).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world10/data_1.wad success=1[19:03:52 2026-01-07] Downloader: "data\Humans\RoboPacer\Textures\RPBody_NM.ztx" downloaded successfully (local checksum=-1630402112, manifest checksum=-1630402112).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPBody_NM.ztx success=1[19:03:52 2026-01-07] Downloader: "data\Humans\RoboPacer\Textures\RPLimbs_DM_D.ztx" downloaded successfully (local checksum=597724343, manifest checksum=597724343).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPLimbs_DM_D.ztx success=1[19:03:52 2026-01-07] Downloader: "data\Humans\RoboPacer\Textures\RPLimbs_DM_TDZ_2026.ztx" downloaded successfully (local checksum=-1178947141, manifest checksum=-1178947141).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPLimbs_DM_TDZ_2026.ztx success=1[19:03:52 2026-01-07] Downloader: "data\Humans\CrowdClusterGeneric\TDZCrowd03.gde" downloaded successfully (local checksum=-210374973, manifest checksum=-210374973).
+[19:03:52 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/CrowdClusterGeneric/TDZCrowd03.gde success=1[19:03:53 2026-01-07] Downloader: "data\Humans\RoboPacer\Textures\RPLimbs_NM.ztx" downloaded successfully (local checksum=-463388104, manifest checksum=-463388104).
+[19:03:53 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/data/Humans/RoboPacer/Textures/RPLimbs_NM.ztx success=1[19:04:00 2026-01-07] Downloader: "assets\global.wad" downloaded successfully (local checksum=-2023376010, manifest checksum=-2023376010).
+[19:04:00 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/global.wad success=1[19:04:04 2026-01-07] Downloader: "ZwiftApp" downloaded successfully (local checksum=-270738151, manifest checksum=-270738151).
+[19:04:04 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/ZwiftApp success=1[19:04:05 2026-01-07] Downloader: "assets\Worlds\world1\data_1.wad" downloaded successfully (local checksum=2107045630, manifest checksum=2107045630).
+[19:04:05 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/assets/Worlds/world1/data_1.wad success=1[19:04:09 2026-01-07] Downloader: "ZwiftAppSilicon" downloaded successfully (local checksum=-1809854741, manifest checksum=-1809854741).
+[19:04:09 2026-01-07] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/ZwiftAppSilicon success=1[19:04:09 2026-01-07] Patcher: Completed download of needed server files for update.
+[19:04:09 2026-01-07] Launcher: DownloadUpdate End
+[19:04:09 2026-01-07] Launcher: Waiting to Patch.
+[20:04:46 2026-01-07] Launcher: PostUpdate Create
+[20:04:46 2026-01-07] Launcher: PostUpdate Start
+[20:04:46 2026-01-07] Patcher: Copying new and replacement files into place...
+[20:04:47 2026-01-07] Patcher: Copying new and replacement files into place...
+[20:04:47 2026-01-07] Patcher: Deleting unneeded files...
+[20:04:47 2026-01-07] Patcher: Deleting old local manifest file...
+[20:04:47 2026-01-07] Patcher: Copying new Manifest file into place ("/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/ZwiftMac_1.0.157262_4f73bc9a_manifest.xml"->"/Users/arthurpfalzgraf/Library/Application Support/Zwift/ZwiftMac_1.0.157262_4f73bc9a_manifest.xml")
+[20:04:47 2026-01-07] Patcher: Copying new Game Version file into place ("/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/ZwiftMac_ver_cur.157262.xml"->"/Users/arthurpfalzgraf/Library/Application Support/Zwift/ZwiftMac_ver_cur.157262.xml")
+[20:04:47 2026-01-07] Patcher: Copying new Launcher Version file into place ("/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/LauncherMac_ver_cur.xml"->"/Users/arthurpfalzgraf/Library/Application Support/Zwift/LauncherMac_ver_cur.xml")
+[20:04:47 2026-01-07] Patcher: Local Game version is now "1.0.157262".
+[20:04:47 2026-01-07] Patcher: Deleting temp files...
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//ZwiftApp
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//ZwiftApp
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//ZwiftAppSilicon
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//ZwiftAppSilicon
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//ZwiftMac_ver_cur.157262.xml
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//ZwiftMac_ver_cur.157262.xml
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//LauncherMac_ver_cur.xml
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//LauncherMac_ver_cur.xml
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//ZwiftMac_1.0.157262_4f73bc9a_manifest.xml
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//ZwiftMac_1.0.157262_4f73bc9a_manifest.xml
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization/Helmets
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization/Helmets
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization/Helmets/OakleyVeloStelvio2026_thumb.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization/Helmets/OakleyVeloStelvio2026_thumb.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization/Helmets
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization/Glasses
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization/Glasses
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization/Glasses/Glasses_OakleyVeloKato2025.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization/Glasses/Glasses_OakleyVeloKato2025.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization/Glasses/Glasses_OakleySphaera2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization/Glasses/Glasses_OakleySphaera2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization/Glasses
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/Customization
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/JerseyIcons
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/JerseyIcons
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/JerseyIcons/ZwiftUnited2025_thumb.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/JerseyIcons/ZwiftUnited2025_thumb.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme/JerseyIcons
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/WhiteOrangeTheme
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/icons
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/icons
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/icons/Icon_SensorRelay.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/icons/Icon_SensorRelay.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI/icons
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/UI
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Helmets
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Helmets
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Helmets/Textures
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Helmets/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Helmets/Textures/OakleyVeloStelvio2026N.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Helmets/Textures/OakleyVeloStelvio2026N.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Helmets/Textures/OakleyVeloStelvio2026D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Helmets/Textures/OakleyVeloStelvio2026D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Helmets/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Helmets/OakleyVeloStelvio2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Helmets/OakleyVeloStelvio2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Helmets
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Hats
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Hats
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Hats/RunningCapTourDeZwift2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Hats/RunningCapTourDeZwift2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Hats
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Glasses
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Glasses
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Glasses/Textures
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Glasses/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Glasses/Textures/OakleySphaeraGlasses2026D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Glasses/Textures/OakleySphaeraGlasses2026D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Glasses/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Glasses/OakleySphaeraGlasses2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Glasses/OakleySphaeraGlasses2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories/Glasses
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Accessories
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Jerseys
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Jerseys
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Jerseys/Clubs
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Jerseys/Clubs
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Jerseys/Clubs/ZwiftUnited2025.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Jerseys/Clubs/ZwiftUnited2025.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Jerseys/Clubs
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/Jerseys
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPLimbs_NM.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPLimbs_NM.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPLimbs_DM_A.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPLimbs_DM_A.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPLimbs_DM_B.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPLimbs_DM_B.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPBody_DM_D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPBody_DM_D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPBody_NM.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPBody_NM.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPLimbs_DM_C.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPLimbs_DM_C.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPBody_DM_A.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPBody_DM_A.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPLimbs_DM_D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPLimbs_DM_D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPBody_DM_B.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPBody_DM_B.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPBody_DM_C.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPBody_DM_C.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPLimbs_DM_TDZ_2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPLimbs_DM_TDZ_2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPBody_DM_TDZ_2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures/RPBody_DM_TDZ_2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/RoboPacer.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer/RoboPacer.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/RoboPacer
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/ZwiftGamesCrowd01.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/ZwiftGamesCrowd01.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/Textures
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/Textures/TDZ2026CrowdDFM.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/Textures/TDZ2026CrowdDFM.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/Textures/GenericCrowdDFM.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/Textures/GenericCrowdDFM.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/Textures/GenericCrowdNMM.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/Textures/GenericCrowdNMM.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/ZwiftGamesCrowd02.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/ZwiftGamesCrowd02.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/ZwiftGamesCrowd03.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/ZwiftGamesCrowd03.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/GenericCrowd01.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/GenericCrowd01.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/GenericCrowd02.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/GenericCrowd02.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/GenericCrowd03.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/GenericCrowd03.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/TDZCrowd01.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/TDZCrowd01.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/TDZCrowd02.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/TDZCrowd02.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/TDZCrowd03.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric/TDZCrowd03.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdClusterGeneric
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdMascotGuy
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdMascotGuy
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdMascotGuy/Textures
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdMascotGuy/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdMascotGuy/Textures/mascotClothTDZ2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdMascotGuy/Textures/mascotClothTDZ2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdMascotGuy/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdMascotGuy/CrowdMascotGuyTDZ2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdMascotGuy/CrowdMascotGuyTDZ2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans/CrowdMascotGuy
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Humans
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/blimpfan.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/blimpfan.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/EventArches
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/EventArches
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/EventArches/TourDeZwiftTierX2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/EventArches/TourDeZwiftTierX2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/EventArches/TourDeZwiftInflatable2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/EventArches/TourDeZwiftInflatable2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/EventArches
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/UCI_Barriers
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/UCI_Barriers
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/UCI_Barriers/InflatableEnd02.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/UCI_Barriers/InflatableEnd02.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/UCI_Barriers
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/TourDeZwift202601.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/TourDeZwift202601.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/Textures
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/Textures/TourDeZwift2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/Textures/TourDeZwift2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/Textures/ZwiftBarrier01.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/Textures/ZwiftBarrier01.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/TourDeZwift202603.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/TourDeZwift202603.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/TourDeZwift202602.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/TourDeZwift202602.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/TourDeZwift202604.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/TourDeZwift202604.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/ZwiftBarrier02.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/ZwiftBarrier02.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/ZwiftBarrier03.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/ZwiftBarrier03.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/ZwiftBarrier01.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers/ZwiftBarrier01.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/Barriers
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/Textures
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/Textures/TourDeZwift2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/Textures/TourDeZwift2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag08.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag08.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag03.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag03.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag02.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag02.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag01.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag01.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag05.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag05.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag04.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag04.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag06.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag06.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag07.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags/TourDeZwift2026Flag07.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide/RoadFlags
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/RoadSide
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/TourDeZwiftBlimp2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/TourDeZwiftBlimp2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/blimp.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures/blimp.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Structures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road/RoadDecals
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road/RoadDecals
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road/RoadDecals/TourDeZwift202601N.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road/RoadDecals/TourDeZwift202601N.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road/RoadDecals/TourDeZwift202602D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road/RoadDecals/TourDeZwift202602D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road/RoadDecals/TourDeZwift202601D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road/RoadDecals/TourDeZwift202601D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road/RoadDecals/TourDeZwift202602N.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road/RoadDecals/TourDeZwift202602N.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road/RoadDecals
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/Road
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/cars
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/cars
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/cars/Textures
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/cars/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/cars/Textures/BobSprinterVanTDZ2026D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/cars/Textures/BobSprinterVanTDZ2026D.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/cars/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/cars/BobTheSprinterVanTDZ2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/cars/BobTheSprinterVanTDZ2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/cars
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/CelebrationBalloons
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/CelebrationBalloons
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/CelebrationBalloons/TDZScottyInflatable2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/CelebrationBalloons/TDZScottyInflatable2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/CelebrationBalloons/Textures
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/CelebrationBalloons/Textures
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/CelebrationBalloons/Textures/TDZScottyInflatable2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/CelebrationBalloons/Textures/TDZScottyInflatable2026.ztx
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/CelebrationBalloons/Textures/UCIScottyInflatableBranded2023.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/CelebrationBalloons/Textures/UCIScottyInflatableBranded2023.ztx
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/CelebrationBalloons/Textures
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment/CelebrationBalloons
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Environment
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Pickups
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Pickups
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Pickups/RideOn
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Pickups/RideOn
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Pickups/RideOn/RideOnTourDeZwift2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Pickups/RideOn/RideOnTourDeZwift2026.gde
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Pickups/RideOn
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data/Pickups
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//data
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/global.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/global.wad
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world13
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world13
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world13/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world13/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world13
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world1
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world1
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world1/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world1/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world1
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world9
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world9
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world9/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world9/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world9
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world7
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world7
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world7/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world7/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world7
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world10
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world10
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world10/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world10/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world10
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world2
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world2
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world2/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world2/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world2
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world5
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world5
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world5/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world5/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world5
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world4
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world4
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world4/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world4/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world4
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world3
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world3
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world3/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world3/data_1.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds/world3
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Worlds
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Humans
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Humans
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Humans/Accessories
+[20:04:47 2026-01-07] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Humans/Accessories
+[20:04:47 2026-01-07] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Humans/Accessories/Accessories.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Humans/Accessories/Accessories.wad
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Humans/Accessories
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets/Humans
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads//assets
+[20:04:47 2026-01-07] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_xB9eBa/Downloads/
+[20:04:47 2026-01-07] Patcher: Parsing local "ZwiftMac_1.0.157262_4f73bc9a_manifest.xml"...
+[20:04:47 2026-01-07] Patcher: Iterating "ZwiftMac_1.0.157262_4f73bc9a_manifest.xml" to verify local files...
+[20:04:47 2026-01-07] Launcher: PostUpdate End
+[20:04:47 2026-01-07] Launcher: Update Complete.

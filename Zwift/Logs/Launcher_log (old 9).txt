@@ -1,0 +1,5 @@
+[15:27:27 2026-01-03] Launcher: Starting Sentry.
+[15:27:27 2026-01-03] Launcher: Initializing Mac Timer.
+[15:27:27 2026-01-03] Launcher: Checking for launcher version number.
+[15:27:27 2026-01-03] Launcher: Checking for VerCur Override
+[15:27:27 2026-01-03] Downloader: InternetConnected() reached maximum number of attempts trying to ping our server. Last received return value was 6.

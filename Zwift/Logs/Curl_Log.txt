@@ -1,0 +1,83 @@
+* Host cdn.zwift.com:80 was resolved.
+* IPv6: (none)
+* IPv4: 18.66.2.112, 18.66.2.121, 18.66.2.74, 18.66.2.107
+*   Trying 18.66.2.112:80...
+* Connected to cdn.zwift.com (18.66.2.112) port 80
+* using HTTP/1.x
+> GET /gameassets/MapSchedule_v2.xml HTTP/1.1
+Host: cdn.zwift.com
+Accept: */*
+
+* Request completely sent off
+< HTTP/1.1 200 OK
+< Content-Type: text/xml
+< Content-Length: 4077
+< Connection: keep-alive
+< Last-Modified: Tue, 25 Nov 2025 19:05:27 GMT
+< x-amz-server-side-encryption: AES256
+< Accept-Ranges: bytes
+< Server: AmazonS3
+< Date: Sat, 24 Jan 2026 05:17:17 GMT
+< ETag: "24ab7de917f01b7a6d2474652b8a7fce"
+< X-Cache: Hit from cloudfront
+< Via: 1.1 36e42f052a24feab91529d442c70cf34.cloudfront.net (CloudFront)
+< X-Amz-Cf-Pop: TXL50-P1
+< X-Amz-Cf-Id: GvyJYT9nCxIKNM4KYsTDQ0RIQViq6_ZG_P2YNKku0l9wvz2n2tYGSg==
+< Age: 56978
+< 
+* Connection #0 to host cdn.zwift.com left intact
+* Re-using existing connection with host cdn.zwift.com
+> GET /gameassets/PortalRoadSchedule_v1.xml HTTP/1.1
+Host: cdn.zwift.com
+Accept: */*
+
+* Request completely sent off
+< HTTP/1.1 200 OK
+< Content-Type: text/xml
+< Content-Length: 10001
+< Connection: keep-alive
+< Last-Modified: Tue, 25 Nov 2025 19:05:28 GMT
+< x-amz-server-side-encryption: AES256
+< Accept-Ranges: bytes
+< Server: AmazonS3
+< Date: Sat, 24 Jan 2026 03:07:43 GMT
+< ETag: "21f63e1a0cec6117e2f3d900db39201a"
+< X-Cache: Hit from cloudfront
+< Via: 1.1 36e42f052a24feab91529d442c70cf34.cloudfront.net (CloudFront)
+< X-Amz-Cf-Pop: TXL50-P1
+< X-Amz-Cf-Id: Lr528UwW9qMjdfE5q3a-_vWbRZ1kAcnh29mrQ28Jw36Pfj9jpZa9Dg==
+< Age: 64849
+< 
+* Connection #0 to host cdn.zwift.com left intact
+* Too old connection (10794 seconds idle), disconnect it
+* Connection 0 seems to be dead
+* shutting down connection #0
+* Hostname in DNS cache was stale, zapped
+* Host cdn.zwift.com:80 was resolved.
+* IPv6: (none)
+* IPv4: 18.66.2.121, 18.66.2.112, 18.66.2.107, 18.66.2.74
+*   Trying 18.66.2.121:80...
+* Connected to cdn.zwift.com (18.66.2.121) port 80
+* using HTTP/1.x
+> GET /gameassets/MapSchedule_v2.xml HTTP/1.1
+Host: cdn.zwift.com
+Accept: */*
+
+* Request completely sent off
+< HTTP/1.1 200 OK
+< Content-Type: text/xml
+< Content-Length: 4077
+< Connection: keep-alive
+< Last-Modified: Tue, 25 Nov 2025 19:05:27 GMT
+< x-amz-server-side-encryption: AES256
+< Accept-Ranges: bytes
+< Server: AmazonS3
+< Date: Sat, 24 Jan 2026 05:17:17 GMT
+< ETag: "24ab7de917f01b7a6d2474652b8a7fce"
+< X-Cache: Hit from cloudfront
+< Via: 1.1 1444224b4b97d67af7507c4e96f65844.cloudfront.net (CloudFront)
+< X-Amz-Cf-Pop: TXL50-P1
+< X-Amz-Cf-Id: dMeByc1mOtZIC6PLFCtOJKhtHQ8ENfzcY9_TqY4atv-hvPmaQbRUdA==
+< Age: 67790
+< 
+* Connection #1 to host cdn.zwift.com left intact

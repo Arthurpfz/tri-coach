@@ -1,0 +1,304 @@
+{
+  "name": "Coach Tri - Daily Checkin (Intervals.icu)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 20,
+              "triggerAtMinute": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [-520, 240],
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw0Xd3T54okfaXa",
+          "mode": "list",
+          "cachedResultName": "Tri Coach MVP"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblK8jxVIxuFi9H8Z",
+          "mode": "list",
+          "cachedResultName": "Users"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [-320, 240],
+      "id": "search-users",
+      "name": "Search Users",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JMbdFoTWoGU3avK9",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [-120, 240],
+      "id": "loop-users",
+      "name": "Loop Over Users"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://intervals.icu/api/v1/athlete/{{ $json['Intervals.icu Athlete ID'] }}/activities",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "oldest",
+              "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "newest",
+              "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [80, 240],
+      "id": "get-activities",
+      "name": "Get Activities",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "JBZzr0E5U1GSy6OQ",
+          "name": "Intervals.icu API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-activities-exist",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [280, 240],
+      "id": "check-activities",
+      "name": "Check Activities Exist"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [480, 160],
+      "id": "loop-activities",
+      "name": "Loop Over Activities"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://intervals.icu/api/v1/activity/{{ $('Loop Over Activities').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [880, 160],
+      "id": "get-activity-details",
+      "name": "Get Activity Details",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "JBZzr0E5U1GSy6OQ",
+          "name": "Intervals.icu API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "calc-monday",
+              "name": "Monday_date",
+              "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1080, 160],
+      "id": "calculate-monday",
+      "name": "Calculate Monday"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appw0Xd3T54okfaXa",
+          "mode": "list",
+          "cachedResultName": "Tri Coach MVP"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblJ0UHyJ1drXv97F",
+          "mode": "list",
+          "cachedResultName": "Weekly Plans"
+        },
+        "filterByFormula": "=AND(\n  {Athlete} = '{{ $('Loop Over Users').item.json.id }}',\n  DATETIME_FORMAT({Week Start Date}, 'YYYY-MM-DD') = '{{ $json.Monday_date }}'\n)",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1280, 160],
+      "id": "search-plan",
+      "name": "Search Plan",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JMbdFoTWoGU3avK9",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an elite Ironman coach analyzing workout data from Intervals.icu with full FIT file data. Your athlete is training seriously and expects rigorous, data-driven coaching.\n\nCONTEXT:\n- Date: {{ $today.toFormat('cccc, yyyy-MM-dd') }}\n- Athlete: {{ $('Loop Over Users').item.json.Name }}\n- Training Phase: {{ $('Loop Over Users').item.json['Training Phase'] }}\n- Fitness Profile: {{ $('Loop Over Users').item.json['Fitness Profile'] }}\n\nPLANNED SESSION:\n{{ $('Search Plan').item.json[$today.toFormat('cccc')] }}\n\nACTUAL EXECUTION:\nActivity: {{ $('Get Activity Details').item.json.type }} - {{ $('Get Activity Details').item.json.name }}\nDevice: {{ $('Get Activity Details').item.json.device_name }}\nDuration: {{ Math.round($('Get Activity Details').item.json.moving_time / 60) }}min moving ({{ Math.round($('Get Activity Details').item.json.elapsed_time / 60) }}min elapsed)\nDistance: {{ ($('Get Activity Details').item.json.distance / 1000).toFixed(2) }}km\n\n=== METRICS ===\n{{ $('Get Activity Details').item.json.avg_watts ? `Power:\n- Average: ${Math.round($('Get Activity Details').item.json.avg_watts)}W\n- Normalized: ${Math.round($('Get Activity Details').item.json.weighted_avg_watts)}W\n- Variability Index: ${$('Get Activity Details').item.json.variability_index.toFixed(2)}\n- Max: ${Math.round($('Get Activity Details').item.json.max_watts)}W` : '' }}\n\n{{ $('Get Activity Details').item.json.average_heartrate ? `Heart Rate:\n- Average: ${Math.round($('Get Activity Details').item.json.average_heartrate)}bpm\n- Max: ${Math.round($('Get Activity Details').item.json.max_heartrate)}bpm\n- LTHR: ${$('Get Activity Details').item.json.lthr}bpm\n- Zone Times (Z1-Z5+): ${$('Get Activity Details').item.json.icu_hr_zone_times ? $('Get Activity Details').item.json.icu_hr_zone_times.map((t, i) => Math.round(t/60) + 'min').join(', ') : 'N/A'}` : '' }}\n\n{{ $('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence ? `Cadence:\n- Average: ${Math.round(($('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence) * ($('Get Activity Details').item.json.type === 'Run' ? 2 : 1))}${$('Get Activity Details').item.json.type === 'Run' ? 'spm' : 'rpm'}` : '' }}\n\n{{ $('Get Activity Details').item.json.average_speed ? `Pace:\n- Avg: ${Math.floor(1000 / $('Get Activity Details').item.json.average_speed / 60)}:${String(Math.round((1000 / $('Get Activity Details').item.json.average_speed) % 60)).padStart(2, '0')}/km\n- Max Speed: ${($('Get Activity Details').item.json.max_speed * 3.6).toFixed(1)}km/h` : '' }}\n\nTraining Load:\n- TSS: {{ $('Get Activity Details').item.json.icu_training_load ? Math.round($('Get Activity Details').item.json.icu_training_load) : 'N/A' }}\n- Intensity Factor: {{ $('Get Activity Details').item.json.intensity ? $('Get Activity Details').item.json.intensity.toFixed(2) : 'N/A' }}\n- TRIMP: {{ $('Get Activity Details').item.json.trimp ? Math.round($('Get Activity Details').item.json.trimp) : 'N/A' }}\n\n{{ $('Get Activity Details').item.json.interval_summary ? `=== INTERVALS ===\n${$('Get Activity Details').item.json.interval_summary.join('\\n')}` : '' }}\n\n{{ $('Get Activity Details').item.json.stream_types ? `Available Streams: ${$('Get Activity Details').item.json.stream_types.join(', ')}` : '' }}\n\n=== ANALYSIS FRAMEWORK ===\n\n1. EXECUTION: Does type/duration/intensity match plan? Grade A/B/C/F.\n\n2. POWER (if available):\n   - VI <1.05 = steady (good for Z2), VI >1.10 = variable (expected for intervals)\n   - Pacing: even, positive split, negative split?\n   - Decoupling: power dropping while HR constant = fatigue\n\n3. HEART RATE:\n   - Zone distribution: time in target zones appropriate?\n   - Cardiac drift: HR rise over time (>10% = concern)\n   - Efficiency factor: NP/Avg HR (higher = fitter)\n\n4. CADENCE:\n   - Running: 170-180spm target\n   - Cycling: 85-95rpm for endurance\n   - Swimming: stroke rate vs pace efficiency\n\n5. INTERVALS:\n   - Structure executed as planned?\n   - Quality maintained across reps?\n   - Recovery adequate?\n\n6. COACHING:\n   - What went RIGHT (specific)\n   - What needs WORK (actionable)\n   - Connection to training phase\n\n=== OUTPUT ===\nWrite 6-10 sentences:\n1. Execution assessment\n2. 2-3 technical insights with specific numbers\n3. One exceptional element\n4. One improvement area (if any)\n5. Training phase context\n6. Forward guidance\n\nTone: Rigorous, data-driven, supportive but honest. No fluff.\n\nExample:\n\"Clean execution of the 90min Z2 ride. Power at 245W avg (85% FTP), NP 258W, VI 1.05 - textbook steady pacing. Cadence held 90-94rpm with <3% variation. Cardiac drift only 5.2% (148→156bpm) - aerobic ceiling rising. Small flag: last 20min saw 8W power drop while HR held, suggesting glycogen depletion. TSS 78 slots perfectly into Base 2. Decoupling 1.03 shows strong efficiency. Easy spin tomorrow.\"\n\nDraft coaching analysis:",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [1480, 160],
+      "id": "llm-chain",
+      "name": "Hardcore Analysis"
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-3.7-sonnet",
+        "options": {
+          "maxTokens": 1000,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [1480, 360],
+      "id": "openrouter-model",
+      "name": "Claude 3.7 Sonnet",
+      "credentials": {
+        "openRouterApi": {
+          "id": "nhbNqmgyP4cAeQ6B",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "TELEGRAM_CHAT_ID_REDACTED",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1680, 160],
+      "id": "send-telegram",
+      "name": "Send Telegram",
+      "credentials": {
+        "telegramApi": {
+          "id": "9IpAp35yJmIQJpeA",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [[{ "node": "Search Users", "type": "main", "index": 0 }]]
+    },
+    "Search Users": {
+      "main": [[{ "node": "Loop Over Users", "type": "main", "index": 0 }]]
+    },
+    "Loop Over Users": {
+      "main": [
+        [{ "node": "Get Activities", "type": "main", "index": 0 }],
+        [{ "node": "Search Users", "type": "main", "index": 0 }]
+      ]
+    },
+    "Get Activities": {
+      "main": [[{ "node": "Check Activities Exist", "type": "main", "index": 0 }]]
+    },
+    "Check Activities Exist": {
+      "main": [[{ "node": "Loop Over Activities", "type": "main", "index": 0 }]]
+    },
+    "Loop Over Activities": {
+      "main": [
+        [{ "node": "Get Activity Details", "type": "main", "index": 0 }],
+        [{ "node": "Get Activities", "type": "main", "index": 0 }]
+      ]
+    },
+    "Get Activity Details": {
+      "main": [[{ "node": "Calculate Monday", "type": "main", "index": 0 }]]
+    },
+    "Calculate Monday": {
+      "main": [[{ "node": "Search Plan", "type": "main", "index": 0 }]]
+    },
+    "Search Plan": {
+      "main": [[{ "node": "Hardcore Analysis", "type": "main", "index": 0 }]]
+    },
+    "Hardcore Analysis": {
+      "main": [[{ "node": "Send Telegram", "type": "main", "index": 0 }]]
+    },
+    "Claude 3.7 Sonnet": {
+      "ai_languageModel": [[{ "node": "Hardcore Analysis", "type": "ai_languageModel", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  }
+}

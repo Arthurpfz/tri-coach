@@ -1,0 +1,61 @@
+[8:12:29 2026-01-17] Launcher: Starting Sentry.
+[8:12:29 2026-01-17] Launcher: Initializing Mac Timer.
+[8:12:29 2026-01-17] Launcher: Checking for launcher version number.
+[8:12:29 2026-01-17] Launcher: Checking for VerCur Override
+[8:12:29 2026-01-17] Downloader::InternetConnected() returns TRUE![8:12:29 2026-01-17] Launcher: Established Internet Connection
+[8:12:30 2026-01-17] Launcher: Prefs file found.
+[8:12:30 2026-01-17] Launcher: Zwift Login URL set as https://launcher.zwift.com/launcher/realms/zwift/protocol/openid-connect/auth?client_id=Game_Launcher&redirect_uri=http%3A%2F%2Fzwift%2F&login=true&response_type=code
+[8:12:30 2026-01-17] Launcher: Setting for VerCur Override
+[8:12:30 2026-01-17] [Info] CNL: 3.68.0
+[8:12:30 2026-01-17] [Info] Machine ID: 2-7E7ABFF0-943B-5DBF-A6CD-DC1605DE57AF
+[8:12:32 2026-01-17] Launcher: Using Exp VerCur ZwiftMac_ver_cur.157262.xml
+[8:12:33 2026-01-17] Launcher: Webview loaded some URL.
+[8:12:33 2026-01-17] Launcher: Starting Update Check
+[8:12:33 2026-01-17] Launcher: Resetting Patcher
+[8:12:33 2026-01-17] Downloader::InternetConnected() returns TRUE![8:12:35 2026-01-17] Launcher: Using Exp VerCur ZwiftMac_ver_cur.157262.xml
+[8:12:35 2026-01-17] Launcher: Calling Update Process Check
+[8:12:35 2026-01-17] Patcher: Patcher Version Number: "1.3.1".
+[8:12:35 2026-01-17] Patcher: Local download path set to "/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_lpyFrf/Downloads/".
+[8:12:35 2026-01-17] Patcher: Server URL path set to "http://cdn.zwift.com/gameassets/Zwift_Updates_Root/".
+[8:12:35 2026-01-17] Patcher: Local update path set to "/Users/arthurpfalzgraf/Library/Application Support/Zwift/".
+[8:12:35 2026-01-17] Patcher: Kicking download of "ZwiftMac_ver_cur.157262.xml"...
+[8:12:35 2026-01-17] Downloader::Download filename=ZwiftMac_ver_cur.157262.xml, length=0[8:12:35 2026-01-17] Patcher: Kicking download of "LauncherMac_ver_cur.xml"...
+[8:12:35 2026-01-17] Downloader::Download filename=LauncherMac_ver_cur.xml, length=0[8:12:35 2026-01-17] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_lpyFrf/Downloads/ZwiftMac_ver_cur.157262.xml
+[8:12:35 2026-01-17] Downloader::Update() local path = /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_lpyFrf/Downloads/LauncherMac_ver_cur.xml
+[8:12:35 2026-01-17] Downloader: "ZwiftMac_ver_cur.157262.xml" downloaded successfully (manifest checksum not provided, i.e. -1).
+[8:12:35 2026-01-17] Downloader: "LauncherMac_ver_cur.xml" downloaded successfully (manifest checksum not provided, i.e. -1).
+[8:12:35 2026-01-17] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_lpyFrf/Downloads/ZwiftMac_ver_cur.157262.xml success=1[8:12:35 2026-01-17] Downloader::Update m_filesCompleted.push_back path=/var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_lpyFrf/Downloads/LauncherMac_ver_cur.xml success=1[8:12:35 2026-01-17] Patcher: Completed downloading server XML version files (Game & Launcher).
+[8:12:35 2026-01-17] Patcher: Fetching version attribute from file: "/Users/arthurpfalzgraf/Library/Application Support/Zwift/ZwiftMac_ver_cur.157262.xml"
+[8:12:35 2026-01-17] Patcher: Local version is "1.0.157262".
+[8:12:35 2026-01-17] Patcher: Server version is "1.0.157262".
+[8:12:35 2026-01-17] Patcher: Local manifest is "ZwiftMac_1.0.157262_4f73bc9a_manifest.xml".
+[8:12:35 2026-01-17] Patcher: Server manifest is "ZwiftMac_1.0.157262_4f73bc9a_manifest.xml".
+[8:12:35 2026-01-17] Patcher: Server manifest file checksum is "-482651808".
+[8:12:35 2026-01-17] Patcher: Server ver_cur checksum is "-1269370276".
+[8:12:35 2026-01-17] Patcher: Local Launcher version is "1.1.14".
+[8:12:35 2026-01-17] Patcher: Server Launcher version is "1.0.5".
+[8:12:35 2026-01-17] Patcher: Launcher URL for updating self is "http://cdn.zwift.com/app/MacUpdate/".
+[8:12:35 2026-01-17] Patcher: No update available, deleting temp files...
+[8:12:35 2026-01-17] 
+Patcher: DeleteFolderHierarchy with /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_lpyFrf/Downloads/
+[8:12:35 2026-01-17] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_lpyFrf/Downloads//ZwiftMac_ver_cur.157262.xml
+[8:12:35 2026-01-17] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_lpyFrf/Downloads//ZwiftMac_ver_cur.157262.xml
+[8:12:35 2026-01-17] 
+Patcher: Opening /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_lpyFrf/Downloads//LauncherMac_ver_cur.xml
+[8:12:35 2026-01-17] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_lpyFrf/Downloads//LauncherMac_ver_cur.xml
+[8:12:35 2026-01-17] 
+Patcher: Deleting /var/folders/qf/92pwcqtn13gf6q9xv7tbvyx40000gn/T/TemporaryItems/NSIRD_Zwift_lpyFrf/Downloads/
+[8:12:35 2026-01-17] Downloader::ForgetCompleted path=ZwiftMac_ver_cur.157262.xml[8:12:35 2026-01-17] Downloader::ForgetCompleted path=LauncherMac_ver_cur.xml[8:12:35 2026-01-17] Launcher: Calling Update Launcher Check
+[8:12:35 2026-01-17] Launcher: Calling Update Process Available
+[8:12:35 2026-01-17] Launcher: Update Not Found.
+[8:12:36 2026-01-17] Launcher: Webview loaded some URL.
+[8:12:36 2026-01-17] Launcher: Webview loaded some URL.
+[8:12:36 2026-01-17] Launcher: Webview loaded some URL.
+[8:12:37 2026-01-17] Launcher: Webview loaded some URL.
+[8:12:37 2026-01-17] Launcher: Webview loaded some URL.
+[8:14:43 2026-01-17] Launcher: Webview loaded some URL.
+[8:14:43 2026-01-17] Launcher: Found Zwift Scheme.
+[8:14:43 2026-01-17] Launcher: Access Code Received.

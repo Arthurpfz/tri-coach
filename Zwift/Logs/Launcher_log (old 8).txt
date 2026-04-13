@@ -1,0 +1,17 @@
+[15:27:44 2026-01-03] Launcher: Starting Sentry.
+[15:27:44 2026-01-03] Launcher: Initializing Mac Timer.
+[15:27:44 2026-01-03] Launcher: Checking for launcher version number.
+[15:27:44 2026-01-03] Launcher: Checking for VerCur Override
+[15:27:44 2026-01-03] Downloader::InternetConnected() returns TRUE![15:27:44 2026-01-03] Launcher: Established Internet Connection
+[15:27:45 2026-01-03] Launcher: Prefs file found.
+[15:27:45 2026-01-03] Launcher: Zwift Login URL set as https://launcher.zwift.com/launcher/realms/zwift/protocol/openid-connect/auth?client_id=Game_Launcher&redirect_uri=http%3A%2F%2Fzwift%2F&login=true&response_type=code
+[15:27:45 2026-01-03] Launcher: Setting for VerCur Override
+[15:27:45 2026-01-03] [Info] CNL: 3.68.0
+[15:27:45 2026-01-03] [Info] Machine ID: 2-7E7ABFF0-943B-5DBF-A6CD-DC1605DE57AF
+[15:27:46 2026-01-03] Launcher: Using Exp VerCur ZwiftMac_ver_cur.157245.xml
+[15:27:47 2026-01-03] Launcher: Webview loaded some URL.
+[15:27:47 2026-01-03] Launcher: Webview loaded some URL.
+[15:27:47 2026-01-03] Launcher: Starting Update Check
+[15:27:48 2026-01-03] Launcher: Webview loaded some URL.
+[15:27:48 2026-01-03] Launcher: Webview loaded some URL.
+[15:27:48 2026-01-03] Launcher: Webview loaded some URL.
