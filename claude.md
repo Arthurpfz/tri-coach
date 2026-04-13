@@ -37,7 +37,7 @@ Daily 8:05 PM → Fetch Plan + Strava Activities → AI Analysis → Feedback to
 - **ID:** Q2KE0XGsc8NWLY8V
 - **Active Version:** aa1d3cdb-f231-4b8c-a2c1-8430216fc13b (v24)
 - **Schedule:** Daily at 20:05 (Europe/Berlin)
-- **Purpose:** Basic activity tracking via Strava API
+- **Purpose:** Basic activity tracking via Strava API (pure session analysis, no plan comparison)
 - **Status:** ✅ Active (fallback system)
 - **AI Model:** Claude 3.5 Sonnet
 
@@ -72,18 +72,18 @@ Daily 8:05 PM → Fetch Plan + Strava Activities → AI Analysis → Feedback to
    - Training load (TSS, IF, TRIMP)
    - Interval structure (auto-detected)
    - Available streams (time-series data)
-7. Calculate current week's Monday date
-8. Fetch weekly plan from Airtable for this week
-9. Send comprehensive data to Claude 3.7 Sonnet with rigorous analysis framework
-10. Claude performs technical analysis:
-    - Execution grading (A/B/C/F vs planned session)
-    - Power analysis (VI, decoupling, pacing strategy)
-    - Cardiovascular analysis (cardiac drift, efficiency factor, HR zones)
-    - Cadence assessment (consistency, sport-specific appropriateness)
-    - Interval quality (structure, consistency across reps)
-    - Training phase context and progression
-    - Specific coaching points with exact metrics
-11. Send 6-10 sentence technical coaching message via Telegram
+7. Send activity data to Claude 3.7 Sonnet with rigorous analysis framework
+8. Claude performs technical analysis ON THE SESSION'S OWN MERITS (no comparison against any planned workout):
+   - Session quality assessment (pacing, control, intent)
+   - Power analysis (VI, decoupling, pacing strategy)
+   - Cardiovascular analysis (cardiac drift, efficiency factor, HR zones)
+   - Cadence assessment (consistency, sport-specific appropriateness)
+   - Interval quality (structure, consistency across reps)
+   - Training phase context (broad fitness development, NOT plan adherence)
+   - Specific coaching points with exact metrics
+9. Send 6-10 sentence technical coaching message via Telegram
+
+**Note:** As of 2026-04-13, the daily check-in does NOT compare today's activity against the weekly plan. The athlete frequently adjusts training on the fly, so the coach analyzes whatever was done on its own terms. The Sunday Planner still generates weekly plans, but the daily check-in ignores them.
 
 **Output Style:**
 - Rigorous and analytical
@@ -91,14 +91,15 @@ Daily 8:05 PM → Fetch Plan + Strava Activities → AI Analysis → Feedback to
 - Supportive but brutally honest
 - No fluff or generic praise
 - Professional coach-to-serious-athlete tone
+- Pure session analysis — no plan-adherence grading
 
 **Example Feedback:**
 ```
-Clean execution of the 90min Z2 ride. Power at 245W avg (85% FTP), NP 258W,
+Strong 90min Z2 ride. Power at 245W avg (85% FTP), NP 258W,
 VI 1.05 - textbook steady pacing. Cadence held 90-94rpm with <3% variation.
 Cardiac drift only 5.2% (148→156bpm) - aerobic ceiling rising. Small flag:
 last 20min saw 8W power drop while HR held, suggesting glycogen depletion.
-TSS 78 slots perfectly into Base 2. Decoupling 1.03 shows strong efficiency.
+TSS 78 is solid aerobic work for Base 2. Decoupling 1.03 shows strong efficiency.
 Easy spin tomorrow.
 ```
 
@@ -282,39 +283,34 @@ REST
 
 ## AI Coaching Logic
 
-### Daily Check-In Analysis (Claude 3.5 Sonnet)
+### Daily Check-In Analysis (Claude 3.5 Sonnet — Strava Legacy / Claude 3.7 Sonnet — Intervals.icu)
+
+**Philosophy:** As of 2026-04-13, the daily coach does **pure session analysis on the session's own merits**. It does NOT compare today's activity to any planned/scheduled workout. The athlete adjusts training on the fly and wants honest feedback on what was actually done — not a plan-adherence grade.
 
 **Context Provided:**
 - Current date and day of week
-- Athlete name
-- Full week's training plan (Monday-Sunday)
-- Today's Strava activities (raw data)
+- Athlete name and training phase
+- Fitness profile (HR zones, paces, power)
+- Today's activity data (Strava raw / Intervals.icu full FIT metrics)
 
 **Analysis Logic:**
 
-1. **Check for Direct Match:**
-   - Does activity type match today's plan? (Run vs Run, Swim vs Swim)
-   - If yes: Provide specific feedback on pace/heart rate/duration
+1. **If a session exists:** Analyze it on its own merits — pacing, intensity distribution, power/HR/cadence quality, training load, interval execution.
 
-2. **Check for Logical Swap (if Step 1 fails):**
-   - Is today's actual workout found elsewhere in this week's plan?
-   - If yes: Acknowledge the swap ("Good call moving the Long Ride to today")
+2. **If no session today:** Keep it short and supportive. Acknowledge the rest day without guilt-tripping.
 
-3. **Check for Rogue Activity (The Guardrail):**
-   - Is activity completely different from anything planned this week?
-   - If yes: Acknowledge effort but flag as off-plan, be curious not angry
-   - Example: "I see you went for a Hike instead of the Swim. Hope the legs are feeling good, but let's watch the fatigue."
-
-4. **Check for Missed Session:**
-   - If actuals are empty and today was a training day
-   - Check if yesterday was huge (maybe they needed rest)
-   - Be gentle and supportive
+**Hard rules baked into the prompt:**
+- Do NOT mention any planned/scheduled workout
+- Do NOT grade execution A/B/C/F against a schedule
+- Do NOT use phrases like "instead of", "as planned", "off-plan", "should have been"
+- Do NOT comment on whether this was the "right" session for today
+- Training-phase context is allowed only as broad fitness development framing, not plan adherence
 
 **Output Requirements:**
-- WhatsApp message to the athlete
-- Tone: "Coach" (short, punchy, human)
-- Be analytical
-- Max 4 sentences
+- Telegram message to the athlete
+- Tone: "Coach" (analytical, data-driven, supportive but honest)
+- Strava (legacy): max 4 sentences
+- Intervals.icu (primary): 6-10 sentences with specific metrics
 - No preamble, just the message
 
 ### Weekly Planning (Claude 3.7 Sonnet)
@@ -548,6 +544,16 @@ This will show:
 ---
 
 ## Changelog
+
+### 2026-04-13
+- **CHANGED:** Daily check-in no longer compares sessions against the weekly plan
+  - **Reason:** Athlete frequently adjusts training on the fly; plan-adherence grading was creating noise
+  - **Behavior:** Coach now performs pure session analysis on the session's own merits
+  - **Files updated:**
+    - `intervals-icu-workflow.json` (primary): removed `Calculate Monday` and `Search Plan` nodes; rewrote `Hardcore Analysis` prompt
+    - `workflow-daily-checkin.json` (Strava legacy): removed `Calculate Monday` and `Search plan` nodes; rewrote `Basic LLM Chain` prompt
+  - **Sunday Planner unchanged:** Weekly plans are still generated, just no longer used in daily feedback
+  - **Action required:** Apply changes to live N8N workflows via the N8N web UI (the JSON files are source-of-truth, not auto-deployed)
 
 ### 2026-01-25
 - **DEPLOYED & TESTED:** Intervals.icu Integration
