@@ -116,11 +116,11 @@
           "parameters": [
             {
               "name": "client_id",
-              "value": "193431"
+              "value": "={{ $env.STRAVA_CLIENT_ID }}"
             },
             {
               "name": "client_secret",
-              "value": "STRAVA_CLIENT_SECRET_REDACTED"
+              "value": "={{ $env.STRAVA_CLIENT_SECRET }}"
             },
             {
               "name": "grant_type",
@@ -419,6 +419,108 @@
           "name": "Telegram account"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "idempotency-check",
+              "leftValue": "={{ $json['Last Coaching Date'] }}",
+              "rightValue": "={{ $today.toFormat('yyyy-MM-dd') }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        96,
+        -16
+      ],
+      "id": "already-coached-today-strava",
+      "name": "Already Coached Today?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appw0Xd3T54okfaXa",
+          "mode": "list",
+          "cachedResultName": "Tri Coach MVP",
+          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblK8jxVIxuFi9H8Z",
+          "mode": "list",
+          "cachedResultName": "Users",
+          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblK8jxVIxuFi9H8Z"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Items').item.json.id }}",
+            "Last Coaching Date": "={{ $today.toFormat('yyyy-MM-dd') }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Last Coaching Date",
+              "displayName": "Last Coaching Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2224,
+        144
+      ],
+      "id": "update-coaching-date-strava",
+      "name": "Update Coaching Date",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JMbdFoTWoGU3avK9",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
     }
   ],
   "connections": {
@@ -448,7 +550,7 @@
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "Already Coached Today?",
             "type": "main",
             "index": 0
           }
@@ -544,11 +646,35 @@
           }
         ]
       ]
+    },
+    "Already Coached Today?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Update Coaching Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "errorWorkflow": "REPLACE_WITH_ERROR_HANDLER_ID"
   },
   "staticData": {
     "node:Schedule Trigger": {
@@ -729,11 +855,11 @@
             "parameters": [
               {
                 "name": "client_id",
-                "value": "193431"
+                "value": "={{ $env.STRAVA_CLIENT_ID }}"
               },
               {
                 "name": "client_secret",
-                "value": "STRAVA_CLIENT_SECRET_REDACTED"
+                "value": "={{ $env.STRAVA_CLIENT_SECRET }}"
               },
               {
                 "name": "grant_type",

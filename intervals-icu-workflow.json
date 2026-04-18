@@ -14,7 +14,10 @@
       },
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
-      "position": [-520, 240],
+      "position": [
+        -520,
+        240
+      ],
       "id": "schedule-trigger",
       "name": "Schedule Trigger"
     },
@@ -37,7 +40,10 @@
       },
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.1,
-      "position": [-320, 240],
+      "position": [
+        -320,
+        240
+      ],
       "id": "search-users",
       "name": "Search Users",
       "credentials": {
@@ -53,7 +59,10 @@
       },
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [-120, 240],
+      "position": [
+        -120,
+        240
+      ],
       "id": "loop-users",
       "name": "Loop Over Users"
     },
@@ -80,7 +89,10 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
-      "position": [80, 240],
+      "position": [
+        80,
+        240
+      ],
       "id": "get-activities",
       "name": "Get Activities",
       "credentials": {
@@ -115,7 +127,10 @@
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
-      "position": [280, 240],
+      "position": [
+        280,
+        240
+      ],
       "id": "check-activities",
       "name": "Check Activities Exist"
     },
@@ -125,7 +140,10 @@
       },
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [480, 160],
+      "position": [
+        480,
+        160
+      ],
       "id": "loop-activities",
       "name": "Loop Over Activities"
     },
@@ -139,7 +157,10 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
-      "position": [880, 160],
+      "position": [
+        880,
+        160
+      ],
       "id": "get-activity-details",
       "name": "Get Activity Details",
       "credentials": {
@@ -165,7 +186,10 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [1080, 160],
+      "position": [
+        1080,
+        160
+      ],
       "id": "calculate-monday",
       "name": "Calculate Monday"
     },
@@ -189,7 +213,10 @@
       },
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.1,
-      "position": [1280, 160],
+      "position": [
+        1280,
+        160
+      ],
       "id": "search-plan",
       "name": "Search Plan",
       "credentials": {
@@ -207,7 +234,10 @@
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.8,
-      "position": [1480, 160],
+      "position": [
+        1480,
+        160
+      ],
       "id": "llm-chain",
       "name": "Hardcore Analysis"
     },
@@ -221,7 +251,10 @@
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
-      "position": [1480, 360],
+      "position": [
+        1480,
+        360
+      ],
       "id": "openrouter-model",
       "name": "Claude 3.7 Sonnet",
       "credentials": {
@@ -241,7 +274,10 @@
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [1680, 160],
+      "position": [
+        1680,
+        160
+      ],
       "id": "send-telegram",
       "name": "Send Telegram",
       "credentials": {
@@ -250,51 +286,271 @@
           "name": "Telegram account"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "idempotency-check",
+              "leftValue": "={{ $json['Last Coaching Date'] }}",
+              "rightValue": "={{ $today.toFormat('yyyy-MM-dd') }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -20,
+        420
+      ],
+      "id": "already-coached-today-icu",
+      "name": "Already Coached Today?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appw0Xd3T54okfaXa",
+          "mode": "list",
+          "cachedResultName": "Tri Coach MVP"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblK8jxVIxuFi9H8Z",
+          "mode": "list",
+          "cachedResultName": "Users"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Users').item.json.id }}",
+            "Last Coaching Date": "={{ $today.toFormat('yyyy-MM-dd') }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Last Coaching Date",
+              "displayName": "Last Coaching Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1880,
+        160
+      ],
+      "id": "update-coaching-date-icu",
+      "name": "Update Coaching Date",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JMbdFoTWoGU3avK9",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
     }
   ],
   "connections": {
     "Schedule Trigger": {
-      "main": [[{ "node": "Search Users", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Search Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Search Users": {
-      "main": [[{ "node": "Loop Over Users", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Loop Over Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Loop Over Users": {
       "main": [
-        [{ "node": "Get Activities", "type": "main", "index": 0 }],
-        [{ "node": "Search Users", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Already Coached Today?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Get Activities": {
-      "main": [[{ "node": "Check Activities Exist", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Check Activities Exist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Check Activities Exist": {
-      "main": [[{ "node": "Loop Over Activities", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Loop Over Activities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Loop Over Activities": {
       "main": [
-        [{ "node": "Get Activity Details", "type": "main", "index": 0 }],
-        [{ "node": "Get Activities", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Get Activity Details",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Activities",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Get Activity Details": {
-      "main": [[{ "node": "Calculate Monday", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Calculate Monday",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Calculate Monday": {
-      "main": [[{ "node": "Search Plan", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Search Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Search Plan": {
-      "main": [[{ "node": "Hardcore Analysis", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Hardcore Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Hardcore Analysis": {
-      "main": [[{ "node": "Send Telegram", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Send Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Claude 3.7 Sonnet": {
-      "ai_languageModel": [[{ "node": "Hardcore Analysis", "type": "ai_languageModel", "index": 0 }]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "Hardcore Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Already Coached Today?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get Activities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Telegram": {
+      "main": [
+        [
+          {
+            "node": "Update Coaching Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "errorWorkflow": "REPLACE_WITH_ERROR_HANDLER_ID"
   },
   "staticData": {
     "node:Schedule Trigger": {
