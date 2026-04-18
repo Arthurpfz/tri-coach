@@ -116,11 +116,11 @@
           "parameters": [
             {
               "name": "client_id",
-              "value": "={{ $env.STRAVA_CLIENT_ID }}"
+              "value": "193431"
             },
             {
               "name": "client_secret",
-              "value": "={{ $env.STRAVA_CLIENT_SECRET }}"
+              "value": "STRAVA_CLIENT_SECRET_REDACTED"
             },
             {
               "name": "grant_type",
@@ -855,11 +855,11 @@
             "parameters": [
               {
                 "name": "client_id",
-                "value": "={{ $env.STRAVA_CLIENT_ID }}"
+                "value": "193431"
               },
               {
                 "name": "client_secret",
-                "value": "={{ $env.STRAVA_CLIENT_SECRET }}"
+                "value": "STRAVA_CLIENT_SECRET_REDACTED"
               },
               {
                 "name": "grant_type",
