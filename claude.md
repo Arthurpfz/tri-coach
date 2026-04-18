@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is an **automated triathlon coaching system** that creates personalized weekly training plans and provides daily performance feedback by analyzing Strava activities against planned workouts.
+This is an **automated triathlon coaching system** that creates personalized weekly training plans and provides daily performance feedback by analyzing the session actually performed — not compared to a plan, but evaluated on its own merits.
 
 **Status:** Production (Active)
 **Author:** Arthur Pfalzgraf
@@ -26,7 +26,7 @@ This is an **automated triathlon coaching system** that creates personalized wee
 
 ```
 Sunday 8:07 PM → Generate Weekly Plan → Store in Airtable → Send to Telegram
-Daily 8:05 PM → Fetch Plan + Strava Activities → AI Analysis → Feedback to Telegram
+Daily 8:05 PM → Fetch Today's Activities → AI Analysis (session-first, no plan comparison) → Feedback to Telegram
 ```
 
 ---
@@ -73,10 +73,10 @@ Daily 8:05 PM → Fetch Plan + Strava Activities → AI Analysis → Feedback to
    - Interval structure (auto-detected)
    - Available streams (time-series data)
 7. Calculate current week's Monday date
-8. Fetch weekly plan from Airtable for this week
+8. Fetch weekly plan from Airtable (kept in graph but no longer used in prompt)
 9. Send comprehensive data to Claude 3.7 Sonnet with rigorous analysis framework
 10. Claude performs technical analysis:
-    - Execution grading (A/B/C/F vs planned session)
+    - Session intent inference + execution grading (A/B/C/F on own merits, NOT vs plan)
     - Power analysis (VI, decoupling, pacing strategy)
     - Cardiovascular analysis (cardiac drift, efficiency factor, HR zones)
     - Cadence assessment (consistency, sport-specific appropriateness)
@@ -287,33 +287,23 @@ REST
 **Context Provided:**
 - Current date and day of week
 - Athlete name
-- Full week's training plan (Monday-Sunday)
 - Today's Strava activities (raw data)
 
 **Analysis Logic:**
+The athlete's schedule shifts often — the daily analysis does NOT compare to a weekly plan. The session is judged on its own merits.
 
-1. **Check for Direct Match:**
-   - Does activity type match today's plan? (Run vs Run, Swim vs Swim)
-   - If yes: Provide specific feedback on pace/heart rate/duration
+1. **If there is an activity:**
+   - Identify the sport and likely intent (endurance / tempo / threshold / intervals / long / recovery)
+   - Give specific feedback on pace, heart rate, duration, and effort
+   - Call out one thing that went well and one thing to watch
 
-2. **Check for Logical Swap (if Step 1 fails):**
-   - Is today's actual workout found elsewhere in this week's plan?
-   - If yes: Acknowledge the swap ("Good call moving the Long Ride to today")
-
-3. **Check for Rogue Activity (The Guardrail):**
-   - Is activity completely different from anything planned this week?
-   - If yes: Acknowledge effort but flag as off-plan, be curious not angry
-   - Example: "I see you went for a Hike instead of the Swim. Hope the legs are feeling good, but let's watch the fatigue."
-
-4. **Check for Missed Session:**
-   - If actuals are empty and today was a training day
-   - Check if yesterday was huge (maybe they needed rest)
-   - Be gentle and supportive
+2. **If there is no activity:**
+   - Treat it as a rest or off day — supportive nudge, no moralising
 
 **Output Requirements:**
 - WhatsApp message to the athlete
-- Tone: "Coach" (short, punchy, human)
-- Be analytical
+- Tone: "Coach" — short, punchy, human
+- Data-driven: cite the actual numbers
 - Max 4 sentences
 - No preamble, just the message
 
@@ -549,6 +539,15 @@ This will show:
 
 ## Changelog
 
+### 2026-04-18
+- **CHANGED:** Daily analysis prompts — all three workflows updated to focus on actual session performed, not plan comparison
+  - Removed plan-vs-actual match/swap/rogue logic from `workflow-daily-checkin.json` (Strava legacy)
+  - Removed `PLANNED SESSION` block and plan-match grading from `intervals-icu-workflow.json` (Intervals.icu main)
+  - Same for `sandbox-daily-checkin-v2.json`
+  - **Reason:** Athlete's schedule shifts often; plan comparison was noisy and unhelpful
+  - New approach: infer session intent from data, grade execution on its own merits (pacing coherence, intensity appropriateness), training-phase context retained
+  - `Search Plan` Airtable nodes left in graph but no longer referenced in prompts
+
 ### 2026-01-25
 - **DEPLOYED & TESTED:** Intervals.icu Integration
   - **Final Workflow ID:** hrSGUqoAwkWQ4gKl
@@ -569,7 +568,7 @@ This will show:
   - Training load analysis (TSS, intensity factor, TRIMP)
   - Interval structure detection and quality assessment across reps
   - Training phase contextualization
-  - Execution grading (A/B/C/F vs planned workout)
+  - Session intent inference and execution grading (A/B/C/F on own merits)
 
   **Issues Encountered & Resolved:**
   1. Missing credential reference → Created HTTP Basic Auth credential via API
@@ -666,4 +665,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-01-25 (Deployed and tested Intervals.icu integration)*
+*Last Updated: 2026-04-18 (Daily analysis switched to session-first, no plan comparison)*
