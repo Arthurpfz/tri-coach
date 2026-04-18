@@ -1,0 +1,55 @@
+{
+  "name": "Coach Tri - Error Handler",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        0
+      ],
+      "id": "error-trigger",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "chatId": "TELEGRAM_CHAT_ID_REDACTED",
+        "text": "=⚠️ Workflow failed: {{ $json.workflow.name }}\nNode: {{ $json.execution.lastNodeExecuted }}\nError: {{ $json.error.message }}\nTime: {{ $now.setZone('Europe/Berlin').toFormat('HH:mm') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        0
+      ],
+      "id": "send-error-alert",
+      "name": "Send Error Alert",
+      "credentials": {
+        "telegramApi": {
+          "id": "9IpAp35yJmIQJpeA",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
