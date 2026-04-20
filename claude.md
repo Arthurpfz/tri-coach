@@ -33,6 +33,14 @@ Daily 8:05 PM → Fetch Plan + Strava Activities → AI Analysis → Feedback to
 
 ## Active Workflows
 
+### 0. Coach Tri - Error Handler
+- **ID:** psyVgPiGJoO5QOa4
+- **Type:** Error Trigger workflow
+- **Status:** ✅ Active
+- **Purpose:** Catches failures from all Coach Tri workflows, sends Telegram alert with workflow name, failing node, and error message
+- **Wired to:** All 3 main workflows via `settings.errorWorkflow`
+- **Note:** Only fires on automated (scheduled) runs, NOT manual executions — by n8n design
+
 ### 1. Coach Tri - Daily Checkin (Strava - LEGACY)
 - **ID:** Q2KE0XGsc8NWLY8V
 - **Active Version:** aa1d3cdb-f231-4b8c-a2c1-8430216fc13b (v24)
@@ -48,6 +56,12 @@ Daily 8:05 PM → Fetch Plan + Strava Activities → AI Analysis → Feedback to
 - **Purpose:** Advanced technical analysis with full FIT file data
 - **Status:** ✅ Active and Tested (2026-01-25)
 - **AI Model:** Claude 3.7 Sonnet
+
+**Idempotency & error handling (added 2026-04-18):**
+- `Already Coached Today?` gate short-circuits if `Last Coaching Date` == today
+- `Update Coaching Date` writes today's date immediately after gate passes (before `Get Activities`) — covers rest days and survives downstream failures
+- `errorWorkflow` → `psyVgPiGJoO5QOa4` for Telegram alerts on failure
+- `Get Activities` URL uses `$('Loop Over Users').item.json['Intervals.icu Athlete ID']` (survives node reordering)
 - **Data Source:** Intervals.icu API (full FIT file metrics + time-series streams)
 - **Credential ID:** JBZzr0E5U1GSy6OQ (HTTP Basic Auth)
 
@@ -102,6 +116,14 @@ TSS 78 slots perfectly into Base 2. Decoupling 1.03 shows strong efficiency.
 Easy spin tomorrow.
 ```
 
+### 1c. SANDBOX - Daily Checkin v2 (Intervals.icu)
+- **ID:** YwxiGs57HWnPdseR
+- **URL:** https://apfz.app.n8n.cloud/workflow/YwxiGs57HWnPdseR
+- **Schedule:** Daily at 20:15 (Europe/Berlin)
+- **Purpose:** Experimental version with streams, intervals, and wellness data pre-computed in Code node
+- **Status:** ✅ Active (sandbox — Telegram messages prefixed with `[SANDBOX v2]`)
+- **Includes same idempotency + error-handler wiring as 1b**
+
 ### 2. Coach Tri - Sunday Planner
 - **ID:** lUcAtn2oxCPkNkJ1
 - **Active Version:** ca59f26f-c598-4238-b3e0-03aa467b9c3b (v18)
@@ -153,6 +175,7 @@ Easy spin tomorrow.
 - Intervals.icu Athlete ID (string): Format i123456
 - Intervals.icu API Key (string): Personal API key from Settings
 - Intervals.icu Last Sync (number): Unix timestamp
+- Last Coaching Date (string): YYYY-MM-DD format, used as idempotency key by daily checkin workflows
 ```
 
 **Current Values (Arthur Pfalzgraf):**
@@ -549,6 +572,17 @@ This will show:
 
 ## Changelog
 
+### 2026-04-18
+- **DEPLOYED:** Idempotency gate + error handler wiring across all daily-checkin workflows
+  - New workflow: **Coach Tri - Error Handler** (ID: `psyVgPiGJoO5QOa4`) — Error Trigger → Telegram alert
+  - Wired `settings.errorWorkflow = psyVgPiGJoO5QOa4` on all 3 main workflows
+  - New Airtable field: **Last Coaching Date** (`singleLineText`, ID `fldLdvY3ZOiTuXkuy`) on Users table
+  - Added `Already Coached Today?` IF node as first gate after Loop Over Users in all 3 workflows — short-circuits if `Last Coaching Date` == today
+  - On Intervals.icu + SANDBOX workflows: moved `Update Coaching Date` to immediately after the idempotency gate (before `Get Activities`), so date is written on rest days too
+  - Fixed `Get Activities` URL in ICU workflows to use `$('Loop Over Users').item.json['Intervals.icu Athlete ID']` (absolute reference survives node reordering)
+  - **Source branch:** `claude/review-tri-coach-n8n-XpXqM` in `Arthurpfz/tri-coach`
+  - **Known n8n behavior:** `settings.errorWorkflow` only fires on automated (schedule/webhook) runs, not manual executions. Validated indirectly — first live test will be next scheduled run failure.
+
 ### 2026-01-25
 - **DEPLOYED & TESTED:** Intervals.icu Integration
   - **Final Workflow ID:** hrSGUqoAwkWQ4gKl
@@ -633,8 +667,11 @@ This will show:
 - **Weekly Plans Table:** tblJ0UHyJ1drXv97F
 - **Daily Check-in Workflow (Strava - Legacy):** Q2KE0XGsc8NWLY8V
 - **Daily Check-in Workflow (Intervals.icu):** hrSGUqoAwkWQ4gKl
+- **SANDBOX Daily Checkin v2:** YwxiGs57HWnPdseR
+- **Error Handler Workflow:** psyVgPiGJoO5QOa4
 - **Sunday Planner Workflow:** lUcAtn2oxCPkNkJ1
 - **Telegram Chat:** TELEGRAM_CHAT_ID_REDACTED
+- **Last Coaching Date field ID:** fldLdvY3ZOiTuXkuy
 - **Strava Client ID:** 193431
 - **Intervals.icu Athlete ID:** i492254
 
@@ -666,4 +703,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-01-25 (Deployed and tested Intervals.icu integration)*
+*Last Updated: 2026-04-18 (Idempotency + error handler deployed across daily-checkin workflows)*
