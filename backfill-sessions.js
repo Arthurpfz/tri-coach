@@ -84,12 +84,22 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function main() {
   console.log(`Fetching activities ${oldest} → ${newest} for athlete ${ICU_ATHLETE}`);
   const rawList = (await icu.get(`/athlete/${ICU_ATHLETE}/activities`, { params: { oldest, newest } })).data;
-  // Same filter as the Daily Checkin Filter Activities node:
-  // keep all non-ZEPP, plus ZEPP records with real training load.
-  const TL_THRESHOLD = 20;
-  const list = rawList.filter(a => a.source !== 'ZEPP' || (a.icu_training_load || 0) >= TL_THRESHOLD);
+  // Same logic as the Daily Checkin Filter Activities Code node:
+  // on days where any non-ZEPP source recorded, drop ZEPP (it's a duplicate
+  // of the real device's recording). On ZEPP-only days, keep ZEPP.
+  const byDay = new Map();
+  for (const a of rawList) {
+    const day = (a.start_date_local || '').slice(0, 10);
+    if (!byDay.has(day)) byDay.set(day, []);
+    byDay.get(day).push(a);
+  }
+  const list = [];
+  for (const [, dayAll] of byDay) {
+    const hasNonZepp = dayAll.some(a => a.source !== 'ZEPP');
+    list.push(...(hasNonZepp ? dayAll.filter(a => a.source !== 'ZEPP') : dayAll));
+  }
   const dropped = rawList.length - list.length;
-  console.log(`Found ${rawList.length} activities (${dropped} ZEPP-noise dropped). Fetching details + upserting...\n`);
+  console.log(`Found ${rawList.length} activities (${dropped} ZEPP duplicates dropped). Fetching details + upserting...\n`);
 
   let ok = 0, fail = 0;
   for (const stub of list) {
