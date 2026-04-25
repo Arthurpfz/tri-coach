@@ -68,9 +68,11 @@ Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI A
 - `Get Activities` URL uses `$('Loop Over Users').item.json['Intervals.icu Athlete ID']` (survives node reordering)
 
 **Session persistence + analysis store (added 2026-04-25):**
+- `Filter Activities` (drops `source == 'ZEPP'`) sits between `Get Activities` and the loop — armband recordings are excluded entirely (they overlap with COROS/WAHOO recordings of the same effort, producing duplicate analyses)
 - `Save Session` (POST `/sessions`) upserts the activity into the `sessions` table on `(athlete_id, intervals_id)` — full FIT payload across ~45 columns + `raw_json`
 - `Save Analysis` (PATCH `/sessions/:id`) writes Claude's coaching output into `analysis` + `analyzed_at` after the LLM runs, before Telegram
 - Rest-day branch: `Check Activities Exist → false → Send Rest-Day Telegram` ("🛌 No activity logged today...")
+- Telegram output rewritten as plain-text bulleted format (sport emoji header · Grade · 3 bullets · Tomorrow · Watch) — no markdown, ~6 lines, fits one Telegram screen
 - **Data Source:** Intervals.icu API (full FIT file metrics + time-series streams)
 - **Credential ID:** JBZzr0E5U1GSy6OQ (HTTP Basic Auth)
 
@@ -124,6 +126,25 @@ last 20min saw 8W power drop while HR held, suggesting glycogen depletion.
 TSS 78 slots perfectly into Base 2. Decoupling 1.03 shows strong efficiency.
 Easy spin tomorrow.
 ```
+
+### 1d. Coach Tri - Weekly Stats
+- **ID:** 2W0SIHwzyAWJW62Q
+- **URL:** https://apfz.app.n8n.cloud/workflow/2W0SIHwzyAWJW62Q
+- **Schedule:** Daily at 20:30 (Europe/Berlin)
+- **Purpose:** Send a single Telegram with cumulative weekly volume — total hours (one 🔥 per hour) + per-sport breakdown
+- **Status:** ✅ Active (deployed 2026-04-25)
+- **Flow:** Schedule Trigger → Calculate Monday → GET `/sessions?athlete_id=1&date_from=<monday>` → Code (aggregate by sport) → Send Telegram
+- **Output format:**
+  ```
+  📊 Week to date
+  🔥🔥🔥🔥 4:26h total
+
+  🏃 Run · 1:08
+  🏊 Swim · 1:20
+  🚴 Ride · 0:00
+  💪 Workout · 1:58
+  ```
+- **Wired to** `errorWorkflow` (`psyVgPiGJoO5QOa4`)
 
 ### 2. Coach Tri - Sunday Planner
 - **ID:** lUcAtn2oxCPkNkJ1
@@ -583,10 +604,13 @@ This will show:
 - **DEPLOYED:** Daily Checkin now persists workouts + analysis to `sessions` table
   - Redeployed `tricoach-db` container with extended schema (45+ session columns) and new `PATCH /sessions/:id` endpoint
   - Fixed upsert bug: `ON CONFLICT(athlete_id, intervals_id)` now includes the partial-index `WHERE intervals_id IS NOT NULL` clause SQLite requires
-  - **Backfill:** ran [`backfill-sessions.js`](./backfill-sessions.js) for 2026-02-25 → 2026-04-25 → 34 sessions imported (idempotent via upsert)
+  - **Backfill:** ran [`backfill-sessions.js`](./backfill-sessions.js) for 2026-02-25 → 2026-04-25 → 12 clean sessions imported (idempotent via upsert)
   - **Workflow `hrSGUqoAwkWQ4gKl`:**
+    - `Filter Activities` node added — drops all `source == 'ZEPP'` (armband records overlap COROS/WAHOO recordings, causing duplicate analyses)
     - `Save Session` and `Save Analysis` HTTP nodes added in flow `Get Activity Details → Save Session → ... → Hardcore Analysis → Save Analysis → Send Telegram`
     - Rest-day branch wired: `Check Activities Exist → false → Send Rest-Day Telegram`
+    - `Hardcore Analysis` prompt rewritten — Telegram-native bulleted output (sport emoji header · Grade · 3 bullets · Tomorrow · Watch), plain text, ~6 lines, no markdown
+  - **NEW WORKFLOW:** Coach Tri - Weekly Stats (`2W0SIHwzyAWJW62Q`) — daily 20:30 cumulative weekly volume Telegram (🔥 per hour + per-sport breakdown)
   - **REMOVED:** SANDBOX Daily Checkin v2 (`YwxiGs57HWnPdseR`) — its streams/wellness/intervals enrichment was not adopted into prod; deleted both n8n workflow and local `sandbox-daily-checkin-v2.json`
 
 ### 2026-04-22
@@ -700,6 +724,7 @@ This will show:
 - **Weekly Plans Table:** tblJ0UHyJ1drXv97F
 - **Daily Check-in Workflow (Strava - Legacy):** Q2KE0XGsc8NWLY8V
 - **Daily Check-in Workflow (Intervals.icu):** hrSGUqoAwkWQ4gKl
+- **Weekly Stats Workflow:** 2W0SIHwzyAWJW62Q
 - **Error Handler Workflow:** psyVgPiGJoO5QOa4
 - **Sunday Planner Workflow:** lUcAtn2oxCPkNkJ1
 - **Telegram Chat:** TELEGRAM_CHAT_ID_REDACTED
@@ -735,4 +760,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-04-25 (Sessions persistence + analysis store deployed; sandbox removed; 34-session backfill complete)*
+*Last Updated: 2026-04-25 (Sessions persistence + ZEPP filter + Telegram-native prompt + Weekly Stats workflow shipped)*
