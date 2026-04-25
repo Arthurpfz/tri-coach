@@ -1,0 +1,14 @@
+services:
+  tricoach-db:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3200:3000"
+    environment:
+      - API_KEY=${TRICOACH_API_KEY}
+      - DB_PATH=/data/tricoach.db
+    volumes:
+      - tricoach-data:/data
+
+volumes:
+  tricoach-data:
