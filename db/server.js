@@ -225,8 +225,10 @@ app.post('/sessions', (req, res) => {
   const updateSet = POST_FIELDS.filter(k => k !== 'athlete_id' && k !== 'intervals_id' && k !== 'strava_id')
     .map(k => `${k} = excluded.${k}`).join(', ');
 
+  // Note: partial unique index on (athlete_id, intervals_id) requires the
+  // matching WHERE clause to be repeated in the conflict target.
   let conflictTarget = null;
-  if (intervals_id) conflictTarget = '(athlete_id, intervals_id)';
+  if (intervals_id) conflictTarget = '(athlete_id, intervals_id) WHERE intervals_id IS NOT NULL';
   else if (strava_id) conflictTarget = '(strava_id)';
 
   const sql = conflictTarget

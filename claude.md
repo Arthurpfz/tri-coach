@@ -15,9 +15,12 @@ This is an **automated triathlon coaching system** that creates personalized wee
 ### Tech Stack
 
 - **N8N Cloud**: Workflow automation platform (https://apfz.app.n8n.cloud)
-- **Airtable**: Database for users, plans, and athlete data
-  - Base: "Tri Coach MVP" (appw0Xd3T54okfaXa)
-- **Strava API**: Activity tracking and OAuth integration
+- **Tricoach DB**: Self-hosted SQLite REST API at https://coach-db.arthurpfz.com
+  - Code: `./db/` — Node 20 + Express + `better-sqlite3`
+  - Deployed: `/data/tricoach-db/` on Hostinger VPS (VPS_IP_REDACTED)
+  - Auth: `X-API-Key` header (n8n credential ID `6GNzKYNE1JAz77RL`)
+- **Intervals.icu**: Primary training data source (full FIT metrics)
+- **Strava API**: Legacy fallback, OAuth tokens still stored for compatibility
 - **Claude AI**: Coaching intelligence (via OpenRouter)
   - Models: Claude 3.5 Sonnet (check-ins), Claude 3.7 Sonnet (planning)
 - **Telegram**: Communication channel (Chat ID: TELEGRAM_CHAT_ID_REDACTED)
@@ -25,8 +28,9 @@ This is an **automated triathlon coaching system** that creates personalized wee
 ### Data Flow
 
 ```
-Sunday 8:07 PM → Generate Weekly Plan → Store in Airtable → Send to Telegram
-Daily 8:05 PM → Fetch Plan + Strava Activities → AI Analysis → Feedback to Telegram
+Sunday 8:07 PM → Generate Weekly Plan → POST /weekly-plans → Send to Telegram
+Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI Analysis
+              → PUT /athletes/:id (last_coaching_date) → Telegram feedback
 ```
 
 ---
@@ -62,6 +66,11 @@ Daily 8:05 PM → Fetch Plan + Strava Activities → AI Analysis → Feedback to
 - `Update Coaching Date` writes today's date immediately after gate passes (before `Get Activities`) — covers rest days and survives downstream failures
 - `errorWorkflow` → `psyVgPiGJoO5QOa4` for Telegram alerts on failure
 - `Get Activities` URL uses `$('Loop Over Users').item.json['Intervals.icu Athlete ID']` (survives node reordering)
+
+**Session persistence + analysis store (added 2026-04-25):**
+- `Save Session` (POST `/sessions`) upserts the activity into the `sessions` table on `(athlete_id, intervals_id)` — full FIT payload across ~45 columns + `raw_json`
+- `Save Analysis` (PATCH `/sessions/:id`) writes Claude's coaching output into `analysis` + `analyzed_at` after the LLM runs, before Telegram
+- Rest-day branch: `Check Activities Exist → false → Send Rest-Day Telegram` ("🛌 No activity logged today...")
 - **Data Source:** Intervals.icu API (full FIT file metrics + time-series streams)
 - **Credential ID:** JBZzr0E5U1GSy6OQ (HTTP Basic Auth)
 
@@ -73,7 +82,7 @@ Daily 8:05 PM → Fetch Plan + Strava Activities → AI Analysis → Feedback to
 - Activities uploaded via Strava will not be analyzed by this workflow
 
 **Workflow Flow:**
-1. Fetch all users from Airtable
+1. Fetch all users from Tricoach DB (`GET /athletes`)
 2. Loop through each user
 3. Fetch today's activities from Intervals.icu API using athlete ID
 4. Check if activities exist (type validation enabled)
@@ -87,7 +96,7 @@ Daily 8:05 PM → Fetch Plan + Strava Activities → AI Analysis → Feedback to
    - Interval structure (auto-detected)
    - Available streams (time-series data)
 7. Calculate current week's Monday date
-8. Fetch weekly plan from Airtable for this week
+8. Fetch weekly plan from Tricoach DB (`GET /weekly-plans?athlete_id=&week_start_date=`)
 9. Send comprehensive data to Claude 3.7 Sonnet with rigorous analysis framework
 10. Claude performs technical analysis:
     - Execution grading (A/B/C/F vs planned session)
@@ -116,14 +125,6 @@ TSS 78 slots perfectly into Base 2. Decoupling 1.03 shows strong efficiency.
 Easy spin tomorrow.
 ```
 
-### 1c. SANDBOX - Daily Checkin v2 (Intervals.icu)
-- **ID:** YwxiGs57HWnPdseR
-- **URL:** https://apfz.app.n8n.cloud/workflow/YwxiGs57HWnPdseR
-- **Schedule:** Daily at 20:15 (Europe/Berlin)
-- **Purpose:** Experimental version with streams, intervals, and wellness data pre-computed in Code node
-- **Status:** ✅ Active (sandbox — Telegram messages prefixed with `[SANDBOX v2]`)
-- **Includes same idempotency + error-handler wiring as 1b**
-
 ### 2. Coach Tri - Sunday Planner
 - **ID:** lUcAtn2oxCPkNkJ1
 - **Active Version:** ca59f26f-c598-4238-b3e0-03aa467b9c3b (v18)
@@ -132,7 +133,7 @@ Easy spin tomorrow.
 - **Status:** ✅ Working correctly
 
 **Flow:**
-1. Fetch user "Arthur Pfalzgraf" from Airtable
+1. Fetch athlete from Tricoach DB (`GET /athletes/1`)
 2. Send profile to Claude with:
    - Race name & date
    - Training phase (Base/Build/Peak/Taper)
@@ -155,48 +156,53 @@ Easy spin tomorrow.
 
 ---
 
-## Airtable Schema
+## SQLite Schema (Tricoach DB)
 
-### Users Table (tblK8jxVIxuFi9H8Z)
+See `./db/schema.sql` for the authoritative schema.
 
-```
-- id (record ID)
-- Name (string)
-- Phone (string)
-- Race Name (string)
-- Race Date (date)
-- Training Phase (string): Base 1, Base 2, Build 1, Build 2, Peak, Taper
-- Fitness Profile (long text): HR zones, paces, power, CSS
-- Constraints (long text): Personal limitations/preferences
-- Strava Refresh Token (string)
-- Strava Access Token (string)
-- Token Expires At (number): Unix timestamp
-- Last Activity Sync (number): Unix timestamp
-- Intervals.icu Athlete ID (string): Format i123456
-- Intervals.icu API Key (string): Personal API key from Settings
-- Intervals.icu Last Sync (number): Unix timestamp
-- Last Coaching Date (string): YYYY-MM-DD format, used as idempotency key by daily checkin workflows
-```
+**Tables:** `athletes`, `weekly_plans`, `sessions` (reserved).
 
-**Current Values (Arthur Pfalzgraf):**
+Columns are snake_case internally but the REST API response maps them to **Airtable-compatible field names** (e.g. `Name`, `Race Name`, `Training Phase`, `Monday`–`Sunday`). This lets existing n8n expressions (`$json['Training Phase']`, `$json['Monday']`, etc.) continue to work unchanged.
+
+### API Endpoints
+
+Base URL: `https://coach-db.arthurpfz.com`
+Auth: `X-API-Key` header (stored in VPS `.env` and n8n credential `6GNzKYNE1JAz77RL`).
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/health` | ping |
+| GET | `/athletes` | list all (used by Daily Checkin loop) |
+| GET | `/athletes/:id` | one athlete (used by Sunday Planner) |
+| PUT | `/athletes/:id` | update fields (last_coaching_date, Strava tokens) |
+| GET | `/weekly-plans?athlete_id=&week_start_date=` | Search Plan for a specific week |
+| GET | `/weekly-plans/latest?athlete_id=` | most recent plan |
+| POST | `/weekly-plans` | upsert plan (Sunday Planner create) |
+| GET | `/sessions?athlete_id=&limit=&date_from=` | list sessions (Daily Checkin Save Session reads via Save Analysis) |
+| POST | `/sessions` | upsert session on `(athlete_id, intervals_id)` (Daily Checkin Save Session) |
+| PATCH | `/sessions/:id` | attach `analysis`, `analyzed_at`, `rpe`, `notes` (Daily Checkin Save Analysis) |
+
+**Current athlete (id=1):** Arthur Pfalzgraf
 - Intervals.icu Athlete ID: `i492254`
 - Intervals.icu API Key: `INTERVALS_API_KEY_REDACTED`
 
-### Weekly Plans Table (tblJ0UHyJ1drXv97F)
+### Migration
 
+One-time migration from Airtable base `appw0Xd3T54okfaXa` lives at `./db/migrate.js`. Run on VPS with:
+
+```bash
+cd /data/tricoach-db
+docker compose exec -e AIRTABLE_PAT=... tricoach-db node migrate.js
 ```
-- id (record ID)
-- Week Start Date (dateTime): Monday of the week
-- Athlete (linked record): Links to Users table
-- Focus (string): 1-2 sentence weekly focus
-- Monday (string): Training plan for Monday
-- Tuesday (string): Training plan for Tuesday
-- Wednesday (string): Training plan for Wednesday
-- Thursday (string): Training plan for Thursday
-- Friday (string): Training plan for Friday
-- Saturday (string): Training plan for Saturday
-- Sunday (string): Training plan for Sunday
-```
+
+Initial migration (2026-04-22): 1 athlete + 16 weekly plans migrated cleanly.
+
+### Relay Operations
+
+Via CroissantRelayBot on Telegram or the webhook:
+- `tricoach-db-status` — container state + last 20 log lines
+- `tricoach-db-logs` — last 50 log lines
+- `tricoach-db-restart` — `docker compose restart`
 
 ---
 
@@ -250,7 +256,7 @@ Full FIT file metrics including:
 ### Token Management Flow
 1. Check: Is token expiring within 30 minutes?
 2. If yes: POST to /oauth/token with refresh_token
-3. Update Airtable with new access_token, refresh_token, expires_at
+3. Update Tricoach DB with new access_token, refresh_token, expires_at (`PUT /athletes/:id`)
 4. Reset Last Activity Sync to 0
 
 ### Activity Fetching
@@ -378,7 +384,8 @@ REST
 - **Weekly Planning:** Sunday 20:07 (8:07 PM)
 
 ### Credentials Used
-- Airtable Personal Access Token (ID: JMbdFoTWoGU3avK9)
+- Tricoach DB (ID: 6GNzKYNE1JAz77RL, httpHeaderAuth with `X-API-Key`)
+- ~~Airtable Personal Access Token (ID: JMbdFoTWoGU3avK9)~~ — deprecated 2026-04-22
 - OpenRouter API (ID: nhbNqmgyP4cAeQ6B)
 - Telegram API (ID: 9IpAp35yJmIQJpeA)
 - Intervals.icu HTTP Basic Auth (ID: JBZzr0E5U1GSy6OQ)
@@ -481,7 +488,7 @@ node analyze-workflows.js
 
 ### System Design Principles
 1. **Automation First:** Minimize manual intervention
-2. **Single Source of Truth:** Airtable as central database
+2. **Single Source of Truth:** Tricoach DB (self-hosted SQLite) as central database
 3. **AI as Coach:** Claude handles reasoning and communication nuance
 4. **Clean Separation:** Planning (Sunday) vs Execution Tracking (Daily)
 5. **Fail Gracefully:** Always output data even if APIs fail
@@ -571,6 +578,30 @@ This will show:
 ---
 
 ## Changelog
+
+### 2026-04-25
+- **DEPLOYED:** Daily Checkin now persists workouts + analysis to `sessions` table
+  - Redeployed `tricoach-db` container with extended schema (45+ session columns) and new `PATCH /sessions/:id` endpoint
+  - Fixed upsert bug: `ON CONFLICT(athlete_id, intervals_id)` now includes the partial-index `WHERE intervals_id IS NOT NULL` clause SQLite requires
+  - **Backfill:** ran [`backfill-sessions.js`](./backfill-sessions.js) for 2026-02-25 → 2026-04-25 → 34 sessions imported (idempotent via upsert)
+  - **Workflow `hrSGUqoAwkWQ4gKl`:**
+    - `Save Session` and `Save Analysis` HTTP nodes added in flow `Get Activity Details → Save Session → ... → Hardcore Analysis → Save Analysis → Send Telegram`
+    - Rest-day branch wired: `Check Activities Exist → false → Send Rest-Day Telegram`
+  - **REMOVED:** SANDBOX Daily Checkin v2 (`YwxiGs57HWnPdseR`) — its streams/wellness/intervals enrichment was not adopted into prod; deleted both n8n workflow and local `sandbox-daily-checkin-v2.json`
+
+### 2026-04-22
+- **MIGRATED:** Airtable → self-hosted SQLite REST API (`tricoach-db`)
+  - **Reason:** Airtable PAT/OAuth blocked at account level, $30/mo wasted
+  - **Service:** Node 20 + Express + `better-sqlite3`, deployed at `/data/tricoach-db/` on Hostinger VPS
+  - **Public URL:** `https://coach-db.arthurpfz.com` (Traefik + LetsEncrypt)
+  - **DNS:** A record on Netlify DNS (domain `arthurpfz.com`)
+  - **n8n:** Created credential "Tricoach DB" (`6GNzKYNE1JAz77RL`, httpHeaderAuth)
+  - **Workflows updated:** Daily Checkin, Sunday Planner, SANDBOX — all Airtable nodes replaced with HTTP Request nodes
+  - **Trick:** API response uses Airtable-compatible field names so AI prompt expressions didn't need editing
+  - **Data migrated:** 1 athlete + 16 weekly plans via `./db/migrate.js` (idempotent, can re-run)
+  - **Relay:** Added `tricoach-db-status`, `tricoach-db-logs`, `tricoach-db-restart` operations
+  - **Verified:** All 5 API paths (GET/PUT/POST) via HTTPS end-to-end
+  - **Airtable cancellation:** safe after one successful scheduled run of each workflow
 
 ### 2026-04-18
 - **DEPLOYED:** Idempotency gate + error handler wiring across all daily-checkin workflows
@@ -662,12 +693,13 @@ This will show:
 
 ### Important IDs
 - **N8N Base URL:** https://apfz.app.n8n.cloud/api/v1
-- **Airtable Base:** appw0Xd3T54okfaXa
+- **Tricoach DB URL:** https://coach-db.arthurpfz.com
+- **Tricoach DB path on VPS:** /data/tricoach-db
+- ~~**Airtable Base:** appw0Xd3T54okfaXa~~ — migrated to Tricoach DB 2026-04-22
 - **Users Table:** tblK8jxVIxuFi9H8Z
 - **Weekly Plans Table:** tblJ0UHyJ1drXv97F
 - **Daily Check-in Workflow (Strava - Legacy):** Q2KE0XGsc8NWLY8V
 - **Daily Check-in Workflow (Intervals.icu):** hrSGUqoAwkWQ4gKl
-- **SANDBOX Daily Checkin v2:** YwxiGs57HWnPdseR
 - **Error Handler Workflow:** psyVgPiGJoO5QOa4
 - **Sunday Planner Workflow:** lUcAtn2oxCPkNkJ1
 - **Telegram Chat:** TELEGRAM_CHAT_ID_REDACTED
@@ -703,4 +735,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-04-18 (Idempotency + error handler deployed across daily-checkin workflows)*
+*Last Updated: 2026-04-25 (Sessions persistence + analysis store deployed; sandbox removed; 34-session backfill complete)*
