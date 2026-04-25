@@ -34,6 +34,7 @@ const SESSION_COLUMNS = [
   ['pool_length_m', 'REAL'], ['lengths', 'INTEGER'], ['gap_sec_per_km', 'REAL'],
   ['calories', 'INTEGER'], ['weight_kg', 'REAL'],
   ['analysis', 'TEXT'], ['analyzed_at', 'TEXT'], ['raw_json', 'TEXT'],
+  ['grade', 'TEXT'], ['user_feedback', 'TEXT'], ['user_feedback_at', 'TEXT'],
 ];
 const existing = new Set(db.pragma('table_info(sessions)').map(c => c.name));
 for (const [col, type] of SESSION_COLUMNS) {
@@ -180,16 +181,19 @@ app.post('/weekly-plans', (req, res) => {
 // ── Sessions ──────────────────────────────────────────────────────────────────
 
 app.get('/sessions', (req, res) => {
-  const { athlete_id, limit = 50, date_from } = req.query;
+  const { athlete_id, limit = 50, date_from, wrap, has_analysis } = req.query;
   if (!athlete_id) return res.status(400).json({ error: 'athlete_id required' });
 
   let sql = 'SELECT * FROM sessions WHERE athlete_id = ?';
   const args = [athlete_id];
   if (date_from) { sql += ' AND date >= ?'; args.push(date_from); }
-  sql += ' ORDER BY date DESC LIMIT ?';
+  if (has_analysis === '1') { sql += ' AND analyzed_at IS NOT NULL'; }
+  sql += ' ORDER BY date DESC, analyzed_at DESC LIMIT ?';
   args.push(Number(limit));
 
-  res.json(db.prepare(sql).all(...args));
+  const results = db.prepare(sql).all(...args);
+  if (wrap === '1') return res.json({ sessions: results, count: results.length });
+  res.json(results);
 });
 
 // Columns settable via POST /sessions (everything except id and created_at).
@@ -208,6 +212,7 @@ const POST_FIELDS = [
   'avg_cadence', 'avg_stride', 'pool_length_m', 'lengths', 'gap_sec_per_km',
   'calories', 'weight_kg',
   'analysis', 'analyzed_at', 'raw_json',
+  'grade', 'user_feedback', 'user_feedback_at',
 ];
 
 app.post('/sessions', (req, res) => {
@@ -251,7 +256,7 @@ app.patch('/sessions/:id', (req, res) => {
   if (!id) return res.status(400).json({ error: 'invalid id' });
 
   // Only allow these fields to be patched
-  const PATCH_FIELDS = ['analysis', 'analyzed_at', 'rpe', 'notes'];
+  const PATCH_FIELDS = ['analysis', 'analyzed_at', 'grade', 'rpe', 'notes', 'user_feedback', 'user_feedback_at'];
   const sets = [];
   const args = { id };
   for (const k of PATCH_FIELDS) {
