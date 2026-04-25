@@ -17,13 +17,13 @@ This is an **automated triathlon coaching system** that creates personalized wee
 - **N8N Cloud**: Workflow automation platform (https://apfz.app.n8n.cloud)
 - **Tricoach DB**: Self-hosted SQLite REST API at https://coach-db.arthurpfz.com
   - Code: `./db/` — Node 20 + Express + `better-sqlite3`
-  - Deployed: `/data/tricoach-db/` on Hostinger VPS (VPS_IP_REDACTED)
+  - Deployed: `/data/tricoach-db/` on Hostinger VPS (IP in `.env` as `VPS_IP`)
   - Auth: `X-API-Key` header (n8n credential ID `6GNzKYNE1JAz77RL`)
 - **Intervals.icu**: Primary training data source (full FIT metrics)
 - **Strava API**: Legacy fallback, OAuth tokens still stored for compatibility
 - **Claude AI**: Coaching intelligence (via OpenRouter)
   - Models: Claude 3.5 Sonnet (check-ins), Claude 3.7 Sonnet (planning)
-- **Telegram**: Communication channel (Chat ID: TELEGRAM_CHAT_ID_REDACTED)
+- **Telegram**: Communication channel (Chat ID stored in `.env` as `TELEGRAM_CHAT_ID`)
 
 ### Data Flow
 
@@ -205,7 +205,7 @@ Auth: `X-API-Key` header (stored in VPS `.env` and n8n credential `6GNzKYNE1JAz7
 
 **Current athlete (id=1):** Arthur Pfalzgraf
 - Intervals.icu Athlete ID: `i492254`
-- Intervals.icu API Key: `INTERVALS_API_KEY_REDACTED`
+- Intervals.icu API Key: stored in `.env` as `INTERVALS_API_KEY` (and in n8n credential `JBZzr0E5U1GSy6OQ`)
 
 ### Migration
 
@@ -270,7 +270,7 @@ Full FIT file metrics including:
 
 ### OAuth Configuration
 - **Client ID:** 193431
-- **Client Secret:** Stored in N8N workflow (STRAVA_CLIENT_SECRET_REDACTED)
+- **Client Secret:** Stored in n8n workflow node (rotate via https://www.strava.com/settings/api). Local copy in `.env` as `STRAVA_CLIENT_SECRET`.
 - **Token Refresh:** Automatic when expiring within 30 minutes
 - **API Endpoint:** https://www.strava.com/api/v3/
 
@@ -413,7 +413,7 @@ REST
 
 ### Active User
 - **Name:** Arthur Pfalzgraf
-- **Telegram Chat ID:** TELEGRAM_CHAT_ID_REDACTED
+- **Telegram Chat ID:** see `.env` (`TELEGRAM_CHAT_ID`)
 
 ---
 
@@ -727,7 +727,7 @@ This will show:
 - **Weekly Stats Workflow:** 2W0SIHwzyAWJW62Q
 - **Error Handler Workflow:** psyVgPiGJoO5QOa4
 - **Sunday Planner Workflow:** lUcAtn2oxCPkNkJ1
-- **Telegram Chat:** TELEGRAM_CHAT_ID_REDACTED
+- **Telegram Chat:** see `.env` (`TELEGRAM_CHAT_ID`)
 - **Last Coaching Date field ID:** fldLdvY3ZOiTuXkuy
 - **Strava Client ID:** 193431
 - **Intervals.icu Athlete ID:** i492254

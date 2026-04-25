@@ -12,7 +12,8 @@ require('dotenv').config();
 const axios = require('axios');
 
 const ICU_BASE = 'https://intervals.icu/api/v1';
-const ICU_KEY = process.env.INTERVALS_API_KEY || 'INTERVALS_API_KEY_REDACTED';
+const ICU_KEY = process.env.INTERVALS_API_KEY;
+if (!ICU_KEY) { console.error('INTERVALS_API_KEY missing in .env'); process.exit(1); }
 const ICU_ATHLETE = process.env.INTERVALS_ATHLETE_ID || 'i492254';
 const DB_URL = process.env.TRICOACH_DB_URL || 'https://coach-db.arthurpfz.com';
 const DB_KEY = process.env.TRICOACH_API_KEY;
