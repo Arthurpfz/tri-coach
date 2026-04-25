@@ -97,6 +97,9 @@ CREATE TABLE IF NOT EXISTS sessions (
   -- Analysis
   analysis TEXT,
   analyzed_at TEXT,
+  grade TEXT,              -- A/B/C/F coaching grade
+  user_feedback TEXT,      -- Athlete's reply feedback
+  user_feedback_at TEXT,   -- When feedback was submitted
   -- Catch-all for any upstream field not promoted to a column
   raw_json TEXT,
   created_at TEXT DEFAULT (datetime('now'))
