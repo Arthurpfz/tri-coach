@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Pre-commit hook: scan staged changes for secrets with gitleaks.
+# Bypass for emergencies: git commit --no-verify
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "warn: gitleaks not installed — skipping secret scan (brew install gitleaks)"
+  exit 0
+fi
+
+gitleaks protect --staged --redact --verbose
+status=$?
+if [ $status -ne 0 ]; then
+  echo ""
+  echo "❌ gitleaks found secrets in staged changes. Commit aborted."
+  echo "   Fix: remove the secret, or rebase it out, then retry."
+  echo "   Override (NOT recommended): git commit --no-verify"
+  exit 1
+fi
+exit 0
