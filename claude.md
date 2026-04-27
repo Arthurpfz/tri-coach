@@ -600,7 +600,22 @@ This will show:
 
 ## Changelog
 
-### 2026-04-25
+### 2026-04-25 (evening) — Public surface cleanup + secret incident
+- **🔐 SECURITY INCIDENT — RESOLVED:** Public `claude.md` (lowercase, original repo init 2026-04-13) had been leaking live secrets for ~12 days. Found during a portfolio audit.
+  - **Exposed:** Strava Client Secret, Intervals.icu API Key, VPS IP `187.124.8.143`, Telegram chat ID, n8n cloud URL, internal credential/workflow IDs.
+  - **Rotated** in dashboards: Strava client secret + Intervals.icu API key (both 2026-04-25 ~20:00 Berlin). n8n API key intentionally NOT rotated (low blast radius).
+  - **Purged** from history with `git-filter-repo --replace-text` across all 14 commits on all 4 branches. Every SHA changed; force-pushed to `origin`. Original commit `1a4c039` is still accessible via the GitHub API for ~90 days (dangling-commit window) — rotation is the actual protection, purge is hygiene.
+  - **No forks** of the repo existed at the time of purge.
+  - **gitleaks 8.30.1** installed via brew + pre-commit hook in `.git/hooks/pre-commit`. Scans staged content before every commit. Hook is currently NOT tracked (lives in `.git/hooks/`); move to `.githooks/` + `git config core.hooksPath .githooks` to share across machines.
+  - **Local `claude.md`** now uses env-var refs (e.g. `see .env (TELEGRAM_CHAT_ID)`) instead of literal values. Committed.
+  - **`backfill-sessions.js`** now requires `INTERVALS_API_KEY` in env (no fallback default).
+  - **Still owed by user:** update local `TRI COACH/.env` with new Strava + ICU values; update n8n credential `JBZzr0E5U1GSy6OQ` (ICU); update Strava workflow node (`Q2KE0XGsc8NWLY8V`); `PUT /athletes/1` on tricoach-db to write new ICU key (otherwise Daily Check-in will 401).
+
+- **PUBLISHED:** [`tricoach-db`](https://github.com/Arthurpfz/tricoach-db) as a standalone public repo. Clean copy of `db/` with proper README explaining the migration story (Airtable → self-hosted SQLite). Lives alongside the existing in-repo `db/` mirror — they're the same code; the standalone version exists for portfolio visibility and reuse.
+
+- **REWROTE:** `tri-coach` README from scratch. Was leftover "N8N Workflow Manager" scaffolding from initial commit; now a proper architecture diagram, sample Telegram output, stack table, design philosophy. Cross-links to `tricoach-db`.
+
+### 2026-04-25 — Sessions persistence + Weekly Stats
 - **DEPLOYED:** Daily Checkin now persists workouts + analysis to `sessions` table
   - Redeployed `tricoach-db` container with extended schema (45+ session columns) and new `PATCH /sessions/:id` endpoint
   - Fixed upsert bug: `ON CONFLICT(athlete_id, intervals_id)` now includes the partial-index `WHERE intervals_id IS NOT NULL` clause SQLite requires
