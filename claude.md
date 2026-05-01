@@ -172,13 +172,26 @@ Easy spin tomorrow.
 
 **Wired to:** Feedback Handler (`gAnJ0r3x0sFxqWxY`) routes `/refresh` here via Execute Workflow node. Error workflow `psyVgPiGJoO5QOa4`.
 
-### 1f. Coach Tri - Feedback Handler
+### 1f. Coach Tri - Feedback Handler (command router)
 - **ID:** gAnJ0r3x0sFxqWxY
 - **Trigger:** Telegram Trigger on CroissantTri bot (cred `9IpAp35yJmIQJpeA`) — listens to all messages
-- **Purpose:** Routes `/refresh` commands to Backfill; routes `!`-prefixed messages to feedback save flow
+- **Purpose:** Single Telegram webhook acting as a command router. Inline branches for stateless commands; sub-workflow call for the heavy `/refresh` flow.
 - **Status:** ✅ Active
-- **Flow:** Check Auth (chat_id allowlist) → **Is /refresh?** → true: Call Backfill → Refresh Done; false: Is Feedback? → existing `!` feedback save logic
-- **Note:** This bot has the only active Telegram webhook on CroissantTri — adding more triggers on the same bot would conflict (Telegram allows 1 webhook per bot). Add new commands by extending this workflow, not by creating new trigger workflows.
+- **Routing chain:** Check Auth (chat_id allowlist) → Is /refresh? → Is /strikes? → Is /training? → Is Feedback? → drop
+
+**Commands:**
+| Command | Branch | What it does |
+|---|---|---|
+| `/refresh` | Call Backfill (sub-workflow `rHIyZMIJNAOqZvM2`) → Refresh Done | Last 7 days, idempotent re-analysis of unanalyzed sessions |
+| `/strikes` | Get Strikes Sessions → Format Strikes → Send Strikes | Same Code aggregation as Weekly Stats workflow (`2W0SIHwzyAWJW62Q`) — 🔥 per hour + per-sport breakdown for the running week |
+| `/training` | Get Training Plan → Format Training → Send Training | `GET /weekly-plans?athlete_id=1&week_start_date=<this Monday>` then formats Mo-Su days as Telegram message |
+| `!<text>` | Save Feedback flow | Saves user feedback against the latest session (existing flow) |
+
+- **Note:** This bot has the only active Telegram webhook on CroissantTri — adding more triggers on the same bot would conflict (Telegram allows 1 webhook per bot). Add new commands by extending this workflow's IF chain, not by creating new trigger workflows.
+- **Lessons baked into this design (from /refresh build, 2026-05-01):**
+  - Avoid nested `splitInBatches` v3 — its loop-back wiring accumulates items across cycles when there are >1 inputs (the "triplet bug"). Use n8n's natural per-item cascade for inner iteration.
+  - When using Execute Workflow + a follow-up Telegram message, set `alwaysOutputData: true` on the call node so the follow-up fires reliably even when the sub-workflow processed 0 items.
+  - All Telegram replies should reference `$('Telegram Trigger').item.json.message.chat.id.toString()` for chat_id (not `$json.chat_id`), so they fire to the user who sent the command.
 
 ### 2. Coach Tri - Sunday Planner
 - **ID:** lUcAtn2oxCPkNkJ1
@@ -637,6 +650,12 @@ This will show:
 
 ## Changelog
 
+### 2026-05-01 (later) — `/strikes` + `/training` Telegram commands
+- Extended Coach Tri - Feedback Handler with two more inline command branches:
+  - **`/strikes`** — clones Weekly Stats workflow's Code aggregation (no sub-workflow call). Returns running-week 🔥 per hour + per-sport breakdown, on demand instead of waiting for the 20:30 daily cron.
+  - **`/training`** — `GET /weekly-plans?athlete_id=1&week_start_date=<this Monday>` then formats Mo-Su days as a single Telegram message with the week's Focus header.
+- Routing chain now: Check Auth → Is /refresh? → Is /strikes? → Is /training? → Is Feedback? → drop. Each command branch uses the same `$('Telegram Trigger').item.json.message.chat.id.toString()` pattern for replies.
+
 ### 2026-05-01 — `/refresh` Telegram command + Save Session upsert fix + VPS Health retry
 - **NEW WORKFLOW:** Coach Tri - Backfill (`rHIyZMIJNAOqZvM2`) — manual catch-up for late-uploaded activities. Triggered by `/refresh` on CroissantTri bot. Pulls last 7 days from Intervals.icu, filters ZEPP, runs analysis only for sessions where `analyzed_at` is null, sends one Telegram per new analysis with 📅 date prefix, ends with "✅ Refresh complete." Idempotent — safe to spam.
 - **Coach Tri - Feedback Handler updated:** added `Is /refresh?` IF gate before existing `Is Feedback?` branch. Routes `/refresh` to Backfill via Execute Workflow node, then sends "✅ Refresh complete." after Backfill returns. Single bot, single webhook, dual-purpose.
@@ -822,4 +841,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-05-01 (`/refresh` backfill command + POST /sessions upsert preservation fix + VPS Health SSH retry)*
+*Last Updated: 2026-05-01 (Telegram commands `/refresh` + `/strikes` + `/training` on CroissantTri bot)*
