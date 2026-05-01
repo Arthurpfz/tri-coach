@@ -42,7 +42,7 @@ Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI A
 - **Type:** Error Trigger workflow
 - **Status:** ✅ Active
 - **Purpose:** Catches failures from all Coach Tri workflows, sends Telegram alert with workflow name, failing node, and error message
-- **Wired to:** All 3 main workflows via `settings.errorWorkflow`
+- **Wired to:** All Coach Tri workflows via `settings.errorWorkflow` (Daily Checkin Strava + ICU, Sunday Planner, Weekly Stats, Backfill, Feedback Handler)
 - **Note:** Only fires on automated (scheduled) runs, NOT manual executions — by n8n design
 
 ### 1. Coach Tri - Daily Checkin (Strava - LEGACY)
@@ -146,6 +146,40 @@ Easy spin tomorrow.
   ```
 - **Wired to** `errorWorkflow` (`psyVgPiGJoO5QOa4`)
 
+### 1e. Coach Tri - Backfill (/refresh) ⭐
+- **ID:** rHIyZMIJNAOqZvM2
+- **Trigger:** Execute Workflow Trigger — invoked from Feedback Handler when user sends `/refresh` on CroissantTri bot
+- **Purpose:** Manual catch-up for late-uploaded activities (e.g. bike computer didn't sync to Intervals.icu in time)
+- **Status:** ✅ Active (deployed 2026-05-01)
+- **AI Model:** Claude 3.7 Sonnet (same prompt as Daily Checkin)
+
+**Flow:**
+1. Send "🔄 Catching up last 7 days…" ack to chat
+2. Fetch athletes → loop over users (splitInBatches v3, outer only)
+3. `GET /athlete/:id/activities?oldest=today-7&newest=today` from Intervals.icu
+4. Filter `source == 'ZEPP'` (drops armband duplicates)
+5. **Per-item natural cascade** (no inner splitInBatches — see "Triplet bug" below):
+   - Get Activity Details (per item)
+   - Save Session — `POST /sessions` returns `{id, analyzed_at}`
+   - **Already Analyzed?** IF gate on `analyzed_at` is empty → run analysis; else skip silently
+6. Calculate Monday (of activity's start_date_local, not today — gets the right week's plan)
+7. Search Plan → Hardcore Analysis → Parse Grade → Save Analysis (PATCH) → Send Telegram (with 📅 date prefix)
+8. After Backfill returns to Feedback Handler → "✅ Refresh complete." sent reliably whether 0 or N analyses ran
+
+**Idempotency guarantee:** spamming `/refresh` is safe. Already-analyzed sessions short-circuit at the `analyzed_at` gate. The only side effect of a re-run is a fresh Save Session upsert that preserves `analysis`/`analyzed_at`/`grade`/`rpe`/`notes`/`user_feedback*` (see `PRESERVE_ON_UPSERT` in `db/server.js`).
+
+**Triplet bug (avoided):** initial design used a nested splitInBatches v3 for activities. With >1 activity, the loop-back wiring (`out1 → Get Activities`) accumulated items across cycles and dumped all duplicates at once, producing N×N analyses. Fixed by removing the inner loop entirely and relying on n8n's natural per-item cascade. Daily Checkin doesn't hit this because it almost always has 1 activity per day.
+
+**Wired to:** Feedback Handler (`gAnJ0r3x0sFxqWxY`) routes `/refresh` here via Execute Workflow node. Error workflow `psyVgPiGJoO5QOa4`.
+
+### 1f. Coach Tri - Feedback Handler
+- **ID:** gAnJ0r3x0sFxqWxY
+- **Trigger:** Telegram Trigger on CroissantTri bot (cred `9IpAp35yJmIQJpeA`) — listens to all messages
+- **Purpose:** Routes `/refresh` commands to Backfill; routes `!`-prefixed messages to feedback save flow
+- **Status:** ✅ Active
+- **Flow:** Check Auth (chat_id allowlist) → **Is /refresh?** → true: Call Backfill → Refresh Done; false: Is Feedback? → existing `!` feedback save logic
+- **Note:** This bot has the only active Telegram webhook on CroissantTri — adding more triggers on the same bot would conflict (Telegram allows 1 webhook per bot). Add new commands by extending this workflow, not by creating new trigger workflows.
+
 ### 2. Coach Tri - Sunday Planner
 - **ID:** lUcAtn2oxCPkNkJ1
 - **Active Version:** ca59f26f-c598-4238-b3e0-03aa467b9c3b (v18)
@@ -200,8 +234,11 @@ Auth: `X-API-Key` header (stored in VPS `.env` and n8n credential `6GNzKYNE1JAz7
 | GET | `/weekly-plans/latest?athlete_id=` | most recent plan |
 | POST | `/weekly-plans` | upsert plan (Sunday Planner create) |
 | GET | `/sessions?athlete_id=&limit=&date_from=` | list sessions (Daily Checkin Save Session reads via Save Analysis) |
-| POST | `/sessions` | upsert session on `(athlete_id, intervals_id)` (Daily Checkin Save Session) |
+| POST | `/sessions` | upsert session on `(athlete_id, intervals_id)`, returns `{id, analyzed_at}`, preserves LLM/user fields on re-upsert |
 | PATCH | `/sessions/:id` | attach `analysis`, `analyzed_at`, `rpe`, `notes` (Daily Checkin Save Analysis) |
+
+**`POST /sessions` upsert semantics (since 2026-05-01):**
+The `PRESERVE_ON_UPSERT` set in `server.js` excludes `analysis`, `analyzed_at`, `grade`, `rpe`, `notes`, `user_feedback`, `user_feedback_at` from the `ON CONFLICT DO UPDATE` clause. Re-saving an existing activity refreshes the raw FIT metrics but does NOT clobber LLM analysis or user feedback. This is what makes `/refresh` idempotent — Backfill calls Save Session every time, but already-analyzed sessions retain `analyzed_at` and short-circuit downstream.
 
 **Current athlete (id=1):** Arthur Pfalzgraf
 - Intervals.icu Athlete ID: `i492254`
@@ -600,6 +637,14 @@ This will show:
 
 ## Changelog
 
+### 2026-05-01 — `/refresh` Telegram command + Save Session upsert fix + VPS Health retry
+- **NEW WORKFLOW:** Coach Tri - Backfill (`rHIyZMIJNAOqZvM2`) — manual catch-up for late-uploaded activities. Triggered by `/refresh` on CroissantTri bot. Pulls last 7 days from Intervals.icu, filters ZEPP, runs analysis only for sessions where `analyzed_at` is null, sends one Telegram per new analysis with 📅 date prefix, ends with "✅ Refresh complete." Idempotent — safe to spam.
+- **Coach Tri - Feedback Handler updated:** added `Is /refresh?` IF gate before existing `Is Feedback?` branch. Routes `/refresh` to Backfill via Execute Workflow node, then sends "✅ Refresh complete." after Backfill returns. Single bot, single webhook, dual-purpose.
+- **DB BUG FIX:** `POST /sessions` was clobbering `analyzed_at` and `analysis` on every re-upsert because `ON CONFLICT DO UPDATE SET` blindly copied all columns. Daily Checkin worked anyway (it always re-analyzes after saving), but `/refresh` would have lost idempotency. Fixed: introduced `PRESERVE_ON_UPSERT` set in `server.js` (analysis, analyzed_at, grade, rpe, notes, user_feedback, user_feedback_at). Also changed POST response from `{id}` to `{id, analyzed_at}` so the workflow can short-circuit downstream when the session is already analyzed. Image rebuilt + redeployed (`docker compose up -d --build`).
+- **VPS HEALTH MONITOR:** SSH node now retries 3× with 30s wait. Diagnoses the 06:00 2026-04-29 failure as a transient `ssh2 client-timeout` (n8n SSH client couldn't open a session within the 20s window — likely `unattended-upgrades`/`cron-apt` momentarily hammering sshd). One alert across the workflow's entire history; not a real outage.
+- **Triplet bug encountered + fixed during build:** initial Backfill design used a nested `splitInBatches` v3 for activities, mirroring Daily Checkin. With >1 activity, the loop-back wiring (`Loop Over Activities out1 → Get Activities`) accumulated items across cycles — Get Activities re-fetched the same 12 activities each loop tick, Filter passed 3 each time, and on cycle 4 splitInBatches dumped all 9 accumulated items at once. Result: 3 Claude analyses for the same Wednesday ride. Daily Checkin doesn't trip this because it almost always has 1 activity per day. Fix: removed the inner loop entirely; n8n's natural per-item cascade handles iteration cleanly.
+- Files touched: `db/server.js` (PRESERVE_ON_UPSERT + RETURNING analyzed_at), n8n workflows (Backfill created, Feedback Handler patched, VPS Health Monitor patched).
+
 ### 2026-04-25 (evening) — Public surface cleanup + secret incident
 - **🔐 SECURITY INCIDENT — RESOLVED:** Public `claude.md` (lowercase, original repo init 2026-04-13) had been leaking live secrets for ~12 days. Found during a portfolio audit.
   - **Exposed:** Strava Client Secret, Intervals.icu API Key, VPS IP `187.124.8.143`, Telegram chat ID, n8n cloud URL, internal credential/workflow IDs.
@@ -740,6 +785,8 @@ This will show:
 - **Daily Check-in Workflow (Strava - Legacy):** Q2KE0XGsc8NWLY8V
 - **Daily Check-in Workflow (Intervals.icu):** hrSGUqoAwkWQ4gKl
 - **Weekly Stats Workflow:** 2W0SIHwzyAWJW62Q
+- **Backfill Workflow (/refresh):** rHIyZMIJNAOqZvM2
+- **Feedback Handler Workflow:** gAnJ0r3x0sFxqWxY
 - **Error Handler Workflow:** psyVgPiGJoO5QOa4
 - **Sunday Planner Workflow:** lUcAtn2oxCPkNkJ1
 - **Telegram Chat:** see `.env` (`TELEGRAM_CHAT_ID`)
@@ -775,4 +822,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-04-25 (Sessions persistence + ZEPP filter + Telegram-native prompt + Weekly Stats workflow shipped)*
+*Last Updated: 2026-05-01 (`/refresh` backfill command + POST /sessions upsert preservation fix + VPS Health SSH retry)*

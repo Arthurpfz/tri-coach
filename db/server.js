@@ -227,7 +227,14 @@ app.post('/sessions', (req, res) => {
   // Composite unique on (athlete_id, intervals_id) handles the intervals case.
   const allCols = POST_FIELDS.join(', ');
   const placeholders = POST_FIELDS.map(k => '@' + k).join(', ');
-  const updateSet = POST_FIELDS.filter(k => k !== 'athlete_id' && k !== 'intervals_id' && k !== 'strava_id')
+  // Don't clobber LLM/user-generated fields on re-upsert — only the analysis flow
+  // (PATCH /sessions/:id) is allowed to write these.
+  const PRESERVE_ON_UPSERT = new Set([
+    'athlete_id', 'intervals_id', 'strava_id',
+    'analysis', 'analyzed_at', 'grade',
+    'rpe', 'notes', 'user_feedback', 'user_feedback_at',
+  ]);
+  const updateSet = POST_FIELDS.filter(k => !PRESERVE_ON_UPSERT.has(k))
     .map(k => `${k} = excluded.${k}`).join(', ');
 
   // Note: partial unique index on (athlete_id, intervals_id) requires the
@@ -239,12 +246,12 @@ app.post('/sessions', (req, res) => {
   const sql = conflictTarget
     ? `INSERT INTO sessions (${allCols}) VALUES (${placeholders})
        ON CONFLICT${conflictTarget} DO UPDATE SET ${updateSet}
-       RETURNING id`
-    : `INSERT INTO sessions (${allCols}) VALUES (${placeholders}) RETURNING id`;
+       RETURNING id, analyzed_at`
+    : `INSERT INTO sessions (${allCols}) VALUES (${placeholders}) RETURNING id, analyzed_at`;
 
   try {
     const row = db.prepare(sql).get(payload);
-    res.status(201).json({ id: row.id });
+    res.status(201).json({ id: row.id, analyzed_at: row.analyzed_at });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
