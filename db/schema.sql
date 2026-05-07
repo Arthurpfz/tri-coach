@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS weekly_plans (
   friday TEXT,
   saturday TEXT,
   sunday TEXT,
+  sessions TEXT,           -- JSON array of {id, label, sport, duration_min, pinned_day, description}
   created_at TEXT DEFAULT (datetime('now')),
   UNIQUE(athlete_id, week_start_date)
 );
@@ -98,6 +99,7 @@ CREATE TABLE IF NOT EXISTS sessions (
   analysis TEXT,
   analyzed_at TEXT,
   grade TEXT,              -- A/B/C/F coaching grade
+  plan_session_id TEXT,    -- matched session id within weekly_plans.sessions for this activity's week
   user_feedback TEXT,      -- Athlete's reply feedback
   user_feedback_at TEXT,   -- When feedback was submitted
   -- Catch-all for any upstream field not promoted to a column
