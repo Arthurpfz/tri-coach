@@ -35,6 +35,7 @@ const SESSION_COLUMNS = [
   ['calories', 'INTEGER'], ['weight_kg', 'REAL'],
   ['analysis', 'TEXT'], ['analyzed_at', 'TEXT'], ['raw_json', 'TEXT'],
   ['grade', 'TEXT'], ['user_feedback', 'TEXT'], ['user_feedback_at', 'TEXT'],
+  ['plan_session_id', 'TEXT'],
 ];
 const existing = new Set(db.pragma('table_info(sessions)').map(c => c.name));
 for (const [col, type] of SESSION_COLUMNS) {
@@ -42,6 +43,15 @@ for (const [col, type] of SESSION_COLUMNS) {
 }
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS sessions_intervals_unique
   ON sessions(athlete_id, intervals_id) WHERE intervals_id IS NOT NULL`);
+
+// Idempotently add new weekly_plans columns (mirror of SESSION_COLUMNS pattern).
+const WEEKLY_PLAN_COLUMNS = [
+  ['sessions', 'TEXT'],
+];
+const existingPlanCols = new Set(db.pragma('table_info(weekly_plans)').map(c => c.name));
+for (const [col, type] of WEEKLY_PLAN_COLUMNS) {
+  if (!existingPlanCols.has(col)) db.exec(`ALTER TABLE weekly_plans ADD COLUMN ${col} ${type}`);
+}
 
 // Map DB rows to Airtable-compatible field names so existing n8n expressions work unchanged
 function toAthleteRow(row) {
@@ -68,6 +78,10 @@ function toAthleteRow(row) {
 
 function toPlanRow(row) {
   if (!row) return null;
+  let sessions = null;
+  if (row.sessions) {
+    try { sessions = JSON.parse(row.sessions); } catch { sessions = null; }
+  }
   return {
     id: row.id,
     athlete_id: row.athlete_id,
@@ -80,6 +94,7 @@ function toPlanRow(row) {
     Friday: row.friday,
     Saturday: row.saturday,
     Sunday: row.sunday,
+    sessions,
     created_at: row.created_at,
   };
 }
@@ -162,16 +177,21 @@ app.post('/weekly-plans', (req, res) => {
   const { athlete_id, week_start_date, focus, monday, tuesday, wednesday, thursday, friday, saturday, sunday } = req.body;
   if (!athlete_id || !week_start_date) return res.status(400).json({ error: 'athlete_id and week_start_date required' });
 
+  // Accept sessions as either a JSON array or a pre-stringified TEXT payload.
+  let sessions = req.body.sessions ?? null;
+  if (sessions != null && typeof sessions !== 'string') sessions = JSON.stringify(sessions);
+
   db.prepare(`
-    INSERT INTO weekly_plans (athlete_id, week_start_date, focus, monday, tuesday, wednesday, thursday, friday, saturday, sunday)
-    VALUES (@athlete_id, @week_start_date, @focus, @monday, @tuesday, @wednesday, @thursday, @friday, @saturday, @sunday)
+    INSERT INTO weekly_plans (athlete_id, week_start_date, focus, monday, tuesday, wednesday, thursday, friday, saturday, sunday, sessions)
+    VALUES (@athlete_id, @week_start_date, @focus, @monday, @tuesday, @wednesday, @thursday, @friday, @saturday, @sunday, @sessions)
     ON CONFLICT(athlete_id, week_start_date) DO UPDATE SET
       focus = excluded.focus, monday = excluded.monday, tuesday = excluded.tuesday,
       wednesday = excluded.wednesday, thursday = excluded.thursday, friday = excluded.friday,
-      saturday = excluded.saturday, sunday = excluded.sunday
+      saturday = excluded.saturday, sunday = excluded.sunday,
+      sessions = excluded.sessions
   `).run({ athlete_id, week_start_date, focus: focus || null, monday: monday || null, tuesday: tuesday || null,
     wednesday: wednesday || null, thursday: thursday || null, friday: friday || null,
-    saturday: saturday || null, sunday: sunday || null });
+    saturday: saturday || null, sunday: sunday || null, sessions });
 
   const row = db.prepare('SELECT * FROM weekly_plans WHERE athlete_id = ? AND week_start_date = ?')
     .get(athlete_id, week_start_date);
@@ -181,12 +201,13 @@ app.post('/weekly-plans', (req, res) => {
 // ── Sessions ──────────────────────────────────────────────────────────────────
 
 app.get('/sessions', (req, res) => {
-  const { athlete_id, limit = 50, date_from, wrap, has_analysis } = req.query;
+  const { athlete_id, limit = 50, date_from, date_to, wrap, has_analysis } = req.query;
   if (!athlete_id) return res.status(400).json({ error: 'athlete_id required' });
 
   let sql = 'SELECT * FROM sessions WHERE athlete_id = ?';
   const args = [athlete_id];
   if (date_from) { sql += ' AND date >= ?'; args.push(date_from); }
+  if (date_to) { sql += ' AND date <= ?'; args.push(date_to); }
   if (has_analysis === '1') { sql += ' AND analyzed_at IS NOT NULL'; }
   sql += ' ORDER BY date DESC, analyzed_at DESC LIMIT ?';
   args.push(Number(limit));
@@ -213,6 +234,7 @@ const POST_FIELDS = [
   'calories', 'weight_kg',
   'analysis', 'analyzed_at', 'raw_json',
   'grade', 'user_feedback', 'user_feedback_at',
+  'plan_session_id',
 ];
 
 app.post('/sessions', (req, res) => {
@@ -233,6 +255,7 @@ app.post('/sessions', (req, res) => {
     'athlete_id', 'intervals_id', 'strava_id',
     'analysis', 'analyzed_at', 'grade',
     'rpe', 'notes', 'user_feedback', 'user_feedback_at',
+    'plan_session_id',
   ]);
   const updateSet = POST_FIELDS.filter(k => !PRESERVE_ON_UPSERT.has(k))
     .map(k => `${k} = excluded.${k}`).join(', ');
@@ -263,7 +286,7 @@ app.patch('/sessions/:id', (req, res) => {
   if (!id) return res.status(400).json({ error: 'invalid id' });
 
   // Only allow these fields to be patched
-  const PATCH_FIELDS = ['analysis', 'analyzed_at', 'grade', 'rpe', 'notes', 'user_feedback', 'user_feedback_at'];
+  const PATCH_FIELDS = ['analysis', 'analyzed_at', 'grade', 'rpe', 'notes', 'user_feedback', 'user_feedback_at', 'plan_session_id'];
   const sets = [];
   const args = { id };
   for (const k of PATCH_FIELDS) {
