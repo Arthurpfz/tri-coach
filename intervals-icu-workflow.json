@@ -1,5 +1,11 @@
 {
+  "updatedAt": "2026-05-07T07:04:31.344Z",
+  "createdAt": "2026-01-25T09:37:00.424Z",
+  "id": "hrSGUqoAwkWQ4gKl",
   "name": "Coach Tri - Daily Checkin (Intervals.icu)",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -14,36 +20,33 @@
       },
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
-      "position": [-520, 240],
+      "position": [
+        -520,
+        240
+      ],
       "id": "schedule-trigger",
       "name": "Schedule Trigger"
     },
     {
-      "parameters": {
-        "operation": "search",
-        "base": {
-          "__rl": true,
-          "value": "appw0Xd3T54okfaXa",
-          "mode": "list",
-          "cachedResultName": "Tri Coach MVP"
-        },
-        "table": {
-          "__rl": true,
-          "value": "tblK8jxVIxuFi9H8Z",
-          "mode": "list",
-          "cachedResultName": "Users"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [-320, 240],
       "id": "search-users",
       "name": "Search Users",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -320,
+        240
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://coach-db.arthurpfz.com/athletes",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
       "credentials": {
-        "airtableTokenApi": {
-          "id": "JMbdFoTWoGU3avK9",
-          "name": "Airtable Personal Access Token account"
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
         }
       }
     },
@@ -53,14 +56,17 @@
       },
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [-120, 240],
+      "position": [
+        -120,
+        240
+      ],
       "id": "loop-users",
       "name": "Loop Over Users"
     },
     {
       "parameters": {
         "method": "GET",
-        "url": "=https://intervals.icu/api/v1/athlete/{{ $json['Intervals.icu Athlete ID'] }}/activities",
+        "url": "=https://intervals.icu/api/v1/athlete/{{ $('Loop Over Users').item.json['Intervals.icu Athlete ID'] }}/activities",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -80,12 +86,15 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
-      "position": [80, 240],
+      "position": [
+        80,
+        240
+      ],
       "id": "get-activities",
       "name": "Get Activities",
       "credentials": {
         "httpBasicAuth": {
-          "id": "JBZzr0E5U1GSy6OQ",
+          "id": "ms91wbaCvecB3tqQ",
           "name": "Intervals.icu API"
         }
       }
@@ -101,7 +110,7 @@
           "conditions": [
             {
               "id": "check-activities-exist",
-              "leftValue": "={{ $json.length }}",
+              "leftValue": "={{ $input.all().length }}",
               "rightValue": 0,
               "operator": {
                 "type": "number",
@@ -115,7 +124,10 @@
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
-      "position": [280, 240],
+      "position": [
+        480,
+        240
+      ],
       "id": "check-activities",
       "name": "Check Activities Exist"
     },
@@ -125,7 +137,10 @@
       },
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [480, 160],
+      "position": [
+        680,
+        160
+      ],
       "id": "loop-activities",
       "name": "Loop Over Activities"
     },
@@ -139,12 +154,15 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
-      "position": [880, 160],
+      "position": [
+        1080,
+        160
+      ],
       "id": "get-activity-details",
       "name": "Get Activity Details",
       "credentials": {
         "httpBasicAuth": {
-          "id": "JBZzr0E5U1GSy6OQ",
+          "id": "ms91wbaCvecB3tqQ",
           "name": "Intervals.icu API"
         }
       }
@@ -165,55 +183,63 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [1080, 160],
+      "position": [
+        1280,
+        160
+      ],
       "id": "calculate-monday",
       "name": "Calculate Monday"
     },
     {
-      "parameters": {
-        "operation": "search",
-        "base": {
-          "__rl": true,
-          "value": "appw0Xd3T54okfaXa",
-          "mode": "list",
-          "cachedResultName": "Tri Coach MVP"
-        },
-        "table": {
-          "__rl": true,
-          "value": "tblJ0UHyJ1drXv97F",
-          "mode": "list",
-          "cachedResultName": "Weekly Plans"
-        },
-        "filterByFormula": "=AND(\n  {Athlete} = '{{ $('Loop Over Users').item.json.id }}',\n  DATETIME_FORMAT({Week Start Date}, 'YYYY-MM-DD') = '{{ $json.Monday_date }}'\n)",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [1280, 160],
       "id": "search-plan",
       "name": "Search Plan",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1480,
+        160
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://coach-db.arthurpfz.com/weekly-plans/latest",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {},
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "athlete_id",
+              "value": "={{ $('Loop Over Users').item.json.id }}"
+            }
+          ]
+        }
+      },
       "credentials": {
-        "airtableTokenApi": {
-          "id": "JMbdFoTWoGU3avK9",
-          "name": "Airtable Personal Access Token account"
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
         }
       }
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are an elite Ironman coach analyzing workout data from Intervals.icu with full FIT file data. Your athlete is training seriously and expects rigorous, data-driven coaching.\n\nCONTEXT:\n- Date: {{ $today.toFormat('cccc, yyyy-MM-dd') }}\n- Athlete: {{ $('Loop Over Users').item.json.Name }}\n- Training Phase: {{ $('Loop Over Users').item.json['Training Phase'] }}\n- Fitness Profile: {{ $('Loop Over Users').item.json['Fitness Profile'] }}\n\nPLANNED SESSION:\n{{ $('Search Plan').item.json[$today.toFormat('cccc')] }}\n\nACTUAL EXECUTION:\nActivity: {{ $('Get Activity Details').item.json.type }} - {{ $('Get Activity Details').item.json.name }}\nDevice: {{ $('Get Activity Details').item.json.device_name }}\nDuration: {{ Math.round($('Get Activity Details').item.json.moving_time / 60) }}min moving ({{ Math.round($('Get Activity Details').item.json.elapsed_time / 60) }}min elapsed)\nDistance: {{ ($('Get Activity Details').item.json.distance / 1000).toFixed(2) }}km\n\n=== METRICS ===\n{{ $('Get Activity Details').item.json.avg_watts ? `Power:\n- Average: ${Math.round($('Get Activity Details').item.json.avg_watts)}W\n- Normalized: ${Math.round($('Get Activity Details').item.json.weighted_avg_watts)}W\n- Variability Index: ${$('Get Activity Details').item.json.variability_index.toFixed(2)}\n- Max: ${Math.round($('Get Activity Details').item.json.max_watts)}W` : '' }}\n\n{{ $('Get Activity Details').item.json.average_heartrate ? `Heart Rate:\n- Average: ${Math.round($('Get Activity Details').item.json.average_heartrate)}bpm\n- Max: ${Math.round($('Get Activity Details').item.json.max_heartrate)}bpm\n- LTHR: ${$('Get Activity Details').item.json.lthr}bpm\n- Zone Times (Z1-Z5+): ${$('Get Activity Details').item.json.icu_hr_zone_times ? $('Get Activity Details').item.json.icu_hr_zone_times.map((t, i) => Math.round(t/60) + 'min').join(', ') : 'N/A'}` : '' }}\n\n{{ $('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence ? `Cadence:\n- Average: ${Math.round(($('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence) * ($('Get Activity Details').item.json.type === 'Run' ? 2 : 1))}${$('Get Activity Details').item.json.type === 'Run' ? 'spm' : 'rpm'}` : '' }}\n\n{{ $('Get Activity Details').item.json.average_speed ? `Pace:\n- Avg: ${Math.floor(1000 / $('Get Activity Details').item.json.average_speed / 60)}:${String(Math.round((1000 / $('Get Activity Details').item.json.average_speed) % 60)).padStart(2, '0')}/km\n- Max Speed: ${($('Get Activity Details').item.json.max_speed * 3.6).toFixed(1)}km/h` : '' }}\n\nTraining Load:\n- TSS: {{ $('Get Activity Details').item.json.icu_training_load ? Math.round($('Get Activity Details').item.json.icu_training_load) : 'N/A' }}\n- Intensity Factor: {{ $('Get Activity Details').item.json.intensity ? $('Get Activity Details').item.json.intensity.toFixed(2) : 'N/A' }}\n- TRIMP: {{ $('Get Activity Details').item.json.trimp ? Math.round($('Get Activity Details').item.json.trimp) : 'N/A' }}\n\n{{ $('Get Activity Details').item.json.interval_summary ? `=== INTERVALS ===\n${$('Get Activity Details').item.json.interval_summary.join('\\n')}` : '' }}\n\n{{ $('Get Activity Details').item.json.stream_types ? `Available Streams: ${$('Get Activity Details').item.json.stream_types.join(', ')}` : '' }}\n\n=== ANALYSIS FRAMEWORK ===\n\n1. EXECUTION: Does type/duration/intensity match plan? Grade A/B/C/F.\n\n2. POWER (if available):\n   - VI <1.05 = steady (good for Z2), VI >1.10 = variable (expected for intervals)\n   - Pacing: even, positive split, negative split?\n   - Decoupling: power dropping while HR constant = fatigue\n\n3. HEART RATE:\n   - Zone distribution: time in target zones appropriate?\n   - Cardiac drift: HR rise over time (>10% = concern)\n   - Efficiency factor: NP/Avg HR (higher = fitter)\n\n4. CADENCE:\n   - Running: 170-180spm target\n   - Cycling: 85-95rpm for endurance\n   - Swimming: stroke rate vs pace efficiency\n\n5. INTERVALS:\n   - Structure executed as planned?\n   - Quality maintained across reps?\n   - Recovery adequate?\n\n6. COACHING:\n   - What went RIGHT (specific)\n   - What needs WORK (actionable)\n   - Connection to training phase\n\n=== OUTPUT ===\nWrite 6-10 sentences:\n1. Execution assessment\n2. 2-3 technical insights with specific numbers\n3. One exceptional element\n4. One improvement area (if any)\n5. Training phase context\n6. Forward guidance\n\nTone: Rigorous, data-driven, supportive but honest. No fluff.\n\nExample:\n\"Clean execution of the 90min Z2 ride. Power at 245W avg (85% FTP), NP 258W, VI 1.05 - textbook steady pacing. Cadence held 90-94rpm with <3% variation. Cardiac drift only 5.2% (148→156bpm) - aerobic ceiling rising. Small flag: last 20min saw 8W power drop while HR held, suggesting glycogen depletion. TSS 78 slots perfectly into Base 2. Decoupling 1.03 shows strong efficiency. Easy spin tomorrow.\"\n\nDraft coaching analysis:",
+        "text": "=You are an elite endurance coach. Output a CONCISE Telegram message in EXACTLY this format:\n\n[sport-emoji] [Sport] · [duration]min · [distance]km · [avg HR]bpm · TSS [tss]\nGrade: [A/B/C/F] — [one reason, ≤8 words]\n\n• [insight 1 with a specific number]\n• [insight 2 with a specific number]\n• Limiter: [the one thing holding back progress]\n\nTomorrow: [session prescription ≤12 words]\nWatch: [one metric to track next time ≤8 words]\n\nCONTEXT:\n- Athlete: {{ $('Loop Over Users').item.json.Name }}\n- Phase: {{ $('Loop Over Users').item.json['Training Phase'] }}\n- Profile: {{ $('Loop Over Users').item.json['Fitness Profile'] }}\n\nTODAY'S SESSION:\nActivity: {{ $('Get Activity Details').item.json.type }} - {{ $('Get Activity Details').item.json.name }}\nSource: {{ $('Get Activity Details').item.json.source }}\nDuration: {{ Math.round($('Get Activity Details').item.json.moving_time / 60) }}min\nDistance: {{ $('Get Activity Details').item.json.distance ? ($('Get Activity Details').item.json.distance / 1000).toFixed(2) + 'km' : 'N/A' }}\n\n{{ $('Get Activity Details').item.json.avg_watts ? 'Power: ' + Math.round($('Get Activity Details').item.json.avg_watts) + 'W avg / ' + Math.round($('Get Activity Details').item.json.weighted_avg_watts) + 'W NP / VI ' + $('Get Activity Details').item.json.variability_index.toFixed(2) : '' }}\n{{ $('Get Activity Details').item.json.average_heartrate ? 'HR: ' + Math.round($('Get Activity Details').item.json.average_heartrate) + 'bpm avg / ' + Math.round($('Get Activity Details').item.json.max_heartrate) + 'bpm max / LTHR ' + $('Get Activity Details').item.json.lthr : '' }}\n{{ $('Get Activity Details').item.json.icu_hr_zone_times ? 'HR zones (Z1-Z5+): ' + $('Get Activity Details').item.json.icu_hr_zone_times.map(t => Math.round(t/60) + 'min').join(' / ') : '' }}\n{{ $('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence ? 'Cadence: ' + Math.round(($('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence) * ($('Get Activity Details').item.json.type === 'Run' ? 2 : 1)) + ($('Get Activity Details').item.json.type === 'Run' ? 'spm' : 'rpm') : '' }}\n{{ $('Get Activity Details').item.json.average_speed && $('Get Activity Details').item.json.type === 'Run' ? 'Pace: ' + Math.floor(1000 / $('Get Activity Details').item.json.average_speed / 60) + ':' + String(Math.round((1000 / $('Get Activity Details').item.json.average_speed) % 60)).padStart(2, '0') + '/km' : '' }}\nTSS: {{ $('Get Activity Details').item.json.icu_training_load ? Math.round($('Get Activity Details').item.json.icu_training_load) : 'N/A' }}\nIF: {{ $('Get Activity Details').item.json.intensity ? $('Get Activity Details').item.json.intensity.toFixed(2) : 'N/A' }}\n\nEMOJI MAP: 🏃 Run · 🏊 Swim · 🚴 Ride/VirtualRide · 💪 Workout · ⛷️ NordicSki · 🚶 Walk · 🥾 Hike\n\nRULES (enforce strictly):\n- ZERO markdown — no **, no *, no __. Plain text only.\n- Bullets are the literal • character.\n- Max 8 lines total. Header + blank + 3 bullets + blank + Tomorrow + Watch.\n- Use only metrics provided above. Never invent numbers. If a metric is N/A, replace that bullet with another insight rather than fabricating.\n- One specific number per bullet (1, 2). Bullet 3 names the limiter in plain English.\n- Tone: rigorous, direct, no hedging, no generic praise.\n- No preamble, no signoff, no closing line.\n\nOutput ONLY a JSON object. No markdown, no code blocks, no extra text whatsoever.\n{\"grade\":\"X\",\"message\":\"<full message text with \\n for newlines>\"}\n\nRules:\n- grade is exactly one of: A, B, C, F (matching the Grade: line in the message)\n- message is the complete Telegram text, same format as above, using \\n for line breaks\n- Do NOT wrap in ```json``` code blocks",
         "batching": {}
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.8,
-      "position": [1480, 160],
+      "position": [
+        1680,
+        160
+      ],
       "id": "llm-chain",
       "name": "Hardcore Analysis"
     },
     {
       "parameters": {
-        "model": "anthropic/claude-3.7-sonnet",
+        "model": "anthropic/claude-sonnet-4.6",
         "options": {
           "maxTokens": 1000,
           "temperature": 0.7
@@ -221,7 +247,10 @@
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
-      "position": [1480, 360],
+      "position": [
+        1480,
+        360
+      ],
       "id": "openrouter-model",
       "name": "Claude 3.7 Sonnet",
       "credentials": {
@@ -233,15 +262,18 @@
     },
     {
       "parameters": {
-        "chatId": "TELEGRAM_CHAT_ID_REDACTED",
-        "text": "={{ $json.text }}",
+        "chatId": "1865798034",
+        "text": "={{ $('Parse Grade').item.json.message }}",
         "additionalFields": {
           "appendAttribution": false
         }
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [1680, 160],
+      "position": [
+        2240,
+        160
+      ],
       "id": "send-telegram",
       "name": "Send Telegram",
       "credentials": {
@@ -249,56 +281,1620 @@
           "id": "9IpAp35yJmIQJpeA",
           "name": "Telegram account"
         }
+      },
+      "webhookId": "2e5b6406-041e-4e69-a8f2-961e31381504"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "idempotency-check",
+              "leftValue": "={{ $json['Last Coaching Date'] }}",
+              "rightValue": "={{ $today.toFormat('yyyy-MM-dd') }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -20,
+        420
+      ],
+      "id": "already-coached-today-icu",
+      "name": "Already Coached Today?"
+    },
+    {
+      "id": "update-coaching-date-icu",
+      "name": "Update Coaching Date",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1880,
+        160
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://coach-db.arthurpfz.com/athletes/{{ $('Loop Over Users').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {},
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "last_coaching_date",
+              "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://coach-db.arthurpfz.com/sessions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "athlete_id",
+              "value": "={{ $('Loop Over Users').item.json.id }}"
+            },
+            {
+              "name": "intervals_id",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "name": "date",
+              "value": "={{ ($json.start_date_local || '').slice(0,10) }}"
+            },
+            {
+              "name": "sport",
+              "value": "={{ $json.type }}"
+            },
+            {
+              "name": "name",
+              "value": "={{ $json.name }}"
+            },
+            {
+              "name": "source",
+              "value": "intervals"
+            },
+            {
+              "name": "device_name",
+              "value": "={{ $json.device_name }}"
+            },
+            {
+              "name": "start_local",
+              "value": "={{ $json.start_date_local }}"
+            },
+            {
+              "name": "elapsed_sec",
+              "value": "={{ $json.elapsed_time }}"
+            },
+            {
+              "name": "moving_sec",
+              "value": "={{ $json.moving_time }}"
+            },
+            {
+              "name": "duration_min",
+              "value": "={{ $json.moving_time ? Math.round($json.moving_time / 60) : null }}"
+            },
+            {
+              "name": "distance_m",
+              "value": "={{ $json.distance }}"
+            },
+            {
+              "name": "distance_km",
+              "value": "={{ $json.distance ? +($json.distance / 1000).toFixed(2) : null }}"
+            },
+            {
+              "name": "avg_speed_ms",
+              "value": "={{ $json.average_speed }}"
+            },
+            {
+              "name": "max_speed_ms",
+              "value": "={{ $json.max_speed }}"
+            },
+            {
+              "name": "avg_hr",
+              "value": "={{ $json.average_heartrate }}"
+            },
+            {
+              "name": "max_hr",
+              "value": "={{ $json.max_heartrate }}"
+            },
+            {
+              "name": "lthr",
+              "value": "={{ $json.icu_lthr }}"
+            },
+            {
+              "name": "resting_hr",
+              "value": "={{ $json.icu_resting_hr }}"
+            },
+            {
+              "name": "avg_power",
+              "value": "={{ $json.icu_average_watts || $json.average_watts }}"
+            },
+            {
+              "name": "normalized_power",
+              "value": "={{ $json.icu_weighted_avg_watts }}"
+            },
+            {
+              "name": "variability_index",
+              "value": "={{ $json.icu_variability_index }}"
+            },
+            {
+              "name": "efficiency_factor",
+              "value": "={{ $json.icu_efficiency_factor }}"
+            },
+            {
+              "name": "decoupling",
+              "value": "={{ $json.decoupling }}"
+            },
+            {
+              "name": "power_load",
+              "value": "={{ $json.icu_power_load }}"
+            },
+            {
+              "name": "strain_score",
+              "value": "={{ $json.icu_strain }}"
+            },
+            {
+              "name": "ftp_at_time",
+              "value": "={{ $json.icu_ftp }}"
+            },
+            {
+              "name": "tss",
+              "value": "={{ $json.icu_training_load }}"
+            },
+            {
+              "name": "trimp",
+              "value": "={{ $json.trimp }}"
+            },
+            {
+              "name": "intensity_factor",
+              "value": "={{ $json.icu_intensity }}"
+            },
+            {
+              "name": "polarization_index",
+              "value": "={{ $json.polarization_index }}"
+            },
+            {
+              "name": "atl",
+              "value": "={{ $json.icu_atl }}"
+            },
+            {
+              "name": "ctl",
+              "value": "={{ $json.icu_ctl }}"
+            },
+            {
+              "name": "hr_load",
+              "value": "={{ $json.icu_hr_load }}"
+            },
+            {
+              "name": "pace_load",
+              "value": "={{ $json.icu_pace_load }}"
+            },
+            {
+              "name": "elevation_gain_m",
+              "value": "={{ $json.total_elevation_gain }}"
+            },
+            {
+              "name": "elevation_loss_m",
+              "value": "={{ $json.icu_elevation_loss || $json.total_elevation_loss }}"
+            },
+            {
+              "name": "avg_cadence",
+              "value": "={{ $json.average_cadence }}"
+            },
+            {
+              "name": "avg_stride",
+              "value": "={{ $json.icu_average_stride }}"
+            },
+            {
+              "name": "pool_length_m",
+              "value": "={{ $json.pool_length }}"
+            },
+            {
+              "name": "lengths",
+              "value": "={{ $json.icu_pool_lengths }}"
+            },
+            {
+              "name": "gap_sec_per_km",
+              "value": "={{ $json.gap }}"
+            },
+            {
+              "name": "calories",
+              "value": "={{ $json.calories }}"
+            },
+            {
+              "name": "weight_kg",
+              "value": "={{ $json.icu_weight }}"
+            },
+            {
+              "name": "raw_json",
+              "value": "={{ JSON.stringify($json) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1280,
+        160
+      ],
+      "id": "save-session-node",
+      "name": "Save Session",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://coach-db.arthurpfz.com/sessions/{{ $('Save Session').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "analysis",
+              "value": "={{ $('Parse Grade').item.json.message }}"
+            },
+            {
+              "name": "analyzed_at",
+              "value": "={{ $now.toISO() }}"
+            },
+            {
+              "name": "grade",
+              "value": "={{ $('Parse Grade').item.json.grade }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2040,
+        160
+      ],
+      "id": "save-analysis-node",
+      "name": "Save Analysis",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "send-rest-day-telegram",
+      "name": "Send Rest-Day Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1080,
+        360
+      ],
+      "parameters": {
+        "chatId": "1865798034",
+        "text": "🛌 No activity logged today. Rest well — recovery is part of the plan.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "9IpAp35yJmIQJpeA",
+          "name": "Telegram account"
+        }
+      },
+      "webhookId": "0d1a6d04-20db-417c-85ff-2d00df519242"
+    },
+    {
+      "id": "filter-activities",
+      "name": "Filter Activities",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        280,
+        240
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "drop-zepp",
+              "leftValue": "={{ $json.source }}",
+              "rightValue": "ZEPP",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "parse-grade-node",
+      "name": "Parse Grade",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1880,
+        160
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "extract-grade",
+              "name": "grade",
+              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); return JSON.parse(t).grade || 'B'; } catch(e) { const m = $json.text.match(/Grade:\\s*([ABCF])/); return m ? m[1] : 'B'; } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "extract-message",
+              "name": "message",
+              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); return JSON.parse(t).message || $json.text; } catch(e) { return $json.text; } })() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
       }
     }
   ],
   "connections": {
     "Schedule Trigger": {
-      "main": [[{ "node": "Search Users", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Search Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Search Users": {
-      "main": [[{ "node": "Loop Over Users", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Loop Over Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Loop Over Users": {
       "main": [
-        [{ "node": "Get Activities", "type": "main", "index": 0 }],
-        [{ "node": "Search Users", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Already Coached Today?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Get Activities": {
-      "main": [[{ "node": "Check Activities Exist", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Filter Activities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Check Activities Exist": {
-      "main": [[{ "node": "Loop Over Activities", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Loop Over Activities",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Rest-Day Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Loop Over Activities": {
       "main": [
-        [{ "node": "Get Activity Details", "type": "main", "index": 0 }],
-        [{ "node": "Get Activities", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Get Activity Details",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Activities",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Get Activity Details": {
-      "main": [[{ "node": "Calculate Monday", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Calculate Monday": {
-      "main": [[{ "node": "Search Plan", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Search Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Search Plan": {
-      "main": [[{ "node": "Hardcore Analysis", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Hardcore Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Hardcore Analysis": {
-      "main": [[{ "node": "Send Telegram", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Parse Grade",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Claude 3.7 Sonnet": {
-      "ai_languageModel": [[{ "node": "Hardcore Analysis", "type": "ai_languageModel", "index": 0 }]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "Hardcore Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Already Coached Today?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Update Coaching Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Telegram": {
+      "main": [
+        []
+      ]
+    },
+    "Update Coaching Date": {
+      "main": [
+        [
+          {
+            "node": "Get Activities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Session": {
+      "main": [
+        [
+          {
+            "node": "Calculate Monday",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Analysis": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Activities": {
+      "main": [
+        [
+          {
+            "node": "Check Activities Exist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Grade": {
+      "main": [
+        [
+          {
+            "node": "Save Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true,
+    "errorWorkflow": "psyVgPiGJoO5QOa4"
   },
   "staticData": {
     "node:Schedule Trigger": {
       "recurrenceRules": []
     }
+  },
+  "meta": null,
+  "pinData": {},
+  "versionId": "5fe1dc8f-8091-431b-82c6-48e44e312857",
+  "activeVersionId": "5fe1dc8f-8091-431b-82c6-48e44e312857",
+  "versionCounter": 165,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-01-25T09:37:00.426Z",
+      "createdAt": "2026-01-25T09:37:00.426Z",
+      "role": "workflow:owner",
+      "workflowId": "hrSGUqoAwkWQ4gKl",
+      "projectId": "51zk01zmzcv1m5vw",
+      "project": {
+        "updatedAt": "2026-01-03T12:23:57.574Z",
+        "createdAt": "2026-01-03T12:23:52.619Z",
+        "id": "51zk01zmzcv1m5vw",
+        "name": "arthur pfalzgraf <arthur.pfalzgraf@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-04-26T06:37:44.377Z",
+    "createdAt": "2026-04-26T06:37:44.377Z",
+    "versionId": "5fe1dc8f-8091-431b-82c6-48e44e312857",
+    "workflowId": "hrSGUqoAwkWQ4gKl",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 20,
+                "triggerAtMinute": 10
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -520,
+          240
+        ],
+        "id": "schedule-trigger",
+        "name": "Schedule Trigger"
+      },
+      {
+        "id": "search-users",
+        "name": "Search Users",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          -320,
+          240
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://coach-db.arthurpfz.com/athletes",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          -120,
+          240
+        ],
+        "id": "loop-users",
+        "name": "Loop Over Users"
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "=https://intervals.icu/api/v1/athlete/{{ $('Loop Over Users').item.json['Intervals.icu Athlete ID'] }}/activities",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "oldest",
+                "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+              },
+              {
+                "name": "newest",
+                "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+              }
+            ]
+          },
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          80,
+          240
+        ],
+        "id": "get-activities",
+        "name": "Get Activities",
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "ms91wbaCvecB3tqQ",
+            "name": "Intervals.icu API"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "check-activities-exist",
+                "leftValue": "={{ $input.all().length }}",
+                "rightValue": 0,
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          480,
+          240
+        ],
+        "id": "check-activities",
+        "name": "Check Activities Exist"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          680,
+          160
+        ],
+        "id": "loop-activities",
+        "name": "Loop Over Activities"
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "=https://intervals.icu/api/v1/activity/{{ $('Loop Over Activities').item.json.id }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          1080,
+          160
+        ],
+        "id": "get-activity-details",
+        "name": "Get Activity Details",
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "ms91wbaCvecB3tqQ",
+            "name": "Intervals.icu API"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "calc-monday",
+                "name": "Monday_date",
+                "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1280,
+          160
+        ],
+        "id": "calculate-monday",
+        "name": "Calculate Monday"
+      },
+      {
+        "id": "search-plan",
+        "name": "Search Plan",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          1480,
+          160
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://coach-db.arthurpfz.com/weekly-plans/latest",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {},
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "athlete_id",
+                "value": "={{ $('Loop Over Users').item.json.id }}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=You are an elite endurance coach. Output a CONCISE Telegram message in EXACTLY this format:\n\n[sport-emoji] [Sport] · [duration]min · [distance]km · [avg HR]bpm · TSS [tss]\nGrade: [A/B/C/F] — [one reason, ≤8 words]\n\n• [insight 1 with a specific number]\n• [insight 2 with a specific number]\n• Limiter: [the one thing holding back progress]\n\nTomorrow: [session prescription ≤12 words]\nWatch: [one metric to track next time ≤8 words]\n\nCONTEXT:\n- Athlete: {{ $('Loop Over Users').item.json.Name }}\n- Phase: {{ $('Loop Over Users').item.json['Training Phase'] }}\n- Profile: {{ $('Loop Over Users').item.json['Fitness Profile'] }}\n\nTODAY'S SESSION:\nActivity: {{ $('Get Activity Details').item.json.type }} - {{ $('Get Activity Details').item.json.name }}\nSource: {{ $('Get Activity Details').item.json.source }}\nDuration: {{ Math.round($('Get Activity Details').item.json.moving_time / 60) }}min\nDistance: {{ $('Get Activity Details').item.json.distance ? ($('Get Activity Details').item.json.distance / 1000).toFixed(2) + 'km' : 'N/A' }}\n\n{{ $('Get Activity Details').item.json.avg_watts ? 'Power: ' + Math.round($('Get Activity Details').item.json.avg_watts) + 'W avg / ' + Math.round($('Get Activity Details').item.json.weighted_avg_watts) + 'W NP / VI ' + $('Get Activity Details').item.json.variability_index.toFixed(2) : '' }}\n{{ $('Get Activity Details').item.json.average_heartrate ? 'HR: ' + Math.round($('Get Activity Details').item.json.average_heartrate) + 'bpm avg / ' + Math.round($('Get Activity Details').item.json.max_heartrate) + 'bpm max / LTHR ' + $('Get Activity Details').item.json.lthr : '' }}\n{{ $('Get Activity Details').item.json.icu_hr_zone_times ? 'HR zones (Z1-Z5+): ' + $('Get Activity Details').item.json.icu_hr_zone_times.map(t => Math.round(t/60) + 'min').join(' / ') : '' }}\n{{ $('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence ? 'Cadence: ' + Math.round(($('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence) * ($('Get Activity Details').item.json.type === 'Run' ? 2 : 1)) + ($('Get Activity Details').item.json.type === 'Run' ? 'spm' : 'rpm') : '' }}\n{{ $('Get Activity Details').item.json.average_speed && $('Get Activity Details').item.json.type === 'Run' ? 'Pace: ' + Math.floor(1000 / $('Get Activity Details').item.json.average_speed / 60) + ':' + String(Math.round((1000 / $('Get Activity Details').item.json.average_speed) % 60)).padStart(2, '0') + '/km' : '' }}\nTSS: {{ $('Get Activity Details').item.json.icu_training_load ? Math.round($('Get Activity Details').item.json.icu_training_load) : 'N/A' }}\nIF: {{ $('Get Activity Details').item.json.intensity ? $('Get Activity Details').item.json.intensity.toFixed(2) : 'N/A' }}\n\nEMOJI MAP: 🏃 Run · 🏊 Swim · 🚴 Ride/VirtualRide · 💪 Workout · ⛷️ NordicSki · 🚶 Walk · 🥾 Hike\n\nRULES (enforce strictly):\n- ZERO markdown — no **, no *, no __. Plain text only.\n- Bullets are the literal • character.\n- Max 8 lines total. Header + blank + 3 bullets + blank + Tomorrow + Watch.\n- Use only metrics provided above. Never invent numbers. If a metric is N/A, replace that bullet with another insight rather than fabricating.\n- One specific number per bullet (1, 2). Bullet 3 names the limiter in plain English.\n- Tone: rigorous, direct, no hedging, no generic praise.\n- No preamble, no signoff, no closing line.\n\nOutput ONLY a JSON object. No markdown, no code blocks, no extra text whatsoever.\n{\"grade\":\"X\",\"message\":\"<full message text with \\n for newlines>\"}\n\nRules:\n- grade is exactly one of: A, B, C, F (matching the Grade: line in the message)\n- message is the complete Telegram text, same format as above, using \\n for line breaks\n- Do NOT wrap in ```json``` code blocks",
+          "batching": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.8,
+        "position": [
+          1680,
+          160
+        ],
+        "id": "llm-chain",
+        "name": "Hardcore Analysis"
+      },
+      {
+        "parameters": {
+          "model": "anthropic/claude-sonnet-4.6",
+          "options": {
+            "maxTokens": 1000,
+            "temperature": 0.7
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+        "typeVersion": 1,
+        "position": [
+          1480,
+          360
+        ],
+        "id": "openrouter-model",
+        "name": "Claude 3.7 Sonnet",
+        "credentials": {
+          "openRouterApi": {
+            "id": "nhbNqmgyP4cAeQ6B",
+            "name": "OpenRouter account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "1865798034",
+          "text": "={{ $('Parse Grade').item.json.message }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          2240,
+          160
+        ],
+        "id": "send-telegram",
+        "name": "Send Telegram",
+        "credentials": {
+          "telegramApi": {
+            "id": "9IpAp35yJmIQJpeA",
+            "name": "Telegram account"
+          }
+        },
+        "webhookId": "2e5b6406-041e-4e69-a8f2-961e31381504"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "idempotency-check",
+                "leftValue": "={{ $json['Last Coaching Date'] }}",
+                "rightValue": "={{ $today.toFormat('yyyy-MM-dd') }}",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -20,
+          420
+        ],
+        "id": "already-coached-today-icu",
+        "name": "Already Coached Today?"
+      },
+      {
+        "id": "update-coaching-date-icu",
+        "name": "Update Coaching Date",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          1880,
+          160
+        ],
+        "parameters": {
+          "method": "PUT",
+          "url": "=https://coach-db.arthurpfz.com/athletes/{{ $('Loop Over Users').item.json.id }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {},
+          "sendBody": true,
+          "contentType": "json",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "last_coaching_date",
+                "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://coach-db.arthurpfz.com/sessions",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "athlete_id",
+                "value": "={{ $('Loop Over Users').item.json.id }}"
+              },
+              {
+                "name": "intervals_id",
+                "value": "={{ $json.id }}"
+              },
+              {
+                "name": "date",
+                "value": "={{ ($json.start_date_local || '').slice(0,10) }}"
+              },
+              {
+                "name": "sport",
+                "value": "={{ $json.type }}"
+              },
+              {
+                "name": "name",
+                "value": "={{ $json.name }}"
+              },
+              {
+                "name": "source",
+                "value": "intervals"
+              },
+              {
+                "name": "device_name",
+                "value": "={{ $json.device_name }}"
+              },
+              {
+                "name": "start_local",
+                "value": "={{ $json.start_date_local }}"
+              },
+              {
+                "name": "elapsed_sec",
+                "value": "={{ $json.elapsed_time }}"
+              },
+              {
+                "name": "moving_sec",
+                "value": "={{ $json.moving_time }}"
+              },
+              {
+                "name": "duration_min",
+                "value": "={{ $json.moving_time ? Math.round($json.moving_time / 60) : null }}"
+              },
+              {
+                "name": "distance_m",
+                "value": "={{ $json.distance }}"
+              },
+              {
+                "name": "distance_km",
+                "value": "={{ $json.distance ? +($json.distance / 1000).toFixed(2) : null }}"
+              },
+              {
+                "name": "avg_speed_ms",
+                "value": "={{ $json.average_speed }}"
+              },
+              {
+                "name": "max_speed_ms",
+                "value": "={{ $json.max_speed }}"
+              },
+              {
+                "name": "avg_hr",
+                "value": "={{ $json.average_heartrate }}"
+              },
+              {
+                "name": "max_hr",
+                "value": "={{ $json.max_heartrate }}"
+              },
+              {
+                "name": "lthr",
+                "value": "={{ $json.icu_lthr }}"
+              },
+              {
+                "name": "resting_hr",
+                "value": "={{ $json.icu_resting_hr }}"
+              },
+              {
+                "name": "avg_power",
+                "value": "={{ $json.icu_average_watts || $json.average_watts }}"
+              },
+              {
+                "name": "normalized_power",
+                "value": "={{ $json.icu_weighted_avg_watts }}"
+              },
+              {
+                "name": "variability_index",
+                "value": "={{ $json.icu_variability_index }}"
+              },
+              {
+                "name": "efficiency_factor",
+                "value": "={{ $json.icu_efficiency_factor }}"
+              },
+              {
+                "name": "decoupling",
+                "value": "={{ $json.decoupling }}"
+              },
+              {
+                "name": "power_load",
+                "value": "={{ $json.icu_power_load }}"
+              },
+              {
+                "name": "strain_score",
+                "value": "={{ $json.icu_strain }}"
+              },
+              {
+                "name": "ftp_at_time",
+                "value": "={{ $json.icu_ftp }}"
+              },
+              {
+                "name": "tss",
+                "value": "={{ $json.icu_training_load }}"
+              },
+              {
+                "name": "trimp",
+                "value": "={{ $json.trimp }}"
+              },
+              {
+                "name": "intensity_factor",
+                "value": "={{ $json.icu_intensity }}"
+              },
+              {
+                "name": "polarization_index",
+                "value": "={{ $json.polarization_index }}"
+              },
+              {
+                "name": "atl",
+                "value": "={{ $json.icu_atl }}"
+              },
+              {
+                "name": "ctl",
+                "value": "={{ $json.icu_ctl }}"
+              },
+              {
+                "name": "hr_load",
+                "value": "={{ $json.icu_hr_load }}"
+              },
+              {
+                "name": "pace_load",
+                "value": "={{ $json.icu_pace_load }}"
+              },
+              {
+                "name": "elevation_gain_m",
+                "value": "={{ $json.total_elevation_gain }}"
+              },
+              {
+                "name": "elevation_loss_m",
+                "value": "={{ $json.icu_elevation_loss || $json.total_elevation_loss }}"
+              },
+              {
+                "name": "avg_cadence",
+                "value": "={{ $json.average_cadence }}"
+              },
+              {
+                "name": "avg_stride",
+                "value": "={{ $json.icu_average_stride }}"
+              },
+              {
+                "name": "pool_length_m",
+                "value": "={{ $json.pool_length }}"
+              },
+              {
+                "name": "lengths",
+                "value": "={{ $json.icu_pool_lengths }}"
+              },
+              {
+                "name": "gap_sec_per_km",
+                "value": "={{ $json.gap }}"
+              },
+              {
+                "name": "calories",
+                "value": "={{ $json.calories }}"
+              },
+              {
+                "name": "weight_kg",
+                "value": "={{ $json.icu_weight }}"
+              },
+              {
+                "name": "raw_json",
+                "value": "={{ JSON.stringify($json) }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          1280,
+          160
+        ],
+        "id": "save-session-node",
+        "name": "Save Session",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "method": "PATCH",
+          "url": "=https://coach-db.arthurpfz.com/sessions/{{ $('Save Session').item.json.id }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "analysis",
+                "value": "={{ $('Parse Grade').item.json.message }}"
+              },
+              {
+                "name": "analyzed_at",
+                "value": "={{ $now.toISO() }}"
+              },
+              {
+                "name": "grade",
+                "value": "={{ $('Parse Grade').item.json.grade }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          2040,
+          160
+        ],
+        "id": "save-analysis-node",
+        "name": "Save Analysis",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "id": "send-rest-day-telegram",
+        "name": "Send Rest-Day Telegram",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1080,
+          360
+        ],
+        "parameters": {
+          "chatId": "1865798034",
+          "text": "🛌 No activity logged today. Rest well — recovery is part of the plan.",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "9IpAp35yJmIQJpeA",
+            "name": "Telegram account"
+          }
+        },
+        "webhookId": "0d1a6d04-20db-417c-85ff-2d00df519242"
+      },
+      {
+        "id": "filter-activities",
+        "name": "Filter Activities",
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2,
+        "position": [
+          280,
+          240
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "drop-zepp",
+                "leftValue": "={{ $json.source }}",
+                "rightValue": "ZEPP",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEquals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "parse-grade-node",
+        "name": "Parse Grade",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1880,
+          160
+        ],
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "extract-grade",
+                "name": "grade",
+                "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); return JSON.parse(t).grade || 'B'; } catch(e) { const m = $json.text.match(/Grade:\\s*([ABCF])/); return m ? m[1] : 'B'; } })() }}",
+                "type": "string"
+              },
+              {
+                "id": "extract-message",
+                "name": "message",
+                "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); return JSON.parse(t).message || $json.text; } catch(e) { return $json.text; } })() }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Search Users",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Search Users": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Users",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Over Users": {
+        "main": [
+          [
+            {
+              "node": "Already Coached Today?",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Search Users",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Activities": {
+        "main": [
+          [
+            {
+              "node": "Filter Activities",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Activities Exist": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Activities",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send Rest-Day Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Over Activities": {
+        "main": [
+          [
+            {
+              "node": "Get Activity Details",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get Activities",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Activity Details": {
+        "main": [
+          [
+            {
+              "node": "Save Session",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Calculate Monday": {
+        "main": [
+          [
+            {
+              "node": "Search Plan",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Search Plan": {
+        "main": [
+          [
+            {
+              "node": "Hardcore Analysis",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Hardcore Analysis": {
+        "main": [
+          [
+            {
+              "node": "Parse Grade",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Claude 3.7 Sonnet": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Hardcore Analysis",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Already Coached Today?": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Update Coaching Date",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Telegram": {
+        "main": [
+          []
+        ]
+      },
+      "Update Coaching Date": {
+        "main": [
+          [
+            {
+              "node": "Get Activities",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Save Session": {
+        "main": [
+          [
+            {
+              "node": "Calculate Monday",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Save Analysis": {
+        "main": [
+          [
+            {
+              "node": "Send Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter Activities": {
+        "main": [
+          [
+            {
+              "node": "Check Activities Exist",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Grade": {
+        "main": [
+          [
+            {
+              "node": "Save Analysis",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "arthur pfalzgraf",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-04-26T06:37:44.580Z",
+        "id": 472,
+        "workflowId": "hrSGUqoAwkWQ4gKl",
+        "versionId": "5fe1dc8f-8091-431b-82c6-48e44e312857",
+        "event": "activated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      },
+      {
+        "createdAt": "2026-04-26T06:37:44.862Z",
+        "id": 474,
+        "workflowId": "hrSGUqoAwkWQ4gKl",
+        "versionId": "5fe1dc8f-8091-431b-82c6-48e44e312857",
+        "event": "activated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      },
+      {
+        "createdAt": "2026-05-07T07:04:31.559Z",
+        "id": 568,
+        "workflowId": "hrSGUqoAwkWQ4gKl",
+        "versionId": "5fe1dc8f-8091-431b-82c6-48e44e312857",
+        "event": "activated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      },
+      {
+        "createdAt": "2026-04-26T06:37:44.475Z",
+        "id": 471,
+        "workflowId": "hrSGUqoAwkWQ4gKl",
+        "versionId": "5fe1dc8f-8091-431b-82c6-48e44e312857",
+        "event": "deactivated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      },
+      {
+        "createdAt": "2026-04-26T06:37:44.770Z",
+        "id": 473,
+        "workflowId": "hrSGUqoAwkWQ4gKl",
+        "versionId": "5fe1dc8f-8091-431b-82c6-48e44e312857",
+        "event": "deactivated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      },
+      {
+        "createdAt": "2026-05-07T07:04:31.458Z",
+        "id": 567,
+        "workflowId": "hrSGUqoAwkWQ4gKl",
+        "versionId": "5fe1dc8f-8091-431b-82c6-48e44e312857",
+        "event": "deactivated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      }
+    ]
   }
 }

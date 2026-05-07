@@ -1,0 +1,1575 @@
+{
+  "updatedAt": "2026-05-07T07:04:42.317Z",
+  "createdAt": "2026-04-25T17:53:49.107Z",
+  "id": "gAnJ0r3x0sFxqWxY",
+  "name": "Coach Tri - Feedback Handler",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "telegram-trigger",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "9IpAp35yJmIQJpeA",
+          "name": "Telegram account"
+        }
+      },
+      "webhookId": "feedback-handler-webhook"
+    },
+    {
+      "id": "check-auth",
+      "name": "Check Auth",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        200,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "auth-check",
+              "leftValue": "={{ $json.message.chat.id.toString() }}",
+              "rightValue": "1865798034",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "is-feedback",
+      "name": "Is Feedback?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        400,
+        -100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "feedback-prefix",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "!",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "get-latest-session",
+      "name": "Get Latest Session",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        600,
+        -100
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://coach-db.arthurpfz.com/sessions",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "athlete_id",
+              "value": "1"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            },
+            {
+              "name": "wrap",
+              "value": "1"
+            },
+            {
+              "name": "has_analysis",
+              "value": "1"
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
+        }
+      }
+    },
+    {
+      "id": "check-session-exists",
+      "name": "Session Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        800,
+        -100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "session-check",
+              "leftValue": "={{ $json.count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "save-feedback",
+      "name": "Save Feedback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1000,
+        -160
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://coach-db.arthurpfz.com/sessions/{{ $json.sessions[0].id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "user_feedback",
+              "value": "={{ $('Telegram Trigger').item.json.message.text.replace(/^!\\s*/, '').trim() }}"
+            },
+            {
+              "name": "user_feedback_at",
+              "value": "={{ $now.toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
+        }
+      }
+    },
+    {
+      "id": "confirm-saved",
+      "name": "Send Confirmation",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        -160
+      ],
+      "parameters": {
+        "chatId": "1865798034",
+        "text": "=Got it — saved to {{ $('Get Latest Session').item.json.sessions[0].date }} {{ $('Get Latest Session').item.json.sessions[0].sport }} session.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "9IpAp35yJmIQJpeA",
+          "name": "Telegram account"
+        }
+      },
+      "webhookId": "86e1b335-8fd9-4e09-8f89-4a104c4c0744"
+    },
+    {
+      "id": "no-session-reply",
+      "name": "No Session Reply",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1000,
+        -40
+      ],
+      "parameters": {
+        "chatId": "1865798034",
+        "text": "No analyzed session found to attach feedback to.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "9IpAp35yJmIQJpeA",
+          "name": "Telegram account"
+        }
+      },
+      "webhookId": "05354f41-4ece-4393-886c-738b55ddfca8"
+    },
+    {
+      "id": "is-refresh",
+      "name": "Is /refresh?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        600,
+        -200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "refresh-check",
+              "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+              "rightValue": "/refresh",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "call-backfill",
+      "name": "Call Backfill",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        820,
+        -300
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": "rHIyZMIJNAOqZvM2",
+        "mode": "each",
+        "options": {},
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat_id": "={{ $json.message.chat.id.toString() }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "send-refresh-done",
+      "name": "Refresh Done",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        -300
+      ],
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+        "text": "✅ Refresh complete.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "9IpAp35yJmIQJpeA",
+          "name": "Telegram account"
+        }
+      },
+      "webhookId": "a39f8efc-c461-406f-8c3d-91deaa83bd12"
+    },
+    {
+      "id": "is-strikes",
+      "name": "Is /strikes?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        600,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "strikes-check",
+              "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+              "rightValue": "/strikes",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "get-strikes-sessions",
+      "name": "Get Strikes Sessions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        820,
+        -100
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://coach-db.arthurpfz.com/sessions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "athlete_id",
+              "value": "1"
+            },
+            {
+              "name": "date_from",
+              "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "limit",
+              "value": "100"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
+        }
+      }
+    },
+    {
+      "id": "format-strikes",
+      "name": "Format Strikes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -100
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Aggregate duration_min by sport for the running week — same logic as Weekly Stats workflow.\nconst sessions = $input.all().map(i => i.json);\nconst totalMin = sessions.reduce((sum, s) => sum + (s.duration_min || 0), 0);\nconst totalH = totalMin / 60;\nconst fires = '🔥'.repeat(Math.floor(totalH)) || '·';\n\nconst sportEmoji = { Run: '🏃 Run', Swim: '🏊 Swim', Ride: '🚴 Ride', Workout: '💪 Workout' };\nconst order = ['Run', 'Swim', 'Ride', 'Workout'];\nconst totals = Object.fromEntries(order.map(s => [s, 0]));\nfor (const s of sessions) {\n  const k = s.sport === 'VirtualRide' ? 'Ride' : s.sport;\n  if (totals[k] !== undefined) totals[k] += (s.duration_min || 0);\n}\n\nconst fmt = m => `${Math.floor(m / 60)}:${String(Math.round(m % 60)).padStart(2, '0')}`;\n\nconst lines = [\n  '📊 Week to date',\n  `${fires} ${fmt(totalMin)}h total`,\n  '',\n  ...order.map(s => `${sportEmoji[s]} · ${fmt(totals[s])}`),\n];\nreturn [{ json: { text: lines.join('\\n') } }];"
+      }
+    },
+    {
+      "id": "send-strikes",
+      "name": "Send Strikes",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1260,
+        -100
+      ],
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "9IpAp35yJmIQJpeA",
+          "name": "Telegram account"
+        }
+      },
+      "webhookId": "0cefc31f-f96e-41cf-8d3f-febf72ac01ed"
+    },
+    {
+      "id": "is-training",
+      "name": "Is /training?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        820,
+        100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "training-check",
+              "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+              "rightValue": "/training",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "get-training-plan",
+      "name": "Get Training Plan",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        100
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://coach-db.arthurpfz.com/weekly-plans",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "athlete_id",
+              "value": "1"
+            },
+            {
+              "name": "week_start_date",
+              "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
+        }
+      }
+    },
+    {
+      "id": "format-training",
+      "name": "Format Training",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1260,
+        100
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Format current week's training plan as a Telegram message.\nconst plans = $input.all().map(i => i.json);\nif (!plans.length) {\n  return [{ json: { text: '📋 No training plan found for this week. The Sunday Planner runs every Sunday at 20:07 — check back then.' } }];\n}\nconst p = plans[0];\nconst days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nconst dayEmoji = { Monday: 'Mo', Tuesday: 'Tu', Wednesday: 'We', Thursday: 'Th', Friday: 'Fr', Saturday: 'Sa', Sunday: 'Su' };\n\nconst lines = [`🗓 Week of ${p['Week Start Date']}`];\nif (p.Focus) lines.push(`Focus: ${p.Focus}`);\nlines.push('');\nfor (const d of days) {\n  const session = (p[d] || 'REST').trim();\n  lines.push(`${dayEmoji[d]} ${d}`);\n  lines.push(session);\n  lines.push('');\n}\nreturn [{ json: { text: lines.join('\\n').trim() } }];"
+      }
+    },
+    {
+      "id": "send-training",
+      "name": "Send Training",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1480,
+        100
+      ],
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "9IpAp35yJmIQJpeA",
+          "name": "Telegram account"
+        }
+      },
+      "webhookId": "e983cbf8-75e1-494d-a3f8-25b310638fb9"
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check Auth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Auth": {
+      "main": [
+        [
+          {
+            "node": "Is /refresh?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Is Feedback?": {
+      "main": [
+        [
+          {
+            "node": "Get Latest Session",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Get Latest Session": {
+      "main": [
+        [
+          {
+            "node": "Session Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Session Exists?": {
+      "main": [
+        [
+          {
+            "node": "Save Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Session Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Feedback": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is /refresh?": {
+      "main": [
+        [
+          {
+            "node": "Call Backfill",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is /strikes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Backfill": {
+      "main": [
+        [
+          {
+            "node": "Refresh Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is /strikes?": {
+      "main": [
+        [
+          {
+            "node": "Get Strikes Sessions",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is /training?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Strikes Sessions": {
+      "main": [
+        [
+          {
+            "node": "Format Strikes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Strikes": {
+      "main": [
+        [
+          {
+            "node": "Send Strikes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Strikes": {
+      "main": [
+        []
+      ]
+    },
+    "Is /training?": {
+      "main": [
+        [
+          {
+            "node": "Get Training Plan",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Feedback?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Training Plan": {
+      "main": [
+        [
+          {
+            "node": "Format Training",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Training": {
+      "main": [
+        [
+          {
+            "node": "Send Training",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Training": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "psyVgPiGJoO5QOa4",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "f9991191-53a9-444b-ab4c-72980822c01d",
+  "activeVersionId": "f9991191-53a9-444b-ab4c-72980822c01d",
+  "versionCounter": 21,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-04-25T17:53:49.109Z",
+      "createdAt": "2026-04-25T17:53:49.109Z",
+      "role": "workflow:owner",
+      "workflowId": "gAnJ0r3x0sFxqWxY",
+      "projectId": "51zk01zmzcv1m5vw",
+      "project": {
+        "updatedAt": "2026-01-03T12:23:57.574Z",
+        "createdAt": "2026-01-03T12:23:52.619Z",
+        "id": "51zk01zmzcv1m5vw",
+        "name": "arthur pfalzgraf <arthur.pfalzgraf@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-01T13:59:56.702Z",
+    "createdAt": "2026-05-01T13:59:56.702Z",
+    "versionId": "f9991191-53a9-444b-ab4c-72980822c01d",
+    "workflowId": "gAnJ0r3x0sFxqWxY",
+    "nodes": [
+      {
+        "id": "telegram-trigger",
+        "name": "Telegram Trigger",
+        "type": "n8n-nodes-base.telegramTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "updates": [
+            "message"
+          ],
+          "additionalFields": {}
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "9IpAp35yJmIQJpeA",
+            "name": "Telegram account"
+          }
+        },
+        "webhookId": "feedback-handler-webhook"
+      },
+      {
+        "id": "check-auth",
+        "name": "Check Auth",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          200,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "auth-check",
+                "leftValue": "={{ $json.message.chat.id.toString() }}",
+                "rightValue": "1865798034",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "is-feedback",
+        "name": "Is Feedback?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          400,
+          -100
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "feedback-prefix",
+                "leftValue": "={{ $json.message.text }}",
+                "rightValue": "!",
+                "operator": {
+                  "type": "string",
+                  "operation": "startsWith"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "get-latest-session",
+        "name": "Get Latest Session",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          600,
+          -100
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://coach-db.arthurpfz.com/sessions",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "athlete_id",
+                "value": "1"
+              },
+              {
+                "name": "limit",
+                "value": "1"
+              },
+              {
+                "name": "wrap",
+                "value": "1"
+              },
+              {
+                "name": "has_analysis",
+                "value": "1"
+              }
+            ]
+          },
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
+          }
+        }
+      },
+      {
+        "id": "check-session-exists",
+        "name": "Session Exists?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          800,
+          -100
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "session-check",
+                "leftValue": "={{ $json.count }}",
+                "rightValue": 0,
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "save-feedback",
+        "name": "Save Feedback",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          1000,
+          -160
+        ],
+        "parameters": {
+          "method": "PATCH",
+          "url": "=https://coach-db.arthurpfz.com/sessions/{{ $json.sessions[0].id }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "contentType": "json",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "user_feedback",
+                "value": "={{ $('Telegram Trigger').item.json.message.text.replace(/^!\\s*/, '').trim() }}"
+              },
+              {
+                "name": "user_feedback_at",
+                "value": "={{ $now.toISO() }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
+          }
+        }
+      },
+      {
+        "id": "confirm-saved",
+        "name": "Send Confirmation",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1200,
+          -160
+        ],
+        "parameters": {
+          "chatId": "1865798034",
+          "text": "=Got it — saved to {{ $('Get Latest Session').item.json.sessions[0].date }} {{ $('Get Latest Session').item.json.sessions[0].sport }} session.",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "9IpAp35yJmIQJpeA",
+            "name": "Telegram account"
+          }
+        },
+        "webhookId": "86e1b335-8fd9-4e09-8f89-4a104c4c0744"
+      },
+      {
+        "id": "no-session-reply",
+        "name": "No Session Reply",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1000,
+          -40
+        ],
+        "parameters": {
+          "chatId": "1865798034",
+          "text": "No analyzed session found to attach feedback to.",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "9IpAp35yJmIQJpeA",
+            "name": "Telegram account"
+          }
+        },
+        "webhookId": "05354f41-4ece-4393-886c-738b55ddfca8"
+      },
+      {
+        "id": "is-refresh",
+        "name": "Is /refresh?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          600,
+          -200
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "refresh-check",
+                "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                "rightValue": "/refresh",
+                "operator": {
+                  "type": "string",
+                  "operation": "startsWith"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "call-backfill",
+        "name": "Call Backfill",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1,
+        "position": [
+          820,
+          -300
+        ],
+        "parameters": {
+          "source": "database",
+          "workflowId": "rHIyZMIJNAOqZvM2",
+          "mode": "each",
+          "options": {},
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "chat_id": "={{ $json.message.chat.id.toString() }}"
+            },
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          }
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "id": "send-refresh-done",
+        "name": "Refresh Done",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1040,
+          -300
+        ],
+        "parameters": {
+          "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+          "text": "✅ Refresh complete.",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "9IpAp35yJmIQJpeA",
+            "name": "Telegram account"
+          }
+        },
+        "webhookId": "a39f8efc-c461-406f-8c3d-91deaa83bd12"
+      },
+      {
+        "id": "is-strikes",
+        "name": "Is /strikes?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          600,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "strikes-check",
+                "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                "rightValue": "/strikes",
+                "operator": {
+                  "type": "string",
+                  "operation": "startsWith"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "get-strikes-sessions",
+        "name": "Get Strikes Sessions",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          820,
+          -100
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://coach-db.arthurpfz.com/sessions",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "athlete_id",
+                "value": "1"
+              },
+              {
+                "name": "date_from",
+                "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}"
+              },
+              {
+                "name": "limit",
+                "value": "100"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
+          }
+        }
+      },
+      {
+        "id": "format-strikes",
+        "name": "Format Strikes",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1040,
+          -100
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "// Aggregate duration_min by sport for the running week — same logic as Weekly Stats workflow.\nconst sessions = $input.all().map(i => i.json);\nconst totalMin = sessions.reduce((sum, s) => sum + (s.duration_min || 0), 0);\nconst totalH = totalMin / 60;\nconst fires = '🔥'.repeat(Math.floor(totalH)) || '·';\n\nconst sportEmoji = { Run: '🏃 Run', Swim: '🏊 Swim', Ride: '🚴 Ride', Workout: '💪 Workout' };\nconst order = ['Run', 'Swim', 'Ride', 'Workout'];\nconst totals = Object.fromEntries(order.map(s => [s, 0]));\nfor (const s of sessions) {\n  const k = s.sport === 'VirtualRide' ? 'Ride' : s.sport;\n  if (totals[k] !== undefined) totals[k] += (s.duration_min || 0);\n}\n\nconst fmt = m => `${Math.floor(m / 60)}:${String(Math.round(m % 60)).padStart(2, '0')}`;\n\nconst lines = [\n  '📊 Week to date',\n  `${fires} ${fmt(totalMin)}h total`,\n  '',\n  ...order.map(s => `${sportEmoji[s]} · ${fmt(totals[s])}`),\n];\nreturn [{ json: { text: lines.join('\\n') } }];"
+        }
+      },
+      {
+        "id": "send-strikes",
+        "name": "Send Strikes",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1260,
+          -100
+        ],
+        "parameters": {
+          "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+          "text": "={{ $json.text }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "9IpAp35yJmIQJpeA",
+            "name": "Telegram account"
+          }
+        },
+        "webhookId": "0cefc31f-f96e-41cf-8d3f-febf72ac01ed"
+      },
+      {
+        "id": "is-training",
+        "name": "Is /training?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          820,
+          100
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "training-check",
+                "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                "rightValue": "/training",
+                "operator": {
+                  "type": "string",
+                  "operation": "startsWith"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "get-training-plan",
+        "name": "Get Training Plan",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1040,
+          100
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://coach-db.arthurpfz.com/weekly-plans",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "athlete_id",
+                "value": "1"
+              },
+              {
+                "name": "week_start_date",
+                "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
+          }
+        }
+      },
+      {
+        "id": "format-training",
+        "name": "Format Training",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1260,
+          100
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "// Format current week's training plan as a Telegram message.\nconst plans = $input.all().map(i => i.json);\nif (!plans.length) {\n  return [{ json: { text: '📋 No training plan found for this week. The Sunday Planner runs every Sunday at 20:07 — check back then.' } }];\n}\nconst p = plans[0];\nconst days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nconst dayEmoji = { Monday: 'Mo', Tuesday: 'Tu', Wednesday: 'We', Thursday: 'Th', Friday: 'Fr', Saturday: 'Sa', Sunday: 'Su' };\n\nconst lines = [`🗓 Week of ${p['Week Start Date']}`];\nif (p.Focus) lines.push(`Focus: ${p.Focus}`);\nlines.push('');\nfor (const d of days) {\n  const session = (p[d] || 'REST').trim();\n  lines.push(`${dayEmoji[d]} ${d}`);\n  lines.push(session);\n  lines.push('');\n}\nreturn [{ json: { text: lines.join('\\n').trim() } }];"
+        }
+      },
+      {
+        "id": "send-training",
+        "name": "Send Training",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1480,
+          100
+        ],
+        "parameters": {
+          "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+          "text": "={{ $json.text }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "9IpAp35yJmIQJpeA",
+            "name": "Telegram account"
+          }
+        },
+        "webhookId": "e983cbf8-75e1-494d-a3f8-25b310638fb9"
+      }
+    ],
+    "connections": {
+      "Telegram Trigger": {
+        "main": [
+          [
+            {
+              "node": "Check Auth",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Auth": {
+        "main": [
+          [
+            {
+              "node": "Is /refresh?",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Is Feedback?": {
+        "main": [
+          [
+            {
+              "node": "Get Latest Session",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Get Latest Session": {
+        "main": [
+          [
+            {
+              "node": "Session Exists?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Session Exists?": {
+        "main": [
+          [
+            {
+              "node": "Save Feedback",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "No Session Reply",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Save Feedback": {
+        "main": [
+          [
+            {
+              "node": "Send Confirmation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is /refresh?": {
+        "main": [
+          [
+            {
+              "node": "Call Backfill",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Is /strikes?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Backfill": {
+        "main": [
+          [
+            {
+              "node": "Refresh Done",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is /strikes?": {
+        "main": [
+          [
+            {
+              "node": "Get Strikes Sessions",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Is /training?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Strikes Sessions": {
+        "main": [
+          [
+            {
+              "node": "Format Strikes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Strikes": {
+        "main": [
+          [
+            {
+              "node": "Send Strikes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Strikes": {
+        "main": [
+          []
+        ]
+      },
+      "Is /training?": {
+        "main": [
+          [
+            {
+              "node": "Get Training Plan",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Is Feedback?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Training Plan": {
+        "main": [
+          [
+            {
+              "node": "Format Training",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Training": {
+        "main": [
+          [
+            {
+              "node": "Send Training",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Training": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "authors": "arthur pfalzgraf",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-01T13:59:57.073Z",
+        "id": 544,
+        "workflowId": "gAnJ0r3x0sFxqWxY",
+        "versionId": "f9991191-53a9-444b-ab4c-72980822c01d",
+        "event": "activated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      },
+      {
+        "createdAt": "2026-05-07T07:04:42.651Z",
+        "id": 574,
+        "workflowId": "gAnJ0r3x0sFxqWxY",
+        "versionId": "f9991191-53a9-444b-ab4c-72980822c01d",
+        "event": "activated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      },
+      {
+        "createdAt": "2026-05-01T13:59:56.876Z",
+        "id": 543,
+        "workflowId": "gAnJ0r3x0sFxqWxY",
+        "versionId": "f9991191-53a9-444b-ab4c-72980822c01d",
+        "event": "deactivated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      },
+      {
+        "createdAt": "2026-05-07T07:04:42.435Z",
+        "id": 573,
+        "workflowId": "gAnJ0r3x0sFxqWxY",
+        "versionId": "f9991191-53a9-444b-ab4c-72980822c01d",
+        "event": "deactivated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      }
+    ]
+  }
+}
