@@ -43,6 +43,17 @@ for (const [col, type] of SESSION_COLUMNS) {
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS sessions_intervals_unique
   ON sessions(athlete_id, intervals_id) WHERE intervals_id IS NOT NULL`);
 
+// Idempotently add any new athletes columns introduced after the table was first created.
+const ATHLETE_COLUMNS = [
+  ['goal', 'TEXT'],
+  ['health_status', 'TEXT'],
+  ['training_principles', 'TEXT'],
+];
+const existingAthleteCols = new Set(db.pragma('table_info(athletes)').map(c => c.name));
+for (const [col, type] of ATHLETE_COLUMNS) {
+  if (!existingAthleteCols.has(col)) db.exec(`ALTER TABLE athletes ADD COLUMN ${col} ${type}`);
+}
+
 // Map DB rows to Airtable-compatible field names so existing n8n expressions work unchanged
 function toAthleteRow(row) {
   if (!row) return null;
@@ -55,6 +66,9 @@ function toAthleteRow(row) {
     'Training Phase': row.training_phase,
     'Fitness Profile': row.fitness_profile,
     Constraints: row.constraints,
+    Goal: row.goal,
+    'Health Status': row.health_status,
+    'Training Principles': row.training_principles,
     'Strava Access Token': row.strava_access_token,
     'Strava Refresh Token': row.strava_refresh_token,
     'Token Expires At': row.token_expires_at,
@@ -118,7 +132,8 @@ app.put('/athletes/:id', (req, res) => {
 
   const allowed = [
     'name', 'phone', 'telegram_chat_id', 'race_name', 'race_date', 'training_phase',
-    'fitness_profile', 'constraints', 'strava_access_token', 'strava_refresh_token',
+    'fitness_profile', 'constraints', 'goal', 'health_status', 'training_principles',
+    'strava_access_token', 'strava_refresh_token',
     'token_expires_at', 'last_activity_sync', 'intervals_athlete_id', 'intervals_api_key',
     'intervals_last_sync', 'last_coaching_date'
   ];
