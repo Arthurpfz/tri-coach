@@ -177,14 +177,15 @@ Easy spin tomorrow.
 - **Trigger:** Telegram Trigger on CroissantTri bot (cred `9IpAp35yJmIQJpeA`) — listens to all messages
 - **Purpose:** Single Telegram webhook acting as a command router. Inline branches for stateless commands; sub-workflow call for the heavy `/refresh` flow.
 - **Status:** ✅ Active
-- **Routing chain:** Check Auth (chat_id allowlist) → Is /refresh? → Is /strikes? → Is /training? → Is Feedback? → drop
+- **Routing chain:** Check Auth (chat_id allowlist) → Is /program? → Is /refresh? → Is /strikes? → Is /training? → Is Feedback? → drop
 
 **Commands:**
 | Command | Branch | What it does |
 |---|---|---|
+| `/program` | Ack Program → Call Planner (sub-workflow `lUcAtn2oxCPkNkJ1`) → Program Done | On-demand Sunday Planner run. Acks immediately, fires Sunday Planner via its `When Called` Execute Workflow Trigger; planner sends the plan itself, then "✅ Plan delivered." |
 | `/refresh` | Call Backfill (sub-workflow `rHIyZMIJNAOqZvM2`) → Refresh Done | Last 7 days, idempotent re-analysis of unanalyzed sessions |
 | `/strikes` | Get Strikes Sessions → Format Strikes → Send Strikes | Same Code aggregation as Weekly Stats workflow (`2W0SIHwzyAWJW62Q`) — 🔥 per hour + per-sport breakdown for the running week |
-| `/training` | Get Training Plan → Format Training → Send Training | `GET /weekly-plans?athlete_id=1&week_start_date=<this Monday>` then formats Mo-Su days as Telegram message |
+| `/training` | Get Training Plan → Format Training → Send Training | `GET /weekly-plans?athlete_id=1&week_start_date=<this Monday>` then formats sessions JSON as Telegram message |
 | `!<text>` | Save Feedback flow | Saves user feedback against the latest session (existing flow) |
 
 - **Note:** This bot has the only active Telegram webhook on CroissantTri — adding more triggers on the same bot would conflict (Telegram allows 1 webhook per bot). Add new commands by extending this workflow's IF chain, not by creating new trigger workflows.
