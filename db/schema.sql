@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS weekly_plans (
   athlete_id INTEGER NOT NULL REFERENCES athletes(id),
   week_start_date TEXT NOT NULL,
   focus TEXT,
+  sessions TEXT,
   monday TEXT,
   tuesday TEXT,
   wednesday TEXT,
