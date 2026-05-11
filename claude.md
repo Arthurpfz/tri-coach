@@ -100,31 +100,42 @@ Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI A
 7. Calculate current week's Monday date
 8. Fetch weekly plan from Tricoach DB (`GET /weekly-plans?athlete_id=&week_start_date=`)
 9. Send comprehensive data to Claude 3.7 Sonnet with rigorous analysis framework
-10. Claude performs technical analysis:
-    - Execution grading (A/B/C/F vs planned session)
+10. Claude performs technical analysis (post-2026-05-10):
+    - **Session quality grading** (A/B/C/F vs fitness profile — NOT plan adherence)
     - Power analysis (VI, decoupling, pacing strategy)
     - Cardiovascular analysis (cardiac drift, efficiency factor, HR zones)
     - Cadence assessment (consistency, sport-specific appropriateness)
     - Interval quality (structure, consistency across reps)
     - Training phase context and progression
     - Specific coaching points with exact metrics
-11. Send 6-10 sentence technical coaching message via Telegram
+    - Plan-matching (`plan_session_id`) for tracking only — does NOT influence grade or wording
+11. Send Telegram-native bulleted message via Telegram
 
-**Output Style:**
-- Rigorous and analytical
-- Data-driven with specific numbers
-- Supportive but brutally honest
-- No fluff or generic praise
-- Professional coach-to-serious-athlete tone
+**Output Style (post-2026-05-10):**
+- Format: sport emoji header · Grade line · 3 bullets · Tomorrow · Watch (~6-8 lines)
+- Plain text, no markdown, literal • bullets
+- **Grade = session quality vs fitness profile, NOT plan adherence** (see [feedback_no_plan_grading.md](../../../../.claude/projects/-Users-arthurpfalzgraf-Desktop-Projects-TRI-COACH/memory/feedback_no_plan_grading.md))
+- Plan is indicative — never use "⚠️ Off-plan" prefix; never scold deviation
+- Mention plan only if it adds genuine context (e.g. "swapped today's swim for a ride — fine"); default to silence about it
+- Rigorous, descriptive, data-driven; no fluff, no moralizing, no generic praise
+
+**Grade rubric:**
+- A — Clean execution: zones held, pacing controlled, cadence in target, no major flags
+- B — Solid with one notable flag (mild drift, minor zone leak, slightly off cadence)
+- C — Significant issues (poor pacing, big zone leaks, mechanical inefficiency)
+- F — Broken session (abandoned, injury risk, severe overreach, data corruption)
 
 **Example Feedback:**
 ```
-Clean execution of the 90min Z2 ride. Power at 245W avg (85% FTP), NP 258W,
-VI 1.05 - textbook steady pacing. Cadence held 90-94rpm with <3% variation.
-Cardiac drift only 5.2% (148→156bpm) - aerobic ceiling rising. Small flag:
-last 20min saw 8W power drop while HR held, suggesting glycogen depletion.
-TSS 78 slots perfectly into Base 2. Decoupling 1.03 shows strong efficiency.
-Easy spin tomorrow.
+🚴 Ride · 90min · 38.5km · 152bpm · TSS 78
+Grade: A — Clean Z2 with disciplined cadence
+
+• Power 245W avg / 258W NP / VI 1.05 — textbook steady pacing
+• Cadence held 90-94rpm with <3% variation across 90min
+• Limiter: last 20min saw 8W power drop while HR held — glycogen depletion likely
+
+Tomorrow: Easy spin 45min Z2 or rest
+Watch: Late-ride power decay vs fueling
 ```
 
 ### 1d. Coach Tri - Weekly Stats
@@ -382,40 +393,31 @@ REST
 
 ## AI Coaching Logic
 
-### Daily Check-In Analysis (Claude 3.5 Sonnet)
+### Daily Check-In Analysis (Claude Sonnet 4.6, post-2026-05-10)
 
 **Context Provided:**
-- Current date and day of week
-- Athlete name
-- Full week's training plan (Monday-Sunday)
-- Today's Strava activities (raw data)
+- Athlete profile (phase + fitness profile: HR zones, FTP, CSS, cadence targets)
+- This week's plan (indicative, not graded against)
+- Already-matched sessions this week (for plan_session_id deduplication only)
+- Today's activity with full FIT metrics from Intervals.icu (power, HR + zones, cadence, pace, TSS, IF, intervals)
 
 **Analysis Logic:**
 
-1. **Check for Direct Match:**
-   - Does activity type match today's plan? (Run vs Run, Swim vs Swim)
-   - If yes: Provide specific feedback on pace/heart rate/duration
+The session is judged purely on **execution quality vs the athlete's fitness profile**. The weekly plan is shown to the LLM as soft context but is NOT used as a benchmark. See [feedback_no_plan_grading.md](../../../../.claude/projects/-Users-arthurpfalzgraf-Desktop-Projects-TRI-COACH/memory/feedback_no_plan_grading.md).
 
-2. **Check for Logical Swap (if Step 1 fails):**
-   - Is today's actual workout found elsewhere in this week's plan?
-   - If yes: Acknowledge the swap ("Good call moving the Long Ride to today")
+1. **Session quality grade (A/B/C/F)** — clean zone work, pacing, cadence, decoupling, drift
+2. **Two technical insights** — specific numbers from the FIT data
+3. **Limiter** — the one thing holding back progress (mechanical, aerobic, fueling, etc.)
+4. **Tomorrow** — forward guidance, ≤12 words
+5. **Watch** — one metric to track next time, ≤8 words
+6. **Plan matching for tracking only** — `plan_session_id` is set when today corresponds to an unmatched session of the same sport. Otherwise null. This affects the DB record, NOT the message tone or grade.
 
-3. **Check for Rogue Activity (The Guardrail):**
-   - Is activity completely different from anything planned this week?
-   - If yes: Acknowledge effort but flag as off-plan, be curious not angry
-   - Example: "I see you went for a Hike instead of the Swim. Hope the legs are feeling good, but let's watch the fatigue."
-
-4. **Check for Missed Session:**
-   - If actuals are empty and today was a training day
-   - Check if yesterday was huge (maybe they needed rest)
-   - Be gentle and supportive
+**Off-plan handling:** there isn't any. An unplanned long Z2 ride that holds zones cleanly is an A. Don't prefix messages with "⚠️ Off-plan", don't moralize about deviation, don't scold. The plan is indicative.
 
 **Output Requirements:**
-- WhatsApp message to the athlete
-- Tone: "Coach" (short, punchy, human)
-- Be analytical
-- Max 4 sentences
-- No preamble, just the message
+- Telegram-native bullets, plain text, ~6-8 lines (see Output Style above)
+- JSON wrapper: `{"plan_session_id":"...","grade":"A|B|C|F","message":"..."}`
+- Parse Grade node extracts `grade` and `message` from the JSON before Save Analysis + Send Telegram
 
 ### Weekly Planning (Claude 3.7 Sonnet)
 
@@ -650,6 +652,47 @@ This will show:
 
 ## Changelog
 
+### 2026-05-11 — Phase 5: Sport-specific form metrics
+- **Two new nodes** added to Daily Checkin (`hrSGUqoAwkWQ4gKl`) and Backfill (`rHIyZMIJNAOqZvM2`):
+  - **Get Activity Streams** — HTTP GET `https://intervals.icu/api/v1/activity/{id}/streams?types=torque`. Tolerates errors (`onError: continueRegularOutput`) so non-cycling sports don't break the flow.
+  - **Build Sport Metrics** — Code node, sport-aware. Outputs `sportMetrics` string consumed by the prompt:
+    - **Run**: cadence (×2 → spm), stride length, pace, sport-science targets (170-180 spm, 0.85-1.10m stride at Z2). Explicit note that Running Dynamics (GCT, oscillation, vertical ratio) are NOT available on COROS PACE 3 wrist-only.
+    - **Swim**: stroke rate, distance per stroke, pool dimensions, **computed SWOLF** = seconds per length + strokes per length (derived from moving_time, lengths, SR). Targets: SWOLF <38 strong, DPS 1.4-1.8m freestyle.
+    - **Ride**: `icu_cadence_z2`, `polarization_index`, anaerobic kJ above FTP, **torque variability CV** computed from the per-second torque stream. Explicit note that L/R balance + pedaling smoothness % NOT available — SRAM Apex AXS is a single-sided crank-arm meter.
+- **Hardware gap documented in the prompt itself** so the LLM cannot hallucinate metrics we don't have. To unlock fuller form coaching, hardware upgrade paths:
+  - Running Dynamics → COROS POD 2 (~€150) or Stryd (~€220)
+  - True L/R balance + pedaling smoothness → dual-sided meter (Favero Assioma DUO ~€650, Garmin Rally)
+- **Prompt size:** 9453 → 10693 chars. Still within Sonnet 4.6 budget.
+- **Form coaching rules** added: cadence prescriptions when <165 spm, stroke-economy push when SWOLF >40, pedaling consistency comment when torque CV >0.40. Honest "do NOT invent missing metrics" rule.
+- **Files touched:** [phase5-sport-metrics.js](phase5-sport-metrics.js), CLAUDE.md.
+
+### 2026-05-10 (later) — 30-day trends + weather/elevation context + garbage filter
+- **30-day trend context** added to Daily Checkin (`hrSGUqoAwkWQ4gKl`) and Backfill (`rHIyZMIJNAOqZvM2`).
+  - Two new nodes: `Get Trend Sessions` (HTTP GET `/sessions?date_from=today-30d&has_analysis=1&wrap=1`) and `Build Trend Stats` (Code node — filters by current sport, computes count, avg duration/distance/TSS/HR/power/decoupling/EF, longest session, grade distribution).
+  - Inserted between `Get Matched Sessions → Hardcore Analysis`. Outputs `trendSummary` string consumed by the prompt as `{{ $json.trendSummary }}`.
+  - Sport filter happens client-side in Build Trend Stats (kept Tricoach DB API unchanged — `?sport=` not added).
+- **Weather + elevation in prompt** — `total_elevation_gain`, `average_temp`, `average_wind_speed` (with optional headwind%) now expressed in the metrics block. Prompt rules updated with "CONDITIONS-AWARE FLAGGING" section: low cadence on a ride with >500m climbing is *expected*, HR drift at >28°C is *expected*, etc. Stops the bot from flagging environmental noise as athlete failures.
+- **Trend usage rule** — "Use trend deltas for color when meaningful (>5% or notable). Don't force mentions. Trend is color, not currency — does NOT change the grade rubric."
+- **Filter Activities — added `distance > 0`** to both workflows. Catches the empty-record case (id=224 was a 15s zero-distance Wahoo recording). Combined with the existing `moving_time >= 600` filter, drops false starts and empty recordings before analysis.
+- **Verified empirically:** ICU `/athlete/{id}/activities` list response includes `moving_time`, `distance`, `total_elevation_gain`, `average_temp`, `average_wind_speed`, `headwind_percent` directly on each item. The 16-item list for 2026-05-10 shows item[0] (real ride) keeps, item[1] (15s, null distance) drops, item[2] (5min, 1.88km) drops via moving_time. Confirms filters work.
+- **Files touched:** [update-trend-and-context.js](update-trend-and-context.js) (one-off update script), CLAUDE.md (this changelog).
+- **Prompt size:** 6142 → 8074 chars. Still well within Sonnet 4.6 context budget.
+
+### 2026-05-10 — Daily analysis decoupled from weekly plan
+- **Hardcore Analysis prompt rewritten** in workflows `hrSGUqoAwkWQ4gKl` (Daily Checkin) and `rHIyZMIJNAOqZvM2` (Backfill) — both shared the same prompt verbatim and got the same rewrite.
+- **Why:** production output graded a 2.5h / 70km Z2 ride as "C — No planned ride existed this week". User flagged this as scolding-for-training. The plan was never meant to be a contract; the bot inherited that framing from earlier prompt iterations.
+- **What changed:**
+  - Grade now reflects **session quality vs fitness profile** (zones held, pacing, cadence, drift, decoupling) — NOT plan adherence.
+  - Removed the `⚠️ Off-plan — ` prefix and all "off-plan", "deviated from plan" language from the prompt rules.
+  - Plan still passed to LLM as soft context — the prompt explicitly states "indicative, not a contract" and instructs the model to default to silence about the plan.
+  - `plan_session_id` matching preserved for tracking only — has zero bearing on grade or message tone.
+  - JSON output schema unchanged (`{plan_session_id, grade, message}`) so Parse Grade → Save Analysis → Send Telegram plumbing works as-is.
+- **Files touched:** [update-prompt-no-plan-grading.js](update-prompt-no-plan-grading.js) (one-off update script), CLAUDE.md (Workflow 1b output style + AI Coaching Logic section), [feedback_no_plan_grading.md](../../../../.claude/projects/-Users-arthurpfalzgraf-Desktop-Projects-TRI-COACH/memory/feedback_no_plan_grading.md) (memory).
+- **Drafts pushed via PUT** — both workflows show `active=true` against the previous version. **Manual activation required** in n8n UI for each (click into workflow → Save) so draft becomes the running version. URLs:
+  - https://apfz.app.n8n.cloud/workflow/hrSGUqoAwkWQ4gKl
+  - https://apfz.app.n8n.cloud/workflow/rHIyZMIJNAOqZvM2
+- **Verification pending:** manual execution test in n8n UI on a recent session, plus one Daily Checkin scheduled run at 20:10 Berlin.
+
 ### 2026-05-01 (later) — `/strikes` + `/training` Telegram commands
 - Extended Coach Tri - Feedback Handler with two more inline command branches:
   - **`/strikes`** — clones Weekly Stats workflow's Code aggregation (no sub-workflow call). Returns running-week 🔥 per hour + per-sport breakdown, on demand instead of waiting for the 20:30 daily cron.
@@ -841,4 +884,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-05-01 (Telegram commands `/refresh` + `/strikes` + `/training` on CroissantTri bot)*
+*Last Updated: 2026-05-11 (phase 5: sport-specific form metrics — Run stride/cadence, Swim SWOLF, Ride torque variability + cadence Z2)*
