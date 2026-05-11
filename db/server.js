@@ -54,6 +54,13 @@ for (const [col, type] of ATHLETE_COLUMNS) {
   if (!existingAthleteCols.has(col)) db.exec(`ALTER TABLE athletes ADD COLUMN ${col} ${type}`);
 }
 
+// Idempotently add new weekly_plans columns.
+const PLAN_COLUMNS = [['sessions', 'TEXT']];
+const existingPlanCols = new Set(db.pragma('table_info(weekly_plans)').map(c => c.name));
+for (const [col, type] of PLAN_COLUMNS) {
+  if (!existingPlanCols.has(col)) db.exec(`ALTER TABLE weekly_plans ADD COLUMN ${col} ${type}`);
+}
+
 // Map DB rows to Airtable-compatible field names so existing n8n expressions work unchanged
 function toAthleteRow(row) {
   if (!row) return null;
@@ -82,11 +89,16 @@ function toAthleteRow(row) {
 
 function toPlanRow(row) {
   if (!row) return null;
+  let sessions = null;
+  if (row.sessions) {
+    try { sessions = JSON.parse(row.sessions); } catch (_) { sessions = null; }
+  }
   return {
     id: row.id,
     athlete_id: row.athlete_id,
     'Week Start Date': row.week_start_date,
     Focus: row.focus,
+    sessions,
     Monday: row.monday,
     Tuesday: row.tuesday,
     Wednesday: row.wednesday,
@@ -174,17 +186,24 @@ app.get('/weekly-plans', (req, res) => {
 });
 
 app.post('/weekly-plans', (req, res) => {
-  const { athlete_id, week_start_date, focus, monday, tuesday, wednesday, thursday, friday, saturday, sunday } = req.body;
+  const { athlete_id, week_start_date, focus, sessions,
+    monday, tuesday, wednesday, thursday, friday, saturday, sunday } = req.body;
   if (!athlete_id || !week_start_date) return res.status(400).json({ error: 'athlete_id and week_start_date required' });
 
+  const sessionsJson = sessions == null ? null
+    : (typeof sessions === 'string' ? sessions : JSON.stringify(sessions));
+
   db.prepare(`
-    INSERT INTO weekly_plans (athlete_id, week_start_date, focus, monday, tuesday, wednesday, thursday, friday, saturday, sunday)
-    VALUES (@athlete_id, @week_start_date, @focus, @monday, @tuesday, @wednesday, @thursday, @friday, @saturday, @sunday)
+    INSERT INTO weekly_plans (athlete_id, week_start_date, focus, sessions, monday, tuesday, wednesday, thursday, friday, saturday, sunday)
+    VALUES (@athlete_id, @week_start_date, @focus, @sessions, @monday, @tuesday, @wednesday, @thursday, @friday, @saturday, @sunday)
     ON CONFLICT(athlete_id, week_start_date) DO UPDATE SET
-      focus = excluded.focus, monday = excluded.monday, tuesday = excluded.tuesday,
+      focus = excluded.focus, sessions = excluded.sessions,
+      monday = excluded.monday, tuesday = excluded.tuesday,
       wednesday = excluded.wednesday, thursday = excluded.thursday, friday = excluded.friday,
       saturday = excluded.saturday, sunday = excluded.sunday
-  `).run({ athlete_id, week_start_date, focus: focus || null, monday: monday || null, tuesday: tuesday || null,
+  `).run({ athlete_id, week_start_date,
+    focus: focus || null, sessions: sessionsJson,
+    monday: monday || null, tuesday: tuesday || null,
     wednesday: wednesday || null, thursday: thursday || null, friday: friday || null,
     saturday: saturday || null, sunday: sunday || null });
 
