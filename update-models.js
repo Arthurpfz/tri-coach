@@ -7,9 +7,9 @@ const client = axios.create({
 });
 
 const WORKFLOWS = [
-  { id: 'hrSGUqoAwkWQ4gKl', name: 'Daily Check-in (Intervals.icu)', from: 'anthropic/claude-3.7-sonnet' },
+  { id: 'hrSGUqoAwkWQ4gKl', name: 'Daily Check-in (Intervals.icu)', from: 'anthropic/claude-sonnet-4.6' },
   { id: 'Q2KE0XGsc8NWLY8V', name: 'Daily Check-in (Strava legacy)', from: 'anthropic/claude-3.5-sonnet' },
-  { id: 'lUcAtn2oxCPkNkJ1', name: 'Sunday Planner',                from: 'anthropic/claude-3.7-sonnet' }
+  { id: 'lUcAtn2oxCPkNkJ1', name: 'Sunday Planner',                from: 'anthropic/claude-sonnet-4.6' }
 ];
 const TARGET = 'anthropic/claude-sonnet-4.6';
 
