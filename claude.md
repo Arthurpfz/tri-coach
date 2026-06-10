@@ -22,13 +22,13 @@ This is an **automated triathlon coaching system** that creates personalized wee
 - **Intervals.icu**: Primary training data source (full FIT metrics)
 - **Strava API**: Legacy fallback, OAuth tokens still stored for compatibility
 - **Claude AI**: Coaching intelligence (via OpenRouter)
-  - Models: Claude 3.5 Sonnet (check-ins), Claude 3.7 Sonnet (planning)
+  - Models: Claude Sonnet 4.6 (check-ins), Claude Opus 4.7 (planning)
 - **Telegram**: Communication channel (Chat ID stored in `.env` as `TELEGRAM_CHAT_ID`)
 
 ### Data Flow
 
 ```
-Sunday 8:07 PM → Generate Weekly Plan → POST /weekly-plans → Send to Telegram
+Sunday 8:05 PM → Generate Weekly Plan → POST /weekly-plans → Send to Telegram
 Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI Analysis
               → PUT /athletes/:id (last_coaching_date) → Telegram feedback
 ```
@@ -42,16 +42,13 @@ Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI A
 - **Type:** Error Trigger workflow
 - **Status:** ✅ Active
 - **Purpose:** Catches failures from all Coach Tri workflows, sends Telegram alert with workflow name, failing node, and error message
-- **Wired to:** All Coach Tri workflows via `settings.errorWorkflow` (Daily Checkin Strava + ICU, Sunday Planner, Weekly Stats, Backfill, Feedback Handler)
+- **Wired to:** All Coach Tri workflows via `settings.errorWorkflow` (Daily Checkin ICU, Sunday Planner, Weekly Stats, Backfill, Feedback Handler)
 - **Note:** Only fires on automated (scheduled) runs, NOT manual executions — by n8n design
 
-### 1. Coach Tri - Daily Checkin (Strava - LEGACY)
-- **ID:** Q2KE0XGsc8NWLY8V
-- **Active Version:** aa1d3cdb-f231-4b8c-a2c1-8430216fc13b (v24)
-- **Schedule:** Daily at 20:05 (Europe/Berlin)
-- **Purpose:** Basic activity tracking via Strava API
-- **Status:** ✅ Active (fallback system)
-- **AI Model:** Claude 3.5 Sonnet
+### 1. ~~Coach Tri - Daily Checkin (Strava - LEGACY)~~ — DELETED 2026-06-06
+- Workflow `Q2KE0XGsc8NWLY8V` deleted. Intervals.icu (1b) is the sole daily check-in.
+- Reason: Strava's new Developer Program (effective 2026-06-30) requires a Strava subscription for Standard Tier API access, and the workflow hadn't been the analysis source since Jan 2026. See [feedback_strava_deprecation.md](../../../.claude/projects/-Users-arthurpfalzgraf-Desktop-Projects-TRI-COACH/memory/feedback_strava_deprecation.md).
+- DB columns (`strava_access_token`, `strava_refresh_token`, `strava_id`, `sessions.source='strava'`) left in place — dormant, no migration needed.
 
 ### 1b. Coach Tri - Daily Checkin (Intervals.icu) ⭐
 - **ID:** hrSGUqoAwkWQ4gKl
@@ -59,7 +56,7 @@ Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI A
 - **Schedule:** Daily at 20:10 (Europe/Berlin)
 - **Purpose:** Advanced technical analysis with full FIT file data
 - **Status:** ✅ Active and Tested (2026-01-25)
-- **AI Model:** Claude 3.7 Sonnet
+- **AI Model:** Claude Sonnet 4.6 (OpenRouter `anthropic/claude-sonnet-4.6`)
 
 **Idempotency & error handling (added 2026-04-18):**
 - `Already Coached Today?` gate short-circuits if `Last Coaching Date` == today
@@ -99,7 +96,7 @@ Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI A
    - Available streams (time-series data)
 7. Calculate current week's Monday date
 8. Fetch weekly plan from Tricoach DB (`GET /weekly-plans?athlete_id=&week_start_date=`)
-9. Send comprehensive data to Claude 3.7 Sonnet with rigorous analysis framework
+9. Send comprehensive data to Claude Sonnet 4.6 with rigorous analysis framework
 10. Claude performs technical analysis (post-2026-05-10):
     - **Session quality grading** (A/B/C/F vs fitness profile — NOT plan adherence)
     - Power analysis (VI, decoupling, pacing strategy)
@@ -155,6 +152,7 @@ Watch: Late-ride power decay vs fueling
   🚴 Ride · 0:00
   💪 Workout · 1:58
   ```
+- **Volume nudge (added 2026-06-06):** `Format Stats` appends a day-aware nudge toward the 6–8h goal. From midweek on (dow ≥ 3), if logged hours are <70% of the prorated pace to the 6h floor, it adds `⚡ Xh to go for your 6h floor — N days left.`; once ≥6h it switches to `✅ 6h goal hit — push toward 8h…`. Mon/Tue or on-pace → no nudge. Uses the fixed 6–8h band (not the planner's ramped target).
 - **Wired to** `errorWorkflow` (`psyVgPiGJoO5QOa4`)
 
 ### 1e. Coach Tri - Backfill (/refresh) ⭐
@@ -162,7 +160,7 @@ Watch: Late-ride power decay vs fueling
 - **Trigger:** Execute Workflow Trigger — invoked from Feedback Handler when user sends `/refresh` on CroissantTri bot
 - **Purpose:** Manual catch-up for late-uploaded activities (e.g. bike computer didn't sync to Intervals.icu in time)
 - **Status:** ✅ Active (deployed 2026-05-01)
-- **AI Model:** Claude 3.7 Sonnet (same prompt as Daily Checkin)
+- **AI Model:** Claude Sonnet 4.6 (same prompt as Daily Checkin)
 
 **Flow:**
 1. Send "🔄 Catching up last 7 days…" ack to chat
@@ -207,32 +205,27 @@ Watch: Late-ride power decay vs fueling
 
 ### 2. Coach Tri - Sunday Planner
 - **ID:** lUcAtn2oxCPkNkJ1
-- **Active Version:** ca59f26f-c598-4238-b3e0-03aa467b9c3b (v18)
-- **Schedule:** Weekly on Sunday at 20:07 (Europe/Berlin)
+- **Schedule:** Weekly on Sunday at 20:05 (Europe/Berlin); also on-demand via `/program` (Feedback Handler → `When Called` Execute Workflow Trigger)
 - **Purpose:** Generate personalized weekly training plan for next week
-- **Status:** ✅ Working correctly
+- **Status:** ✅ Active
+- **AI Model:** Claude Opus 4.7 (OpenRouter `anthropic/claude-opus-4.7`)
 
-**Flow:**
-1. Fetch athlete from Tricoach DB (`GET /athletes/1`)
-2. Send profile to Claude with:
-   - Race name & date
-   - Training phase (Base/Build/Peak/Taper)
-   - Fitness profile (HR zones, paces, power, CSS)
-   - Personal constraints
-3. Claude generates structured JSON plan for next week
-4. Parse JSON response
-5. Create record in "Weekly Plans" table
-6. Send formatted plan via Telegram
+**Flow (live — Tricoach DB HTTP nodes, NOT the old Airtable export):**
+1. `Search records` — `GET /athletes/1`
+2. `Get Last Week Sessions` — `GET /sessions` for last calendar week (`has_analysis=1`)
+3. `Build Prompt Context` (Code) — merges athlete + builds `lastWeekSummary`, AND computes **live periodization**: `weeks_to_race` from `Race Date`, derived `phase` (Base/Build/Peak/Taper/Race Week) and `weekly_hours_target` (ramps 6→8h, holds, then tapers). Overrides the stale static `Training Phase`.
+4. `Basic LLM Chain` — Claude generates the plan from the athlete's DB `Goal`/`Training Principles`/`Constraints` + computed phase/volume
+5. `Parse Json` (Set) → `Build Plan Telegram` (Code) + `Create a record` (`POST /weekly-plans`)
+6. `Send a text message` — Telegram
 
-**AI Model:** Claude 3.7 Sonnet
-**Session Labels:** KEY, OPTIONAL (Easy), OPTIONAL (Intensity), REST
+**Session schema (flex-pool, post-2026-06-06):** plan is a `sessions[]` array, each `{id, label, sport, duration_min, pinned_day, description}`. `pinned_day` is set ONLY when a constraint requires that day — currently **only the Wednesday Rapha ride**; everything else is `pinned_day: null`, a pickable pool. Telegram renders "📌 Pinned" + "🟦 Flex pool". No REST entries — rest = unused blocks.
+**Labels:** KEY, OPTIONAL (Easy), OPTIONAL (Intensity).
 
-**Planning Philosophy:**
-- Constraints are non-negotiable
-- Phase-appropriate training intensity
-- Max 1 OPTIONAL (Intensity) session per week
-- OPTIONAL (Intensity) never day before KEY session
-- Uses exact values from Fitness Profile
+**Planning intelligence (where each fact lives — "one home per fact"):**
+- **Volume target** — computed in `Build Prompt Context`, enforced as a HARD rule in the prompt (sum of `duration_min` ≈ `weekly_hours_target` ±30min). Ramp 6→8h: Base weeks 6.0–7.5h, Build/Peak 8h, Taper 6.5→5h, Race Week 3.5h.
+- **Periodization** — auto from `weeks_to_race` (no manual phase bumping); the DB `Training Phase` field is now vestigial/overridden.
+- **Coaching rules** — live in the **DB athlete fields**, not the prompt: polarized 80/20, weekly bricks from Build, run cadence 175–180 spm, swim-as-priority, CSS descent (`Training Principles`); race targets + course implications (`Goal`); flex-pool scheduling + resource caps (`Constraints`).
+- **Last-week adaptation** — Rule 7: C/F or low volume → trim; all A/B → hold/marginal increase; nothing logged → conservative. (One-week memory only, by design.)
 
 ---
 
@@ -328,25 +321,11 @@ Full FIT file metrics including:
 
 ---
 
-## Strava Integration (Legacy)
+## Strava Integration — DEPRECATED 2026-06-06
 
-### OAuth Configuration
-- **Client ID:** 193431
-- **Client Secret:** Stored in n8n workflow node (rotate via https://www.strava.com/settings/api). Local copy in `.env` as `STRAVA_CLIENT_SECRET`.
-- **Token Refresh:** Automatic when expiring within 30 minutes
-- **API Endpoint:** https://www.strava.com/api/v3/
+Workflow `Q2KE0XGsc8NWLY8V` deleted. OAuth tokens and DB columns retained but unused.
 
-### Token Management Flow
-1. Check: Is token expiring within 30 minutes?
-2. If yes: POST to /oauth/token with refresh_token
-3. Update Tricoach DB with new access_token, refresh_token, expires_at (`PUT /athletes/:id`)
-4. Reset Last Activity Sync to 0
-
-### Activity Fetching
-- **Endpoint:** /athlete/activities
-- **Filter:** `after` = today at midnight (Europe/Berlin)
-- **Authorization:** Bearer token in headers
-- **Output:** Always outputs data even if empty
+**Future option (not built):** Strava's official MCP launches 2026-06-01 (included with subscription). Could plug in as an interactive Telegram layer for ad-hoc questions about historical Strava activities — Intervals.icu remains the source of truth for the automated daily/weekly pipeline.
 
 ---
 
@@ -420,7 +399,7 @@ The session is judged purely on **execution quality vs the athlete's fitness pro
 - JSON wrapper: `{"plan_session_id":"...","grade":"A|B|C|F","message":"..."}`
 - Parse Grade node extracts `grade` and `message` from the JSON before Save Analysis + Send Telegram
 
-### Weekly Planning (Claude 3.7 Sonnet)
+### Weekly Planning (Claude Opus 4.7)
 
 **Context Provided:**
 - Athlete profile (name, race, race date)
@@ -454,8 +433,9 @@ The session is judged purely on **execution quality vs the athlete's fitness pro
 ## Current Configuration
 
 ### Schedule Times (Europe/Berlin)
-- **Daily Check-in:** 20:05 (8:05 PM)
-- **Weekly Planning:** Sunday 20:07 (8:07 PM)
+- **Daily Check-in:** 20:10 (8:10 PM)
+- **Weekly Stats:** 20:30 (8:30 PM)
+- **Weekly Planning:** Sunday 20:05 (8:05 PM)
 
 ### Credentials Used
 - Tricoach DB (ID: 6GNzKYNE1JAz77RL, httpHeaderAuth with `X-API-Key`)
@@ -653,6 +633,32 @@ This will show:
 
 ## Changelog
 
+### 2026-06-10 — Audit cleanup: doc/live sync, DB hardening, repo archive
+- **Docs synced to live n8n state:** check-ins/backfill run Claude Sonnet 4.6 (`anthropic/claude-sonnet-4.6`), Sunday Planner runs Claude Opus 4.7 (`anthropic/claude-opus-4.7`); schedule times corrected (Daily 20:10, Stats 20:30, Planner Sun 20:05).
+- **`db/server.js` hardening:** startup fails if `API_KEY` unset (was: silently unauthenticated); `?limit` clamped to 1–1000; POST/PATCH `/sessions` errors logged server-side, generic message returned (no more raw SQLite errors to clients). Rebuilt + redeployed on VPS.
+- **Repo hygiene:** one-off scripts and dead status docs moved to `archive/`; `workflow-daily-checkin.json` re-exported from live; `.claude/` + `.DS_Store` gitignored.
+
+### 2026-06-06 (later) — Erkner 70.3 objective: flex-pool + auto-periodization + 6–8h volume target
+- **Goal:** 14 weeks out from Erkner 70.3 (2026-09-13), target 6–8h/week, ramping from a ~3h/week actual base. Athlete data showed two flags: run cadence stuck ~150 spm (target 175–180) and an under-trained swim.
+- **Sunday Planner (`lUcAtn2oxCPkNkJ1`):**
+  - `Build Prompt Context` Code node now computes **live periodization** from `Race Date`: `weeks_to_race`, derived `phase`, and `weekly_hours_target` (ramp 6→8h over Base weeks, hold 8h Build/Peak, taper 6.5→5→3.5h). Overrides the stale static `Training Phase`.
+  - Prompt: profile line now shows phase | weeks-to-race | volume target; the old "generate 6–9 sessions" rule replaced with a **HARD volume rule** (sum of `duration_min` ≈ target ±30min) + "only Rapha pinned (Wed), all else `pinned_day: null`".
+- **DB athlete record (`PUT /athletes/1`):**
+  - `Constraints` rewritten to a **flex-pool model** — all day restrictions removed (no fixed KEY days, no Mon/Sun rest rules, no Fri-eve block, no weekday/weekend duration caps). Only Wednesday Rapha stays pinned. Durations now sized by session type. Resource caps kept (pool/treadmill, max 2 runs & 2 swims/wk).
+  - `Training Principles`: removed the Tue/Wed/Fri-KEY-day line and the Sat-pinned long-ride line (now "any day"). Polarized 80/20, weekly bricks from Build, cadence 175–180, swim priority all retained — these already drive the prompt, so no prompt duplication.
+- **Weekly Stats (`2W0SIHwzyAWJW62Q`):** `Format Stats` appends a day-aware 6–8h volume nudge (see workflow 1d).
+- **Deploy:** all via REST API (`PUT /athletes/1`, `PUT /workflows/{id}` ×2) — HTTP 200 each, both workflows confirmed `active`.
+- **Verified:** DB rewrite + deployed node content via GET; periodization formula via node; **Weekly Stats nudge end-to-end** against live sessions (rendered `⚡ 4.4h to go for your 6h floor — 1 day left.`). NOT verifiable from CLI: the Planner's live LLM output — local `OPENROUTER_API_KEY` is dead (401) and the n8n public API can't trigger runs (405). Exercised by the next Sunday cron or a `/program`.
+- **Files:** CLAUDE.md (this entry + Planner/Weekly-Stats sections); `workflow-sunday-planner.json` re-exported from live (was a stale Airtable export).
+- **Follow-up (same day):** swim sessions simplified per athlete feedback — `Training Principles` swim block rewritten to "keep it simple" (building warm-up → one main set at race pace, default 8x150 @ 1:58/15s → short cool-down; no drill alphabet; 400m TT every 4-6 weeks as the only test) and the prompt's swim example updated to match. See memory `feedback_simple_sessions.md`.
+
+### 2026-06-06 — Strava deprecation (legacy workflow deleted)
+- **Trigger:** Strava Developer Program update (effective 2026-06-30) requires a Strava subscription for Standard Tier API access; 2027 introduces base URL migration to `api-v3.strava.com`.
+- **Action:** Deleted n8n workflow `Q2KE0XGsc8NWLY8V` ([ARCHIVED] Coach Tri - Daily Checkin Strava). It had been inactive since Intervals.icu became primary in Jan 2026.
+- **Kept dormant:** athlete columns `strava_access_token`, `strava_refresh_token`, `strava_id`; `sessions.source='strava'` value. No migration — schema cost is zero.
+- **Cleaned:** removed Strava section from CLAUDE.md, dropped Strava IDs from Quick Reference, retagged Error Handler "Wired to" line.
+- **Not built:** Strava's official MCP (launches 2026-06-01, included with subscription) could later be an interactive Telegram layer for historical Strava queries — Intervals.icu remains source of truth for the automated pipeline.
+
 ### 2026-05-11 — Phase 5: Sport-specific form metrics
 - **Two new nodes** added to Daily Checkin (`hrSGUqoAwkWQ4gKl`) and Backfill (`rHIyZMIJNAOqZvM2`):
   - **Get Activity Streams** — HTTP GET `https://intervals.icu/api/v1/activity/{id}/streams?types=torque`. Tolerates errors (`onError: continueRegularOutput`) so non-cycling sports don't break the flow.
@@ -665,7 +671,7 @@ This will show:
   - True L/R balance + pedaling smoothness → dual-sided meter (Favero Assioma DUO ~€650, Garmin Rally)
 - **Prompt size:** 9453 → 10693 chars. Still within Sonnet 4.6 budget.
 - **Form coaching rules** added: cadence prescriptions when <165 spm, stroke-economy push when SWOLF >40, pedaling consistency comment when torque CV >0.40. Honest "do NOT invent missing metrics" rule.
-- **Files touched:** [phase5-sport-metrics.js](phase5-sport-metrics.js), CLAUDE.md.
+- **Files touched:** [phase5-sport-metrics.js](archive/phase5-sport-metrics.js), CLAUDE.md.
 
 ### 2026-05-10 (later) — 30-day trends + weather/elevation context + garbage filter
 - **30-day trend context** added to Daily Checkin (`hrSGUqoAwkWQ4gKl`) and Backfill (`rHIyZMIJNAOqZvM2`).
@@ -676,7 +682,7 @@ This will show:
 - **Trend usage rule** — "Use trend deltas for color when meaningful (>5% or notable). Don't force mentions. Trend is color, not currency — does NOT change the grade rubric."
 - **Filter Activities — added `distance > 0`** to both workflows. Catches the empty-record case (id=224 was a 15s zero-distance Wahoo recording). Combined with the existing `moving_time >= 600` filter, drops false starts and empty recordings before analysis.
 - **Verified empirically:** ICU `/athlete/{id}/activities` list response includes `moving_time`, `distance`, `total_elevation_gain`, `average_temp`, `average_wind_speed`, `headwind_percent` directly on each item. The 16-item list for 2026-05-10 shows item[0] (real ride) keeps, item[1] (15s, null distance) drops, item[2] (5min, 1.88km) drops via moving_time. Confirms filters work.
-- **Files touched:** [update-trend-and-context.js](update-trend-and-context.js) (one-off update script), CLAUDE.md (this changelog).
+- **Files touched:** [update-trend-and-context.js](archive/update-trend-and-context.js) (one-off update script), CLAUDE.md (this changelog).
 - **Prompt size:** 6142 → 8074 chars. Still well within Sonnet 4.6 context budget.
 
 ### 2026-05-10 — Daily analysis decoupled from weekly plan
@@ -688,7 +694,7 @@ This will show:
   - Plan still passed to LLM as soft context — the prompt explicitly states "indicative, not a contract" and instructs the model to default to silence about the plan.
   - `plan_session_id` matching preserved for tracking only — has zero bearing on grade or message tone.
   - JSON output schema unchanged (`{plan_session_id, grade, message}`) so Parse Grade → Save Analysis → Send Telegram plumbing works as-is.
-- **Files touched:** [update-prompt-no-plan-grading.js](update-prompt-no-plan-grading.js) (one-off update script), CLAUDE.md (Workflow 1b output style + AI Coaching Logic section), [feedback_no_plan_grading.md](../../../../.claude/projects/-Users-arthurpfalzgraf-Desktop-Projects-TRI-COACH/memory/feedback_no_plan_grading.md) (memory).
+- **Files touched:** [update-prompt-no-plan-grading.js](archive/update-prompt-no-plan-grading.js) (one-off update script), CLAUDE.md (Workflow 1b output style + AI Coaching Logic section), [feedback_no_plan_grading.md](../../../../.claude/projects/-Users-arthurpfalzgraf-Desktop-Projects-TRI-COACH/memory/feedback_no_plan_grading.md) (memory).
 - **Drafts pushed via PUT** — both workflows show `active=true` against the previous version. **Manual activation required** in n8n UI for each (click into workflow → Save) so draft becomes the running version. URLs:
   - https://apfz.app.n8n.cloud/workflow/hrSGUqoAwkWQ4gKl
   - https://apfz.app.n8n.cloud/workflow/rHIyZMIJNAOqZvM2
@@ -845,7 +851,6 @@ This will show:
 - ~~**Airtable Base:** appw0Xd3T54okfaXa~~ — migrated to Tricoach DB 2026-04-22
 - **Users Table:** tblK8jxVIxuFi9H8Z
 - **Weekly Plans Table:** tblJ0UHyJ1drXv97F
-- **Daily Check-in Workflow (Strava - Legacy):** Q2KE0XGsc8NWLY8V
 - **Daily Check-in Workflow (Intervals.icu):** hrSGUqoAwkWQ4gKl
 - **Weekly Stats Workflow:** 2W0SIHwzyAWJW62Q
 - **Backfill Workflow (/refresh):** rHIyZMIJNAOqZvM2
@@ -854,7 +859,6 @@ This will show:
 - **Sunday Planner Workflow:** lUcAtn2oxCPkNkJ1
 - **Telegram Chat:** see `.env` (`TELEGRAM_CHAT_ID`)
 - **Last Coaching Date field ID:** fldLdvY3ZOiTuXkuy
-- **Strava Client ID:** 193431
 - **Intervals.icu Athlete ID:** i492254
 
 ### Useful Commands
@@ -885,4 +889,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-05-11 (phase 5: sport-specific form metrics — Run stride/cadence, Swim SWOLF, Ride torque variability + cadence Z2)*
+*Last Updated: 2026-06-10 (audit cleanup: doc/live model sync, DB API hardening, repo archive)*
