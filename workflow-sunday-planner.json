@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-18T19:04:09.353Z",
+  "updatedAt": "2026-06-06T19:57:46.345Z",
   "createdAt": "2026-01-03T21:42:38.058Z",
   "id": "lUcAtn2oxCPkNkJ1",
   "name": "Coach Tri - Sunday Planner",
@@ -29,50 +29,38 @@
       "name": "Schedule Trigger"
     },
     {
-      "parameters": {
-        "operation": "search",
-        "base": {
-          "__rl": true,
-          "value": "appw0Xd3T54okfaXa",
-          "mode": "list",
-          "cachedResultName": "Tri Coach MVP",
-          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
-        },
-        "table": {
-          "__rl": true,
-          "value": "tblK8jxVIxuFi9H8Z",
-          "mode": "list",
-          "cachedResultName": "Users",
-          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblK8jxVIxuFi9H8Z"
-        },
-        "filterByFormula": "Name = \"Arthur Pfalzgraf\"",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
+      "id": "40fd91b0-e028-43f3-b85a-a13429bc0de1",
+      "name": "Search records",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
       "position": [
         208,
         0
       ],
-      "id": "40fd91b0-e028-43f3-b85a-a13429bc0de1",
-      "name": "Search records",
+      "parameters": {
+        "method": "GET",
+        "url": "https://coach-db.arthurpfz.com/athletes/1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
       "credentials": {
-        "airtableTokenApi": {
-          "id": "JMbdFoTWoGU3avK9",
-          "name": "Airtable Personal Access Token account"
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
         }
       }
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are an expert Ironman Coach creating personalized weekly training plans.\n\n=== ATHLETE PROFILE ===\n- Name: {{ $json.Name }}\n- Race: {{ $json['Race Name'] }} ({{ $json['Race Date'] }})\n- Current Phase: {{ $json['Training Phase'] }}\n- Fitness Profile: {{ $json['Fitness Profile'] }}\n\n=== ATHLETE CONSTRAINTS ===\n{{ $json.Constraints }}\n\n=== INSTRUCTIONS ===\n\n1. **Constraints are non-negotiable.** If constraints conflict with coaching best practices, constraints win. Always.\n\n2. **Label every session** with exactly one of:\n   - KEY: Priority session, do not skip, contains structured work\n   - OPTIONAL (Easy): Can skip freely, Zone 2 only, 30-50min\n   - OPTIONAL (Intensity): Can skip, short intervals allowed, 30-40min max\n   - REST: No training\n\n3. **Optional session rules:**\n   - Max 1x OPTIONAL (Intensity) per week\n   - OPTIONAL (Intensity) never scheduled the day before a KEY session\n   - OPTIONAL (Easy) is always Zone 2, no exceptions\n\n4. **Phase-appropriate focus:**\n   - Base 1-2: Aerobic endurance, consistency, technique (80-90% Zone 2)\n   - Build 1-2: Introduce intensity, sport-specific work (70-80% Zone 2)\n   - Peak: Race simulation, sharpening\n   - Taper: Reduce volume, maintain some intensity\n\n5. **Use exact values from Fitness Profile:**\n   - HR zones: Use exact bpm ranges provided\n   - Paces: Use exact min/km or min/100m provided\n   - Power: Use exact watts and %FTP provided\n   - CSS: Use exact swim pace provided\n\n6. **Session structure:**\n   - KEY sessions: Include warm-up, main set with specific targets, cool-down\n   - OPTIONAL sessions: Simple structure, clear intensity guidance\n   - Always specify: duration, intensity (HR/power/pace), and focus\n\n=== OUTPUT FORMAT ===\nReturn JSON only. No markdown, no explanations, no extra text.\n\n{\n  \"week_of\": \"YYYY-MM-DD\",\n  \"phase\": \"Current training phase\",\n  \"focus\": \"1-2 sentence focus for this week\",\n  \"total_hours\": \"Estimated range (e.g., 5-6h)\",\n  \"key_sessions\": 3,\n  \"monday\": \"REST or OPTIONAL (Easy/Intensity): description\",\n  \"tuesday\": \"KEY: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"wednesday\": \"KEY: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"thursday\": \"REST or OPTIONAL (Easy/Intensity): description\",\n  \"friday\": \"KEY: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"saturday\": \"KEY or OPTIONAL: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"sunday\": \"REST or OPTIONAL (Easy): description\"\n}\n\n=== EXAMPLE SESSION FORMATS ===\n- \"KEY: Swim: 55min. WU: 10min easy. MS: 6x200m @ CSS (2:05/100m) w/ 30s rest. CD: 5min easy.\"\n- \"KEY: Bike: 60min Zwift. WU: 15min Z2. MS: 4x8min sweet spot (235-248W) w/ 3min recovery. CD: 10min easy.\"\n- \"OPTIONAL (Easy): Run: 40min Zone 2 (114-149bpm) treadmill. Relaxed form, conversational pace.\"\n- \"OPTIONAL (Intensity): Run: 35min. WU: 15min Z2. MS: 6x30s strides w/ 90s recovery. CD: 10min easy.\"\n- \"REST\"\n\nGenerate the training plan for NEXT WEEK (starting Monday)",
+        "text": "=You are an expert Ironman Coach creating personalized weekly training plans.\n\n=== ATHLETE PROFILE ===\n- Name: {{ $json.Name }}\n- Race: {{ $json['Race Name'] }} ({{ $json['Race Date'] }})\n- Phase: {{ $json['Training Phase'] }} | Weeks to race: {{ $json.weeks_to_race }} | Weekly volume target: {{ $json.weekly_hours_target }}h\n- Fitness Profile: {{ $json['Fitness Profile'] }}\n\n=== GOAL & RACE CONTEXT ===\n{{ $json.Goal }}\n\n=== CURRENT HEALTH STATUS ===\n{{ $json['Health Status'] }}\n\n=== TRAINING PRINCIPLES (use these to shape session selection) ===\n{{ $json['Training Principles'] }}\n\n=== ATHLETE CONSTRAINTS ===\n{{ $json.Constraints }}\n\n=== LAST WEEK'S EXECUTION ===\n{{ $json.lastWeekSummary }}\n\n=== INSTRUCTIONS ===\n\n1. Constraints are non-negotiable. Translate any \"always Tuesday\" / \"non-negotiable Thursday\" / recurring weekly anchor (e.g. Rapha club ride) into a session with pinned_day set to that weekday. Everything else is a flex pool — the athlete picks when to do them.\n\n2. Generate the set of training blocks whose duration_min sum to approximately {{ $json.weekly_hours_target }} hours (±30 min). This weekly volume target is a HARD target, not an estimate. Only the Rapha ride is pinned (Wednesday); every other block has pinned_day = null so the athlete picks the day. No separate REST entries — rest = unused blocks.\n\n3. Label every session with exactly one of:\n   - KEY: priority session, structured work, do not skip\n   - OPTIONAL (Easy): can skip freely, Zone 2 only, 30-50min\n   - OPTIONAL (Intensity): can skip, short intervals, 30-40min max\n\n4. Optional rules:\n   - Max 1x OPTIONAL (Intensity) per week.\n   - OPTIONAL (Easy) is always Zone 2.\n\n5. Phase-appropriate focus:\n   - Base 1-2: aerobic endurance, technique (80-90% Z2)\n   - Build 1-2: introduce intensity, sport-specific (70-80% Z2)\n   - Peak: race simulation, sharpening\n   - Taper: reduce volume, maintain some intensity\n\n6. Use exact values from Fitness Profile (HR bpm, paces, watts, CSS).\n\n7. Adapt to LAST WEEK'S EXECUTION:\n   - C/F grades or low volume → trim load this week.\n   - All A/B → stay the course or marginal increase within phase guidelines.\n   - No sessions logged → plan conservatively.\n\n8. Each session description should specify duration, intensity targets, and a clear focus. KEY sessions include WU/MS/CD with specific numbers.\n\n=== OUTPUT FORMAT ===\nReturn JSON only. No markdown, no code blocks, no extra prose.\n\n{\n  \"focus\": \"1-2 sentence focus for this week\",\n  \"sessions\": [\n    {\n      \"id\": \"kebab-case-stable-id\",\n      \"label\": \"KEY\",\n      \"sport\": \"Run | Ride | Swim | Workout\",\n      \"duration_min\": 60,\n      \"pinned_day\": \"Mon | Tue | Wed | Thu | Fri | Sat | Sun | null\",\n      \"description\": \"Full session prescription with WU/MS/CD and targets.\"\n    }\n  ]\n}\n\nRules for id: short, kebab-case, unique within the plan, descriptive (e.g. \"rapha-ride\", \"long-run\", \"swim-css\", \"easy-run-1\"). The athlete will see this id in match logs — make it readable.\n\nRules for pinned_day: only set when the athlete's constraints REQUIRE that day. Otherwise null.\n\n=== EXAMPLES ===\n{\"id\":\"rapha-ride\",\"label\":\"KEY\",\"sport\":\"Ride\",\"duration_min\":90,\"pinned_day\":\"Tue\",\"description\":\"Rapha club ride. Z2/Z3 mixed, social pace. ~90min.\"}\n{\"id\":\"swim-css\",\"label\":\"KEY\",\"sport\":\"Swim\",\"duration_min\":50,\"pinned_day\":null,\"description\":\"600m easy build (this is the warm-up). MS 8x150m @ race pace (1:58/100m) on 15s rest, even splits. 200m easy. ~2000m.\"}\n{\"id\":\"long-run\",\"label\":\"KEY\",\"sport\":\"Run\",\"duration_min\":80,\"pinned_day\":null,\"description\":\"Long Z2 run. 80min. HR 130-150bpm. Conversational, relaxed form.\"}\n{\"id\":\"easy-run-1\",\"label\":\"OPTIONAL (Easy)\",\"sport\":\"Run\",\"duration_min\":40,\"pinned_day\":null,\"description\":\"Z2 (114-149bpm), treadmill or outdoor. Conversational pace, cadence 175-180spm.\"}\n\nGenerate the training plan for NEXT WEEK (starting Monday).",
         "batching": {}
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.8,
       "position": [
-        496,
+        1016,
         16
       ],
       "id": "70dbba47-5cce-4e10-ada8-d927fe63ac21",
@@ -80,13 +68,13 @@
     },
     {
       "parameters": {
-        "model": "anthropic/claude-sonnet-4.6",
+        "model": "anthropic/claude-opus-4.7",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        496,
+        1016,
         192
       ],
       "id": "54315f91-0483-4651-aa0f-4a4e9e074eb8",
@@ -115,182 +103,43 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        848,
+        1368,
         16
       ],
       "id": "9b9d70f0-9de7-4ca6-9bb3-5b8a62c0febe",
       "name": "Parse Json"
     },
     {
-      "parameters": {
-        "operation": "create",
-        "base": {
-          "__rl": true,
-          "value": "appw0Xd3T54okfaXa",
-          "mode": "list",
-          "cachedResultName": "Tri Coach MVP",
-          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
-        },
-        "table": {
-          "__rl": true,
-          "value": "tblJ0UHyJ1drXv97F",
-          "mode": "list",
-          "cachedResultName": "Weekly Plans",
-          "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblJ0UHyJ1drXv97F"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "Week Start Date": "={{ $today.endOf('week').plus({ days: 1 }).toFormat('yyyy-MM-dd') }}",
-            "Athlete": "={{ $('Search records').item.json.id }}",
-            "Monday": "={{ JSON.parse($('Parse Json').item.json.plan).monday }}",
-            "Tuesday": "={{ JSON.parse($('Parse Json').item.json.plan).tuesday }}",
-            "Wednesday": "={{ JSON.parse($('Parse Json').item.json.plan).wednesday }} ",
-            "Thursday": "={{ JSON.parse($('Parse Json').item.json.plan).thursday }}",
-            "Friday": "={{ JSON.parse($('Parse Json').item.json.plan).friday }}",
-            "Saturday": "={{ JSON.parse($('Parse Json').item.json.plan).saturday }}",
-            "Sunday": "={{ JSON.parse($('Parse Json').item.json.plan).sunday }}",
-            "Focus": "={{ JSON.parse($('Parse Json').item.json.plan).focus}}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "Week Start Date",
-              "displayName": "Week Start Date",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": true,
-              "display": true,
-              "type": "dateTime",
-              "readOnly": false,
-              "removed": false
-            },
-            {
-              "id": "Athlete",
-              "displayName": "Athlete",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": true,
-              "display": true,
-              "type": "string",
-              "readOnly": false,
-              "removed": false
-            },
-            {
-              "id": "Focus",
-              "displayName": "Focus",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": true,
-              "display": true,
-              "type": "string",
-              "readOnly": false,
-              "removed": false
-            },
-            {
-              "id": "Monday",
-              "displayName": "Monday",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": true,
-              "display": true,
-              "type": "string",
-              "readOnly": false,
-              "removed": false
-            },
-            {
-              "id": "Tuesday",
-              "displayName": "Tuesday",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": true,
-              "display": true,
-              "type": "string",
-              "readOnly": false,
-              "removed": false
-            },
-            {
-              "id": "Wednesday",
-              "displayName": "Wednesday",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": true,
-              "display": true,
-              "type": "string",
-              "readOnly": false,
-              "removed": false
-            },
-            {
-              "id": "Thursday",
-              "displayName": "Thursday",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": true,
-              "display": true,
-              "type": "string",
-              "readOnly": false,
-              "removed": false
-            },
-            {
-              "id": "Friday",
-              "displayName": "Friday",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": true,
-              "display": true,
-              "type": "string",
-              "readOnly": false,
-              "removed": false
-            },
-            {
-              "id": "Saturday",
-              "displayName": "Saturday",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": true,
-              "display": true,
-              "type": "string",
-              "readOnly": false,
-              "removed": false
-            },
-            {
-              "id": "Sunday",
-              "displayName": "Sunday",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": true,
-              "display": true,
-              "type": "string",
-              "readOnly": false,
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {
-          "typecast": true
-        }
-      },
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [
-        1056,
-        16
-      ],
       "id": "08185412-4a3b-4ba6-a15f-35c62e3db4ca",
       "name": "Create a record",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1576,
+        16
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://coach-db.arthurpfz.com/weekly-plans",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {},
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  athlete_id: $('Search records').item.json.id,\n  week_start_date: $today.endOf('week').plus({ days: 1 }).toFormat('yyyy-MM-dd'),\n  focus: JSON.parse($('Parse Json').item.json.plan).focus,\n  sessions: JSON.parse($('Parse Json').item.json.plan).sessions\n}) }}"
+      },
       "credentials": {
-        "airtableTokenApi": {
-          "id": "JMbdFoTWoGU3avK9",
-          "name": "Airtable Personal Access Token account"
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
         }
       }
     },
     {
       "parameters": {
         "chatId": "TELEGRAM_CHAT_ID_REDACTED",
-        "text": "=📅 *Training Plan | {{ $today.endOf('week').plus({ days: 1 }).toFormat('MMM d, yyyy') }}*\n\n🎯 *Focus:*\n{{ JSON.parse($('Parse Json').item.json.plan).focus }}\n\nMonday:\n{{ JSON.parse($('Parse Json').item.json.plan).monday }}\n\nTuesday:\n{{ JSON.parse($('Parse Json').item.json.plan).tuesday }}\n\nWednesday:\n{{ JSON.parse($('Parse Json').item.json.plan).wednesday }}\n\nThursday:\n{{ JSON.parse($('Parse Json').item.json.plan).thursday }}\n\nFriday:\n{{ JSON.parse($('Parse Json').item.json.plan).friday }}\n\nSaturday:\n{{ JSON.parse($('Parse Json').item.json.plan).saturday }}\n\nSunday:\n{{ JSON.parse($('Parse Json').item.json.plan).sunday }}\n\n_Go crush it! 🚀_",
+        "text": "={{ $('Build Plan Telegram').item.json.telegramText }}",
         "additionalFields": {
           "appendAttribution": false
         }
@@ -298,7 +147,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1056,
+        1576,
         192
       ],
       "id": "497d4be5-0335-4c74-8999-3de620a0d2e7",
@@ -310,6 +159,95 @@
           "name": "Telegram account"
         }
       }
+    },
+    {
+      "id": "get-this-week-sessions",
+      "name": "Get Last Week Sessions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://coach-db.arthurpfz.com/sessions",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "athlete_id",
+              "value": "={{ $('Search records').item.json.id }}"
+            },
+            {
+              "name": "date_from",
+              "value": "={{ $today.startOf('week').minus({ weeks: 1 }).toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "limit",
+              "value": "14"
+            },
+            {
+              "name": "wrap",
+              "value": "1"
+            },
+            {
+              "name": "date_to",
+              "value": "={{ $today.startOf('week').minus({ days: 1 }).toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "has_analysis",
+              "value": "1"
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
+        }
+      }
+    },
+    {
+      "id": "build-prompt-context",
+      "name": "Build Prompt Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const athlete = $('Search records').first().json;\nconst wrapped = $json; // {sessions: [...], count: N}\nconst sessions = Array.isArray(wrapped.sessions) ? wrapped.sessions : [];\n\nconst lines = [];\nif (sessions.length === 0) {\n  lines.push('No sessions logged last week.');\n} else {\n  const totalMin = sessions.reduce((s, x) => s + (x.duration_min || 0), 0);\n  const totalTSS = sessions.reduce((s, x) => s + (parseFloat(x.tss) || 0), 0);\n  const grades = sessions.filter(x => x.grade).map(x => x.grade);\n  lines.push(sessions.length + ' session' + (sessions.length > 1 ? 's' : '') +\n             ' · ' + (totalMin / 60).toFixed(1) + 'h · TSS ' + Math.round(totalTSS));\n  if (grades.length) lines.push('Grades: ' + grades.join(', '));\n  sessions.slice().reverse().forEach(s => {\n    const head = [\n      (s.date || '').slice(5),\n      s.sport || '?',\n      s.duration_min ? s.duration_min + 'min' : null,\n      s.tss ? 'TSS ' + Math.round(s.tss) : null,\n      s.grade ? 'Grade ' + s.grade : null,\n    ].filter(Boolean).join(' · ');\n    lines.push('  - ' + head);\n    if (s.analysis) {\n      const oneLiner = String(s.analysis).split('\\n').find(l => l.trim()) || '';\n      if (oneLiner) lines.push('    ' + oneLiner.slice(0, 140));\n    }\n  });\n}\n\n// --- Periodization: live weeks-to-race -> phase + weekly volume target ---\nconst raceDate = DateTime.fromISO(athlete['Race Date']);\nconst nextMon  = DateTime.now().endOf('week').plus({ days: 1 });\nconst W = Math.max(0, Math.ceil(raceDate.diff(nextMon, 'weeks').weeks));\nlet phase;\nif (W >= 11) phase = 'Base'; else if (W >= 7) phase = 'Build';\nelse if (W >= 4) phase = 'Peak'; else if (W >= 2) phase = 'Taper'; else phase = 'Race Week';\nlet hours;\nif (W >= 10)      hours = Math.max(6, Math.min(8, 6 + (14 - W) * 0.5));\nelse if (W >= 4)  hours = 8;\nelse if (W === 3) hours = 6.5;\nelse if (W === 2) hours = 5;\nelse              hours = 3.5;\n\nreturn [{ json: { ...athlete, lastWeekSummary: lines.join('\\n'), weeks_to_race: W, weekly_hours_target: hours, 'Training Phase': phase } }];"
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const plan = JSON.parse($('Parse Json').item.json.plan);\nconst sessions = plan.sessions || [];\nconst focus = plan.focus || '';\nconst dayOrder = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];\nconst pinned = sessions.filter(s => s.pinned_day);\nconst flex = sessions.filter(s => !s.pinned_day);\npinned.sort((a,b) => dayOrder.indexOf(a.pinned_day) - dayOrder.indexOf(b.pinned_day));\n\nconst fmt = s => '• ' +\n  (s.pinned_day ? s.pinned_day + ' — ' : '') +\n  s.label + ' · ' + s.sport + ' · ' + s.duration_min + 'min — ' + s.description;\n\nconst weekStart = DateTime.now().endOf('week').plus({ days: 1 }).toFormat('MMM d, yyyy');\nlet out = '📅 Training Plan | ' + weekStart + '\\n\\n🎯 Focus: ' + focus + '\\n\\n';\nif (pinned.length) out += '📌 Pinned\\n' + pinned.map(fmt).join('\\n') + '\\n\\n';\nif (flex.length) out += '🟦 Flex pool\\n' + flex.map(fmt).join('\\n');\nout += '\\n\\nGo crush it! 🚀';\n\nreturn [{ json: { telegramText: out.trim() } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        200
+      ],
+      "id": "build-plan-telegram-mov6sb3w",
+      "name": "Build Plan Telegram"
+    },
+    {
+      "parameters": {},
+      "id": "ebba99fa-cf29-481f-b263-157a2ef2e5b8",
+      "name": "When Called",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ]
     }
   ],
   "connections": {
@@ -339,7 +277,7 @@
       "main": [
         [
           {
-            "node": "Basic LLM Chain",
+            "node": "Get Last Week Sessions",
             "type": "main",
             "index": 0
           }
@@ -366,7 +304,7 @@
             "index": 0
           },
           {
-            "node": "Send a text message",
+            "node": "Build Plan Telegram",
             "type": "main",
             "index": 0
           }
@@ -377,11 +315,56 @@
       "main": [
         []
       ]
+    },
+    "Build Prompt Context": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Last Week Sessions": {
+      "main": [
+        [
+          {
+            "node": "Build Prompt Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Plan Telegram": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Called": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": true,
+    "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": {
     "node:Schedule Trigger": {
@@ -392,9 +375,9 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "8ee4c71c-9584-4765-aa0e-a95b910598f3",
-  "activeVersionId": "ca59f26f-c598-4238-b3e0-03aa467b9c3b",
-  "versionCounter": 18,
+  "versionId": "8baf8566-aac4-4bb2-b6ea-3bd2f8831ba5",
+  "activeVersionId": "8baf8566-aac4-4bb2-b6ea-3bd2f8831ba5",
+  "versionCounter": 80,
   "triggerCount": 1,
   "shared": [
     {
@@ -411,46 +394,15 @@
         "type": "personal",
         "icon": null,
         "description": null,
-        "creatorId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e",
-        "projectRelations": [
-          {
-            "updatedAt": "2026-01-03T12:23:52.620Z",
-            "createdAt": "2026-01-03T12:23:52.620Z",
-            "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e",
-            "projectId": "51zk01zmzcv1m5vw",
-            "user": {
-              "updatedAt": "2026-01-24T10:20:22.000Z",
-              "createdAt": "2026-01-03T12:23:50.969Z",
-              "id": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e",
-              "email": "arthur.pfalzgraf@gmail.com",
-              "firstName": "arthur",
-              "lastName": "pfalzgraf",
-              "personalizationAnswers": null,
-              "settings": {
-                "userActivated": true,
-                "easyAIWorkflowOnboarded": true,
-                "firstSuccessfulWorkflowId": "lUcAtn2oxCPkNkJ1",
-                "userActivatedAt": 1767553640139,
-                "npsSurvey": {
-                  "responded": true,
-                  "lastShownAt": 1768763018630
-                }
-              },
-              "disabled": false,
-              "mfaEnabled": false,
-              "lastActiveAt": "2026-01-23",
-              "isPending": false
-            }
-          }
-        ]
+        "creatorId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
       }
     }
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-01-05T18:44:38.000Z",
-    "createdAt": "2026-01-05T18:44:36.124Z",
-    "versionId": "ca59f26f-c598-4238-b3e0-03aa467b9c3b",
+    "updatedAt": "2026-06-06T19:57:46.346Z",
+    "createdAt": "2026-06-06T19:57:46.346Z",
+    "versionId": "8baf8566-aac4-4bb2-b6ea-3bd2f8831ba5",
     "workflowId": "lUcAtn2oxCPkNkJ1",
     "nodes": [
       {
@@ -460,7 +412,7 @@
               {
                 "field": "weeks",
                 "triggerAtHour": 20,
-                "triggerAtMinute": 7
+                "triggerAtMinute": 5
               }
             ]
           }
@@ -475,50 +427,38 @@
         "name": "Schedule Trigger"
       },
       {
-        "parameters": {
-          "operation": "search",
-          "base": {
-            "__rl": true,
-            "value": "appw0Xd3T54okfaXa",
-            "mode": "list",
-            "cachedResultName": "Tri Coach MVP",
-            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
-          },
-          "table": {
-            "__rl": true,
-            "value": "tblK8jxVIxuFi9H8Z",
-            "mode": "list",
-            "cachedResultName": "Users",
-            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblK8jxVIxuFi9H8Z"
-          },
-          "filterByFormula": "Name = \"Arthur Pfalzgraf\"",
-          "options": {}
-        },
-        "type": "n8n-nodes-base.airtable",
-        "typeVersion": 2.1,
+        "id": "40fd91b0-e028-43f3-b85a-a13429bc0de1",
+        "name": "Search records",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
         "position": [
           208,
           0
         ],
-        "id": "40fd91b0-e028-43f3-b85a-a13429bc0de1",
-        "name": "Search records",
+        "parameters": {
+          "method": "GET",
+          "url": "https://coach-db.arthurpfz.com/athletes/1",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {}
+        },
         "credentials": {
-          "airtableTokenApi": {
-            "id": "JMbdFoTWoGU3avK9",
-            "name": "Airtable Personal Access Token account"
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
           }
         }
       },
       {
         "parameters": {
           "promptType": "define",
-          "text": "=You are an expert Ironman Coach creating personalized weekly training plans.\n\n=== ATHLETE PROFILE ===\n- Name: {{ $json.Name }}\n- Race: {{ $json['Race Name'] }} ({{ $json['Race Date'] }})\n- Current Phase: {{ $json['Training Phase'] }}\n- Fitness Profile: {{ $json['Fitness Profile'] }}\n\n=== ATHLETE CONSTRAINTS ===\n{{ $json.Constraints }}\n\n=== INSTRUCTIONS ===\n\n1. **Constraints are non-negotiable.** If constraints conflict with coaching best practices, constraints win. Always.\n\n2. **Label every session** with exactly one of:\n   - KEY: Priority session, do not skip, contains structured work\n   - OPTIONAL (Easy): Can skip freely, Zone 2 only, 30-50min\n   - OPTIONAL (Intensity): Can skip, short intervals allowed, 30-40min max\n   - REST: No training\n\n3. **Optional session rules:**\n   - Max 1x OPTIONAL (Intensity) per week\n   - OPTIONAL (Intensity) never scheduled the day before a KEY session\n   - OPTIONAL (Easy) is always Zone 2, no exceptions\n\n4. **Phase-appropriate focus:**\n   - Base 1-2: Aerobic endurance, consistency, technique (80-90% Zone 2)\n   - Build 1-2: Introduce intensity, sport-specific work (70-80% Zone 2)\n   - Peak: Race simulation, sharpening\n   - Taper: Reduce volume, maintain some intensity\n\n5. **Use exact values from Fitness Profile:**\n   - HR zones: Use exact bpm ranges provided\n   - Paces: Use exact min/km or min/100m provided\n   - Power: Use exact watts and %FTP provided\n   - CSS: Use exact swim pace provided\n\n6. **Session structure:**\n   - KEY sessions: Include warm-up, main set with specific targets, cool-down\n   - OPTIONAL sessions: Simple structure, clear intensity guidance\n   - Always specify: duration, intensity (HR/power/pace), and focus\n\n=== OUTPUT FORMAT ===\nReturn JSON only. No markdown, no explanations, no extra text.\n\n{\n  \"week_of\": \"YYYY-MM-DD\",\n  \"phase\": \"Current training phase\",\n  \"focus\": \"1-2 sentence focus for this week\",\n  \"total_hours\": \"Estimated range (e.g., 5-6h)\",\n  \"key_sessions\": 3,\n  \"monday\": \"REST or OPTIONAL (Easy/Intensity): description\",\n  \"tuesday\": \"KEY: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"wednesday\": \"KEY: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"thursday\": \"REST or OPTIONAL (Easy/Intensity): description\",\n  \"friday\": \"KEY: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"saturday\": \"KEY or OPTIONAL: [Discipline]: [Duration]. [Structure]. [Targets].\",\n  \"sunday\": \"REST or OPTIONAL (Easy): description\"\n}\n\n=== EXAMPLE SESSION FORMATS ===\n- \"KEY: Swim: 55min. WU: 10min easy. MS: 6x200m @ CSS (2:05/100m) w/ 30s rest. CD: 5min easy.\"\n- \"KEY: Bike: 60min Zwift. WU: 15min Z2. MS: 4x8min sweet spot (235-248W) w/ 3min recovery. CD: 10min easy.\"\n- \"OPTIONAL (Easy): Run: 40min Zone 2 (114-149bpm) treadmill. Relaxed form, conversational pace.\"\n- \"OPTIONAL (Intensity): Run: 35min. WU: 15min Z2. MS: 6x30s strides w/ 90s recovery. CD: 10min easy.\"\n- \"REST\"\n\nGenerate the training plan for NEXT WEEK (starting Monday)",
+          "text": "=You are an expert Ironman Coach creating personalized weekly training plans.\n\n=== ATHLETE PROFILE ===\n- Name: {{ $json.Name }}\n- Race: {{ $json['Race Name'] }} ({{ $json['Race Date'] }})\n- Phase: {{ $json['Training Phase'] }} | Weeks to race: {{ $json.weeks_to_race }} | Weekly volume target: {{ $json.weekly_hours_target }}h\n- Fitness Profile: {{ $json['Fitness Profile'] }}\n\n=== GOAL & RACE CONTEXT ===\n{{ $json.Goal }}\n\n=== CURRENT HEALTH STATUS ===\n{{ $json['Health Status'] }}\n\n=== TRAINING PRINCIPLES (use these to shape session selection) ===\n{{ $json['Training Principles'] }}\n\n=== ATHLETE CONSTRAINTS ===\n{{ $json.Constraints }}\n\n=== LAST WEEK'S EXECUTION ===\n{{ $json.lastWeekSummary }}\n\n=== INSTRUCTIONS ===\n\n1. Constraints are non-negotiable. Translate any \"always Tuesday\" / \"non-negotiable Thursday\" / recurring weekly anchor (e.g. Rapha club ride) into a session with pinned_day set to that weekday. Everything else is a flex pool — the athlete picks when to do them.\n\n2. Generate the set of training blocks whose duration_min sum to approximately {{ $json.weekly_hours_target }} hours (±30 min). This weekly volume target is a HARD target, not an estimate. Only the Rapha ride is pinned (Wednesday); every other block has pinned_day = null so the athlete picks the day. No separate REST entries — rest = unused blocks.\n\n3. Label every session with exactly one of:\n   - KEY: priority session, structured work, do not skip\n   - OPTIONAL (Easy): can skip freely, Zone 2 only, 30-50min\n   - OPTIONAL (Intensity): can skip, short intervals, 30-40min max\n\n4. Optional rules:\n   - Max 1x OPTIONAL (Intensity) per week.\n   - OPTIONAL (Easy) is always Zone 2.\n\n5. Phase-appropriate focus:\n   - Base 1-2: aerobic endurance, technique (80-90% Z2)\n   - Build 1-2: introduce intensity, sport-specific (70-80% Z2)\n   - Peak: race simulation, sharpening\n   - Taper: reduce volume, maintain some intensity\n\n6. Use exact values from Fitness Profile (HR bpm, paces, watts, CSS).\n\n7. Adapt to LAST WEEK'S EXECUTION:\n   - C/F grades or low volume → trim load this week.\n   - All A/B → stay the course or marginal increase within phase guidelines.\n   - No sessions logged → plan conservatively.\n\n8. Each session description should specify duration, intensity targets, and a clear focus. KEY sessions include WU/MS/CD with specific numbers.\n\n=== OUTPUT FORMAT ===\nReturn JSON only. No markdown, no code blocks, no extra prose.\n\n{\n  \"focus\": \"1-2 sentence focus for this week\",\n  \"sessions\": [\n    {\n      \"id\": \"kebab-case-stable-id\",\n      \"label\": \"KEY\",\n      \"sport\": \"Run | Ride | Swim | Workout\",\n      \"duration_min\": 60,\n      \"pinned_day\": \"Mon | Tue | Wed | Thu | Fri | Sat | Sun | null\",\n      \"description\": \"Full session prescription with WU/MS/CD and targets.\"\n    }\n  ]\n}\n\nRules for id: short, kebab-case, unique within the plan, descriptive (e.g. \"rapha-ride\", \"long-run\", \"swim-css\", \"easy-run-1\"). The athlete will see this id in match logs — make it readable.\n\nRules for pinned_day: only set when the athlete's constraints REQUIRE that day. Otherwise null.\n\n=== EXAMPLES ===\n{\"id\":\"rapha-ride\",\"label\":\"KEY\",\"sport\":\"Ride\",\"duration_min\":90,\"pinned_day\":\"Tue\",\"description\":\"Rapha club ride. Z2/Z3 mixed, social pace. ~90min.\"}\n{\"id\":\"swim-css\",\"label\":\"KEY\",\"sport\":\"Swim\",\"duration_min\":50,\"pinned_day\":null,\"description\":\"600m easy build (this is the warm-up). MS 8x150m @ race pace (1:58/100m) on 15s rest, even splits. 200m easy. ~2000m.\"}\n{\"id\":\"long-run\",\"label\":\"KEY\",\"sport\":\"Run\",\"duration_min\":80,\"pinned_day\":null,\"description\":\"Long Z2 run. 80min. HR 130-150bpm. Conversational, relaxed form.\"}\n{\"id\":\"easy-run-1\",\"label\":\"OPTIONAL (Easy)\",\"sport\":\"Run\",\"duration_min\":40,\"pinned_day\":null,\"description\":\"Z2 (114-149bpm), treadmill or outdoor. Conversational pace, cadence 175-180spm.\"}\n\nGenerate the training plan for NEXT WEEK (starting Monday).",
           "batching": {}
         },
         "type": "@n8n/n8n-nodes-langchain.chainLlm",
         "typeVersion": 1.8,
         "position": [
-          496,
+          1016,
           16
         ],
         "id": "70dbba47-5cce-4e10-ada8-d927fe63ac21",
@@ -526,13 +466,13 @@
       },
       {
         "parameters": {
-          "model": "anthropic/claude-sonnet-4.6",
+          "model": "anthropic/claude-opus-4.7",
           "options": {}
         },
         "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
         "typeVersion": 1,
         "position": [
-          496,
+          1016,
           192
         ],
         "id": "54315f91-0483-4651-aa0f-4a4e9e074eb8",
@@ -561,182 +501,43 @@
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
-          848,
+          1368,
           16
         ],
         "id": "9b9d70f0-9de7-4ca6-9bb3-5b8a62c0febe",
         "name": "Parse Json"
       },
       {
-        "parameters": {
-          "operation": "create",
-          "base": {
-            "__rl": true,
-            "value": "appw0Xd3T54okfaXa",
-            "mode": "list",
-            "cachedResultName": "Tri Coach MVP",
-            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa"
-          },
-          "table": {
-            "__rl": true,
-            "value": "tblJ0UHyJ1drXv97F",
-            "mode": "list",
-            "cachedResultName": "Weekly Plans",
-            "cachedResultUrl": "https://airtable.com/appw0Xd3T54okfaXa/tblJ0UHyJ1drXv97F"
-          },
-          "columns": {
-            "mappingMode": "defineBelow",
-            "value": {
-              "Week Start Date": "={{ $today.endOf('week').plus({ days: 1 }).toFormat('yyyy-MM-dd') }}",
-              "Athlete": "={{ $('Search records').item.json.id }}",
-              "Monday": "={{ JSON.parse($('Parse Json').item.json.plan).monday }}",
-              "Tuesday": "={{ JSON.parse($('Parse Json').item.json.plan).tuesday }}",
-              "Wednesday": "={{ JSON.parse($('Parse Json').item.json.plan).wednesday }} ",
-              "Thursday": "={{ JSON.parse($('Parse Json').item.json.plan).thursday }}",
-              "Friday": "={{ JSON.parse($('Parse Json').item.json.plan).friday }}",
-              "Saturday": "={{ JSON.parse($('Parse Json').item.json.plan).saturday }}",
-              "Sunday": "={{ JSON.parse($('Parse Json').item.json.plan).sunday }}",
-              "Focus": "={{ JSON.parse($('Parse Json').item.json.plan).focus}}"
-            },
-            "matchingColumns": [],
-            "schema": [
-              {
-                "id": "Week Start Date",
-                "displayName": "Week Start Date",
-                "required": false,
-                "defaultMatch": false,
-                "canBeUsedToMatch": true,
-                "display": true,
-                "type": "dateTime",
-                "readOnly": false,
-                "removed": false
-              },
-              {
-                "id": "Athlete",
-                "displayName": "Athlete",
-                "required": false,
-                "defaultMatch": false,
-                "canBeUsedToMatch": true,
-                "display": true,
-                "type": "string",
-                "readOnly": false,
-                "removed": false
-              },
-              {
-                "id": "Focus",
-                "displayName": "Focus",
-                "required": false,
-                "defaultMatch": false,
-                "canBeUsedToMatch": true,
-                "display": true,
-                "type": "string",
-                "readOnly": false,
-                "removed": false
-              },
-              {
-                "id": "Monday",
-                "displayName": "Monday",
-                "required": false,
-                "defaultMatch": false,
-                "canBeUsedToMatch": true,
-                "display": true,
-                "type": "string",
-                "readOnly": false,
-                "removed": false
-              },
-              {
-                "id": "Tuesday",
-                "displayName": "Tuesday",
-                "required": false,
-                "defaultMatch": false,
-                "canBeUsedToMatch": true,
-                "display": true,
-                "type": "string",
-                "readOnly": false,
-                "removed": false
-              },
-              {
-                "id": "Wednesday",
-                "displayName": "Wednesday",
-                "required": false,
-                "defaultMatch": false,
-                "canBeUsedToMatch": true,
-                "display": true,
-                "type": "string",
-                "readOnly": false,
-                "removed": false
-              },
-              {
-                "id": "Thursday",
-                "displayName": "Thursday",
-                "required": false,
-                "defaultMatch": false,
-                "canBeUsedToMatch": true,
-                "display": true,
-                "type": "string",
-                "readOnly": false,
-                "removed": false
-              },
-              {
-                "id": "Friday",
-                "displayName": "Friday",
-                "required": false,
-                "defaultMatch": false,
-                "canBeUsedToMatch": true,
-                "display": true,
-                "type": "string",
-                "readOnly": false,
-                "removed": false
-              },
-              {
-                "id": "Saturday",
-                "displayName": "Saturday",
-                "required": false,
-                "defaultMatch": false,
-                "canBeUsedToMatch": true,
-                "display": true,
-                "type": "string",
-                "readOnly": false,
-                "removed": false
-              },
-              {
-                "id": "Sunday",
-                "displayName": "Sunday",
-                "required": false,
-                "defaultMatch": false,
-                "canBeUsedToMatch": true,
-                "display": true,
-                "type": "string",
-                "readOnly": false,
-                "removed": false
-              }
-            ],
-            "attemptToConvertTypes": false,
-            "convertFieldsToString": false
-          },
-          "options": {
-            "typecast": true
-          }
-        },
-        "type": "n8n-nodes-base.airtable",
-        "typeVersion": 2.1,
-        "position": [
-          1056,
-          16
-        ],
         "id": "08185412-4a3b-4ba6-a15f-35c62e3db4ca",
         "name": "Create a record",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          1576,
+          16
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://coach-db.arthurpfz.com/weekly-plans",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {},
+          "sendBody": true,
+          "contentType": "json",
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({\n  athlete_id: $('Search records').item.json.id,\n  week_start_date: $today.endOf('week').plus({ days: 1 }).toFormat('yyyy-MM-dd'),\n  focus: JSON.parse($('Parse Json').item.json.plan).focus,\n  sessions: JSON.parse($('Parse Json').item.json.plan).sessions\n}) }}"
+        },
         "credentials": {
-          "airtableTokenApi": {
-            "id": "JMbdFoTWoGU3avK9",
-            "name": "Airtable Personal Access Token account"
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
           }
         }
       },
       {
         "parameters": {
           "chatId": "TELEGRAM_CHAT_ID_REDACTED",
-          "text": "=📅 *Training Plan | {{ $today.endOf('week').plus({ days: 1 }).toFormat('MMM d, yyyy') }}*\n\n🎯 *Focus:*\n{{ JSON.parse($('Parse Json').item.json.plan).focus }}\n\nMonday:\n{{ JSON.parse($('Parse Json').item.json.plan).monday }}\n\nTuesday:\n{{ JSON.parse($('Parse Json').item.json.plan).tuesday }}\n\nWednesday:\n{{ JSON.parse($('Parse Json').item.json.plan).wednesday }}\n\nThursday:\n{{ JSON.parse($('Parse Json').item.json.plan).thursday }}\n\nFriday:\n{{ JSON.parse($('Parse Json').item.json.plan).friday }}\n\nSaturday:\n{{ JSON.parse($('Parse Json').item.json.plan).saturday }}\n\nSunday:\n{{ JSON.parse($('Parse Json').item.json.plan).sunday }}\n\n_Go crush it! 🚀_",
+          "text": "={{ $('Build Plan Telegram').item.json.telegramText }}",
           "additionalFields": {
             "appendAttribution": false
           }
@@ -744,7 +545,7 @@
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1.2,
         "position": [
-          1056,
+          1576,
           192
         ],
         "id": "497d4be5-0335-4c74-8999-3de620a0d2e7",
@@ -756,6 +557,95 @@
             "name": "Telegram account"
           }
         }
+      },
+      {
+        "id": "get-this-week-sessions",
+        "name": "Get Last Week Sessions",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          448,
+          0
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://coach-db.arthurpfz.com/sessions",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "athlete_id",
+                "value": "={{ $('Search records').item.json.id }}"
+              },
+              {
+                "name": "date_from",
+                "value": "={{ $today.startOf('week').minus({ weeks: 1 }).toFormat('yyyy-MM-dd') }}"
+              },
+              {
+                "name": "limit",
+                "value": "14"
+              },
+              {
+                "name": "wrap",
+                "value": "1"
+              },
+              {
+                "name": "date_to",
+                "value": "={{ $today.startOf('week').minus({ days: 1 }).toFormat('yyyy-MM-dd') }}"
+              },
+              {
+                "name": "has_analysis",
+                "value": "1"
+              }
+            ]
+          },
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
+          }
+        }
+      },
+      {
+        "id": "build-prompt-context",
+        "name": "Build Prompt Context",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          688,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const athlete = $('Search records').first().json;\nconst wrapped = $json; // {sessions: [...], count: N}\nconst sessions = Array.isArray(wrapped.sessions) ? wrapped.sessions : [];\n\nconst lines = [];\nif (sessions.length === 0) {\n  lines.push('No sessions logged last week.');\n} else {\n  const totalMin = sessions.reduce((s, x) => s + (x.duration_min || 0), 0);\n  const totalTSS = sessions.reduce((s, x) => s + (parseFloat(x.tss) || 0), 0);\n  const grades = sessions.filter(x => x.grade).map(x => x.grade);\n  lines.push(sessions.length + ' session' + (sessions.length > 1 ? 's' : '') +\n             ' · ' + (totalMin / 60).toFixed(1) + 'h · TSS ' + Math.round(totalTSS));\n  if (grades.length) lines.push('Grades: ' + grades.join(', '));\n  sessions.slice().reverse().forEach(s => {\n    const head = [\n      (s.date || '').slice(5),\n      s.sport || '?',\n      s.duration_min ? s.duration_min + 'min' : null,\n      s.tss ? 'TSS ' + Math.round(s.tss) : null,\n      s.grade ? 'Grade ' + s.grade : null,\n    ].filter(Boolean).join(' · ');\n    lines.push('  - ' + head);\n    if (s.analysis) {\n      const oneLiner = String(s.analysis).split('\\n').find(l => l.trim()) || '';\n      if (oneLiner) lines.push('    ' + oneLiner.slice(0, 140));\n    }\n  });\n}\n\n// --- Periodization: live weeks-to-race -> phase + weekly volume target ---\nconst raceDate = DateTime.fromISO(athlete['Race Date']);\nconst nextMon  = DateTime.now().endOf('week').plus({ days: 1 });\nconst W = Math.max(0, Math.ceil(raceDate.diff(nextMon, 'weeks').weeks));\nlet phase;\nif (W >= 11) phase = 'Base'; else if (W >= 7) phase = 'Build';\nelse if (W >= 4) phase = 'Peak'; else if (W >= 2) phase = 'Taper'; else phase = 'Race Week';\nlet hours;\nif (W >= 10)      hours = Math.max(6, Math.min(8, 6 + (14 - W) * 0.5));\nelse if (W >= 4)  hours = 8;\nelse if (W === 3) hours = 6.5;\nelse if (W === 2) hours = 5;\nelse              hours = 3.5;\n\nreturn [{ json: { ...athlete, lastWeekSummary: lines.join('\\n'), weeks_to_race: W, weekly_hours_target: hours, 'Training Phase': phase } }];"
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const plan = JSON.parse($('Parse Json').item.json.plan);\nconst sessions = plan.sessions || [];\nconst focus = plan.focus || '';\nconst dayOrder = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];\nconst pinned = sessions.filter(s => s.pinned_day);\nconst flex = sessions.filter(s => !s.pinned_day);\npinned.sort((a,b) => dayOrder.indexOf(a.pinned_day) - dayOrder.indexOf(b.pinned_day));\n\nconst fmt = s => '• ' +\n  (s.pinned_day ? s.pinned_day + ' — ' : '') +\n  s.label + ' · ' + s.sport + ' · ' + s.duration_min + 'min — ' + s.description;\n\nconst weekStart = DateTime.now().endOf('week').plus({ days: 1 }).toFormat('MMM d, yyyy');\nlet out = '📅 Training Plan | ' + weekStart + '\\n\\n🎯 Focus: ' + focus + '\\n\\n';\nif (pinned.length) out += '📌 Pinned\\n' + pinned.map(fmt).join('\\n') + '\\n\\n';\nif (flex.length) out += '🟦 Flex pool\\n' + flex.map(fmt).join('\\n');\nout += '\\n\\nGo crush it! 🚀';\n\nreturn [{ json: { telegramText: out.trim() } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          848,
+          200
+        ],
+        "id": "build-plan-telegram-mov6sb3w",
+        "name": "Build Plan Telegram"
+      },
+      {
+        "parameters": {},
+        "id": "ebba99fa-cf29-481f-b263-157a2ef2e5b8",
+        "name": "When Called",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          200
+        ]
       }
     ],
     "connections": {
@@ -785,7 +675,7 @@
         "main": [
           [
             {
-              "node": "Basic LLM Chain",
+              "node": "Get Last Week Sessions",
               "type": "main",
               "index": 0
             }
@@ -812,7 +702,7 @@
               "index": 0
             },
             {
-              "node": "Send a text message",
+              "node": "Build Plan Telegram",
               "type": "main",
               "index": 0
             }
@@ -823,19 +713,71 @@
         "main": [
           []
         ]
+      },
+      "Build Prompt Context": {
+        "main": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Last Week Sessions": {
+        "main": [
+          [
+            {
+              "node": "Build Prompt Context",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Plan Telegram": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "When Called": {
+        "main": [
+          [
+            {
+              "node": "Search records",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "arthur pfalzgraf",
-    "name": "Version ca59f26f",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-01-05T18:44:38.423Z",
-        "id": 5,
+        "createdAt": "2026-06-06T19:57:46.517Z",
+        "id": 756,
         "workflowId": "lUcAtn2oxCPkNkJ1",
-        "versionId": "ca59f26f-c598-4238-b3e0-03aa467b9c3b",
+        "versionId": "8baf8566-aac4-4bb2-b6ea-3bd2f8831ba5",
         "event": "activated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      },
+      {
+        "createdAt": "2026-06-06T19:57:46.444Z",
+        "id": 755,
+        "workflowId": "lUcAtn2oxCPkNkJ1",
+        "versionId": "8baf8566-aac4-4bb2-b6ea-3bd2f8831ba5",
+        "event": "deactivated",
         "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
       }
     ]

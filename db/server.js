@@ -8,6 +8,10 @@ app.use(express.json());
 
 const DB_PATH = process.env.DB_PATH || './tricoach.db';
 const API_KEY = process.env.API_KEY;
+if (!API_KEY) {
+  console.error('API_KEY is not set — refusing to start unauthenticated');
+  process.exit(1);
+}
 
 // Init DB and run schema
 const db = new Database(DB_PATH);
@@ -111,7 +115,6 @@ function toPlanRow(row) {
 }
 
 function auth(req, res, next) {
-  if (!API_KEY) return next();
   const key = req.headers['x-api-key'];
   if (key !== API_KEY) return res.status(401).json({ error: 'Unauthorized' });
   next();
@@ -223,7 +226,7 @@ app.get('/sessions', (req, res) => {
   if (date_from) { sql += ' AND date >= ?'; args.push(date_from); }
   if (has_analysis === '1') { sql += ' AND analyzed_at IS NOT NULL'; }
   sql += ' ORDER BY date DESC, analyzed_at DESC LIMIT ?';
-  args.push(Number(limit));
+  args.push(Math.min(Math.max(Number(limit) || 50, 1), 1000));
 
   const results = db.prepare(sql).all(...args);
   if (wrap === '1') return res.json({ sessions: results, count: results.length });
@@ -287,7 +290,8 @@ app.post('/sessions', (req, res) => {
     const row = db.prepare(sql).get(payload);
     res.status(201).json({ id: row.id, analyzed_at: row.analyzed_at });
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    console.error('POST /sessions failed:', e.message);
+    res.status(400).json({ error: 'invalid request' });
   }
 });
 
@@ -313,7 +317,8 @@ app.patch('/sessions/:id', (req, res) => {
     if (result.changes === 0) return res.status(404).json({ error: 'not found' });
     res.json({ ok: true });
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    console.error('PATCH /sessions failed:', e.message);
+    res.status(400).json({ error: 'invalid request' });
   }
 });
 
