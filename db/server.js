@@ -39,6 +39,7 @@ const SESSION_COLUMNS = [
   ['calories', 'INTEGER'], ['weight_kg', 'REAL'],
   ['analysis', 'TEXT'], ['analyzed_at', 'TEXT'], ['raw_json', 'TEXT'],
   ['grade', 'TEXT'], ['user_feedback', 'TEXT'], ['user_feedback_at', 'TEXT'],
+  ['plan_session_id', 'TEXT'],
 ];
 const existing = new Set(db.pragma('table_info(sessions)').map(c => c.name));
 for (const [col, type] of SESSION_COLUMNS) {
@@ -215,15 +216,22 @@ app.post('/weekly-plans', (req, res) => {
   res.status(201).json(toPlanRow(row));
 });
 
+app.delete('/weekly-plans/:id', (req, res) => {
+  const result = db.prepare('DELETE FROM weekly_plans WHERE id = ?').run(req.params.id);
+  if (result.changes === 0) return res.status(404).json({ error: 'Not found' });
+  res.json({ ok: true });
+});
+
 // ── Sessions ──────────────────────────────────────────────────────────────────
 
 app.get('/sessions', (req, res) => {
-  const { athlete_id, limit = 50, date_from, wrap, has_analysis } = req.query;
+  const { athlete_id, limit = 50, date_from, date_to, wrap, has_analysis } = req.query;
   if (!athlete_id) return res.status(400).json({ error: 'athlete_id required' });
 
   let sql = 'SELECT * FROM sessions WHERE athlete_id = ?';
   const args = [athlete_id];
   if (date_from) { sql += ' AND date >= ?'; args.push(date_from); }
+  if (date_to) { sql += ' AND date <= ?'; args.push(date_to); }
   if (has_analysis === '1') { sql += ' AND analyzed_at IS NOT NULL'; }
   sql += ' ORDER BY date DESC, analyzed_at DESC LIMIT ?';
   args.push(Math.min(Math.max(Number(limit) || 50, 1), 1000));
@@ -301,7 +309,7 @@ app.patch('/sessions/:id', (req, res) => {
   if (!id) return res.status(400).json({ error: 'invalid id' });
 
   // Only allow these fields to be patched
-  const PATCH_FIELDS = ['analysis', 'analyzed_at', 'grade', 'rpe', 'notes', 'user_feedback', 'user_feedback_at'];
+  const PATCH_FIELDS = ['analysis', 'analyzed_at', 'grade', 'rpe', 'notes', 'user_feedback', 'user_feedback_at', 'plan_session_id'];
   const sets = [];
   const args = { id };
   for (const k of PATCH_FIELDS) {
