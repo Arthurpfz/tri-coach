@@ -212,11 +212,12 @@ Watch: Late-ride power decay vs fueling
 
 **Flow (live — Tricoach DB HTTP nodes, NOT the old Airtable export):**
 1. `Search records` — `GET /athletes/1`
-2. `Get Last Week Sessions` — `GET /sessions` for last calendar week (`has_analysis=1`)
-3. `Build Prompt Context` (Code) — merges athlete + builds `lastWeekSummary`, AND computes **live periodization**: `weeks_to_race` from `Race Date`, derived `phase` (Base/Build/Peak/Taper/Race Week) and `weekly_hours_target` (ramps 6→8h, holds, then tapers). Overrides the stale static `Training Phase`.
-4. `Basic LLM Chain` — Claude generates the plan from the athlete's DB `Goal`/`Training Principles`/`Constraints` + computed phase/volume
-5. `Parse Json` (Set) → `Build Plan Telegram` (Code) + `Create a record` (`POST /weekly-plans`)
-6. `Send a text message` — Telegram
+2. `Get Last Week Sessions` — `GET /sessions` for the last 4 weeks (`has_analysis=1`; CTL trend window — the running-week subset is the "last week" summary)
+3. `Get Last Week Plan` — `GET /weekly-plans` for the running week (adherence comparison; `alwaysOutputData` so a missing plan doesn't kill the run)
+4. `Build Prompt Context` (Code) — merges athlete + builds `lastWeekSummary`, `adherenceSummary` (planned blocks vs done — matched by `plan_session_id`, sport fallback for unmatched), `ctlLine` (CTL now vs ~4wk ago with direction), AND computes **live periodization**: `weeks_to_race` from `Race Date`, derived `phase` (Base/Build/Peak/Taper/Race Week) and `weekly_hours_target` (ramps 6→8h, holds, then tapers). Overrides the stale static `Training Phase`.
+5. `Basic LLM Chain` — Claude generates the plan from the athlete's DB `Goal`/`Training Principles`/`Constraints` + computed phase/volume + adherence + fitness trend
+6. `Parse Json` (Set) → `Build Plan Telegram` (Code, appends `📈 CTL …` trend line) + `Create a record` (`POST /weekly-plans`)
+7. `Send a text message` — Telegram
 
 **Session schema (flex-pool, post-2026-06-06):** plan is a `sessions[]` array, each `{id, label, sport, duration_min, pinned_day, description}`. `pinned_day` is set ONLY when a constraint requires that day — currently **only the Wednesday Rapha ride**; everything else is `pinned_day: null`, a pickable pool. Telegram renders "📌 Pinned" + "🟦 Flex pool". No REST entries — rest = unused blocks.
 **Labels:** KEY, OPTIONAL (Easy), OPTIONAL (Intensity).
@@ -226,6 +227,8 @@ Watch: Late-ride power decay vs fueling
 - **Periodization** — auto from `weeks_to_race` (no manual phase bumping); the DB `Training Phase` field is now vestigial/overridden.
 - **Coaching rules** — live in the **DB athlete fields**, not the prompt: polarized 80/20, weekly bricks from Build, run cadence 175–180 spm, swim-as-priority, CSS descent (`Training Principles`); race targets + course implications (`Goal`); flex-pool scheduling + resource caps (`Constraints`).
 - **Last-week adaptation** — Rule 7: C/F or low volume → trim; all A/B → hold/marginal increase; nothing logged → conservative. (One-week memory only, by design.)
+- **Plan adherence (added 2026-06-10)** — Daily Checkin/Backfill persist `plan_session_id` on sessions (column + PATCH support added same day; the workflows had been sending it for weeks but the API silently dropped it). The planner compares the running week's plan blocks vs done sessions and feeds `adherenceSummary` to the prompt — Rule 7 extension: skipped KEY sessions (especially swim) carry over and are named in the focus line; repeated sport substitution → rebalance, not scold.
+- **Fitness trend (added 2026-06-10)** — `ctlLine` from session `ctl` values (now vs ~4wk ago) goes to both the prompt (declining CTL → bias to consistency over intensity) and the Telegram message (`📈 CTL 18 (+0 vs 2wk ago — holding steady)`).
 
 ---
 
@@ -251,9 +254,10 @@ Auth: `X-API-Key` header (stored in VPS `.env` and n8n credential `6GNzKYNE1JAz7
 | GET | `/weekly-plans?athlete_id=&week_start_date=` | Search Plan for a specific week |
 | GET | `/weekly-plans/latest?athlete_id=` | most recent plan |
 | POST | `/weekly-plans` | upsert plan (Sunday Planner create) |
-| GET | `/sessions?athlete_id=&limit=&date_from=` | list sessions (Daily Checkin Save Session reads via Save Analysis) |
+| DELETE | `/weekly-plans/:id` | delete a plan row (added 2026-06-10) |
+| GET | `/sessions?athlete_id=&limit=&date_from=&date_to=` | list sessions (`date_to` supported since 2026-06-10; `limit` clamped 1–1000) |
 | POST | `/sessions` | upsert session on `(athlete_id, intervals_id)`, returns `{id, analyzed_at}`, preserves LLM/user fields on re-upsert |
-| PATCH | `/sessions/:id` | attach `analysis`, `analyzed_at`, `rpe`, `notes` (Daily Checkin Save Analysis) |
+| PATCH | `/sessions/:id` | attach `analysis`, `analyzed_at`, `grade`, `plan_session_id`, `rpe`, `notes` (Daily Checkin Save Analysis) |
 
 **`POST /sessions` upsert semantics (since 2026-05-01):**
 The `PRESERVE_ON_UPSERT` set in `server.js` excludes `analysis`, `analyzed_at`, `grade`, `rpe`, `notes`, `user_feedback`, `user_feedback_at` from the `ON CONFLICT DO UPDATE` clause. Re-saving an existing activity refreshes the raw FIT metrics but does NOT clobber LLM analysis or user feedback. This is what makes `/refresh` idempotent — Backfill calls Save Session every time, but already-analyzed sessions retain `analyzed_at` and short-circuit downstream.
@@ -633,6 +637,21 @@ This will show:
 
 ## Changelog
 
+### 2026-06-10 (evening) — Plan adherence loop + CTL trend in Sunday Planner
+- **BUG FIX (data layer):** Daily Checkin/Backfill `Save Analysis` had been PATCHing `plan_session_id` for weeks, but `db/server.js` had no such column and it wasn't in `PATCH_FIELDS` — silently dropped. Added column (auto-migrated) + PATCH support. Also: `date_to` filter on `GET /sessions` (the planner was already sending it — silently ignored), `DELETE /weekly-plans/:id`, and removed a leftover test plan row (`week 2099-01-01`) that broke `/weekly-plans/latest`. Deployed via PR #7 + `tricoach-db-deploy-raw`.
+- **Sunday Planner (`lUcAtn2oxCPkNkJ1`):** new `Get Last Week Plan` node; `Get Last Week Sessions` widened to a 4-week window (CTL trend); `Build Prompt Context` builds `adherenceSummary` (planned blocks vs done, `plan_session_id` match with sport fallback) + `ctlLine`; prompt gains ADHERENCE + FITNESS TREND blocks and Rule 7 extensions (skipped KEY carries over, declining CTL → consistency over intensity); `Build Plan Telegram` appends `📈 CTL …`.
+- **Verified end-to-end** via temp webhook bridge (deleted after): adherence showed `rapha-ride: DONE · Grade B` via persisted plan_session_id, LLM named the carry-over in the focus line, Telegram included the CTL line, plan row for 2026-06-15 saved. Note: the test ran Wednesday so adherence saw a partial week — Sunday's cron run is the first full-data run.
+- Update script archived at [update-planner-adherence.js](archive/update-planner-adherence.js); `workflow-sunday-planner.json` re-exported.
+
+### 2026-06-10 (later) — Swim analysis silent failure + Rapha ride intent grading
+- **BUG (since Phase 5, 2026-05-11): swims never analyzed.** `Get Activity Streams` returns an empty array for swims (no torque stream) → 0 items → branch dies silently, n8n still reports "success". Sessions saved but `analyzed_at` stayed null (May 18 + June 9 swims affected; rides/runs unaffected). **Fix:** `alwaysOutputData: true` on `Get Activity Streams` in Daily Checkin (`hrSGUqoAwkWQ4gKl`) + Backfill (`rHIyZMIJNAOqZvM2`) — `Build Sport Metrics` already guards empty input. June 9 swim re-analyzed via Backfill (Grade B, delivered). May 18 swim left unanalyzed (outside 7-day window, stale).
+- **Rapha ride intent grading.** The June 10 Wednesday Rapha ride was graded C as a "failed Z2" — sprints flagged as zone leakage, torque CV/cadence as mechanical faults. Arthur: Rapha = Z2 base + deliberate sprints in the middle. **Fix in `Hardcore Analysis` prompt (both workflows):**
+  - New `Date (weekday):` line in the activity block (Luxon `toFormat('cccc, yyyy-MM-dd')`) — the LLM can't derive weekday from a date.
+  - New `SESSION INTENT` section with a **hard Wednesday-ride rule**: Z4/Z5 spikes = designed sprint block (never leakage); torque CV/VI/avg cadence EXCLUDED from grading (group dynamics distort them); grade on Z2 base discipline + effort commitment + HR recovery. Generic surge-pattern rule for other group rides.
+  - Lesson: a soft "infer intent" rule did NOT change the output — the rule had to be imperative before the model stopped penalizing sprints. Verified by re-running the same session: C → C → **B "Clean Rapha execution"**.
+- **Re-analysis technique:** PATCH session `analysis/analyzed_at/grade` to null, then trigger Backfill via a temporary webhook→Execute Workflow bridge (Telegram trigger rejects synthetic posts with 403 — secret token). Temp workflow deleted after use.
+- Memory: [feedback_rapha_ride_intent.md](../../../.claude/projects/-Users-arthurpfalzgraf-Desktop-Projects-TRI-COACH/memory/feedback_rapha_ride_intent.md).
+
 ### 2026-06-10 — Audit cleanup: doc/live sync, DB hardening, repo archive
 - **Docs synced to live n8n state:** check-ins/backfill run Claude Sonnet 4.6 (`anthropic/claude-sonnet-4.6`), Sunday Planner runs Claude Opus 4.7 (`anthropic/claude-opus-4.7`); schedule times corrected (Daily 20:10, Stats 20:30, Planner Sun 20:05).
 - **`db/server.js` hardening:** startup fails if `API_KEY` unset (was: silently unauthenticated); `?limit` clamped to 1–1000; POST/PATCH `/sessions` errors logged server-side, generic message returned (no more raw SQLite errors to clients). Rebuilt + redeployed on VPS.
@@ -889,4 +908,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-06-10 (audit cleanup: doc/live model sync, DB API hardening, repo archive)*
+*Last Updated: 2026-06-10 (plan adherence loop + CTL trend in Sunday Planner)*
