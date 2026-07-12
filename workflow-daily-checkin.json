@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-12T12:04:14.977Z",
+  "updatedAt": "2026-07-12T15:53:16.560Z",
   "createdAt": "2026-01-25T09:37:00.424Z",
   "id": "hrSGUqoAwkWQ4gKl",
   "name": "Coach Tri - Daily Checkin (Intervals.icu)",
@@ -97,7 +97,8 @@
           "id": "ms91wbaCvecB3tqQ",
           "name": "Intervals.icu API"
         }
-      }
+      },
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -110,7 +111,7 @@
           "conditions": [
             {
               "id": "check-activities-exist",
-              "leftValue": "={{ $input.all().length }}",
+              "leftValue": "={{ $input.all().filter(i => i.json && i.json.id).length }}",
               "rightValue": 0,
               "operator": {
                 "type": "number",
@@ -646,7 +647,8 @@
           "combinator": "and"
         },
         "options": {}
-      }
+      },
+      "alwaysOutputData": true
     },
     {
       "id": "parse-grade-node",
@@ -1337,9 +1339,9 @@
   "meta": null,
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "1f6677af-1773-4f82-bdf8-6c196bb9fc7e",
-  "activeVersionId": "1f6677af-1773-4f82-bdf8-6c196bb9fc7e",
-  "versionCounter": 203,
+  "versionId": "5c798c73-50d4-48e0-8277-c090845f797f",
+  "activeVersionId": "5c798c73-50d4-48e0-8277-c090845f797f",
+  "versionCounter": 206,
   "triggerCount": 1,
   "sourceWorkflowId": null,
   "shared": [
@@ -1364,9 +1366,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-07-12T12:04:14.978Z",
-    "createdAt": "2026-07-12T12:04:14.978Z",
-    "versionId": "1f6677af-1773-4f82-bdf8-6c196bb9fc7e",
+    "updatedAt": "2026-07-12T15:53:16.562Z",
+    "createdAt": "2026-07-12T15:53:16.562Z",
+    "versionId": "5c798c73-50d4-48e0-8277-c090845f797f",
     "workflowId": "hrSGUqoAwkWQ4gKl",
     "nodes": [
       {
@@ -1459,7 +1461,8 @@
             "id": "ms91wbaCvecB3tqQ",
             "name": "Intervals.icu API"
           }
-        }
+        },
+        "alwaysOutputData": true
       },
       {
         "parameters": {
@@ -1472,7 +1475,7 @@
             "conditions": [
               {
                 "id": "check-activities-exist",
-                "leftValue": "={{ $input.all().length }}",
+                "leftValue": "={{ $input.all().filter(i => i.json && i.json.id).length }}",
                 "rightValue": 0,
                 "operator": {
                   "type": "number",
@@ -2008,7 +2011,8 @@
             "combinator": "and"
           },
           "options": {}
-        }
+        },
+        "alwaysOutputData": true
       },
       {
         "id": "parse-grade-node",
@@ -2687,18 +2691,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-07-12T12:04:15.211Z",
-        "id": 810,
+        "createdAt": "2026-07-12T15:53:16.742Z",
+        "id": 843,
         "workflowId": "hrSGUqoAwkWQ4gKl",
-        "versionId": "1f6677af-1773-4f82-bdf8-6c196bb9fc7e",
+        "versionId": "5c798c73-50d4-48e0-8277-c090845f797f",
         "event": "activated",
         "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
       },
       {
-        "createdAt": "2026-07-12T12:04:15.119Z",
-        "id": 809,
+        "createdAt": "2026-07-12T15:53:16.697Z",
+        "id": 842,
         "workflowId": "hrSGUqoAwkWQ4gKl",
-        "versionId": "1f6677af-1773-4f82-bdf8-6c196bb9fc7e",
+        "versionId": "5c798c73-50d4-48e0-8277-c090845f797f",
         "event": "deactivated",
         "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
       }
