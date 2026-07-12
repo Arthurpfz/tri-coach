@@ -1,0 +1,793 @@
+{
+  "updatedAt": "2026-07-12T12:10:35.872Z",
+  "createdAt": "2026-07-12T12:08:10.568Z",
+  "id": "AA2oAY6ZPu5i1c7I",
+  "name": "Coach Tri - Monthly Review",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                0
+              ],
+              "triggerAtHour": 19,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "id": "cfa554ce-0e72-4798-9f2c-d2c52bdc9000"
+    },
+    {
+      "name": "First Sunday?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "first-sunday",
+              "leftValue": "={{ $now.day }}",
+              "rightValue": 7,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e447246c-180e-4dec-b24c-73a5c4bb986d"
+    },
+    {
+      "name": "Get Athlete",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
+        }
+      },
+      "parameters": {
+        "method": "GET",
+        "url": "https://coach-db.arthurpfz.com/athletes/1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "63236387-f742-4093-b9b2-fb17449b06d3"
+    },
+    {
+      "name": "Get Review Sessions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6GNzKYNE1JAz77RL",
+          "name": "Tricoach DB"
+        }
+      },
+      "parameters": {
+        "method": "GET",
+        "url": "https://coach-db.arthurpfz.com/sessions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "athlete_id",
+              "value": "1"
+            },
+            {
+              "name": "date_from",
+              "value": "={{ $today.minus({ days: 56 }).toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "limit",
+              "value": "300"
+            },
+            {
+              "name": "wrap",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cc7af638-6e4c-4d34-9e54-2dfcddf9ca09"
+    },
+    {
+      "name": "Get Wellness 8wk",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        800,
+        0
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "ms91wbaCvecB3tqQ",
+          "name": "Intervals.icu API"
+        }
+      },
+      "parameters": {
+        "method": "GET",
+        "url": "=https://intervals.icu/api/v1/athlete/{{ $('Get Athlete').item.json['Intervals.icu Athlete ID'] }}/wellness",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "oldest",
+              "value": "={{ $today.minus({ days: 55 }).toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "newest",
+              "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "f305b802-b05b-4c10-9c91-0b9661f350f3"
+    },
+    {
+      "name": "Build Review Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// 8-week zoom-out: volume table, CTL, cadence, grades, swim count, recovery.\nconst athlete = $('Get Athlete').first().json;\nconst wrapped = $('Get Review Sessions').first().json;\nconst sessions = Array.isArray(wrapped.sessions) ? wrapped.sessions : [];\nconst wresp = $input.first().json;\nconst wellness = Array.isArray(wresp.body) ? wresp.body : [];\n\nconst normSport = s => { const sp = (s || '').toLowerCase(); if (sp.includes('swim')) return 'Swim'; if (sp.includes('run')) return 'Run'; if (sp.includes('ride') || sp.includes('bike') || sp.includes('cycl') || sp.includes('virtual')) return 'Ride'; return 'Workout'; };\n\n// Volume by ISO week\nconst byWeek = {};\nfor (const s of sessions) {\n  if (!s.date) continue;\n  const wk = DateTime.fromISO(s.date).startOf('week').toFormat('yyyy-MM-dd');\n  byWeek[wk] = byWeek[wk] || { total: 0, Swim: 0, Run: 0, Ride: 0, Workout: 0, n: 0 };\n  const b = byWeek[wk];\n  b.total += (s.duration_min || 0); b[normSport(s.sport)] += (s.duration_min || 0); b.n++;\n}\nconst weeks = Object.keys(byWeek).sort();\nconst h = m => (m / 60).toFixed(1);\nconst volLines = weeks.map(wk => 'Wk of ' + wk.slice(5) + ': ' + h(byWeek[wk].total) + 'h (' + byWeek[wk].n + ' sessions) — swim ' + h(byWeek[wk].Swim) + ' / bike ' + h(byWeek[wk].Ride) + ' / run ' + h(byWeek[wk].Run) + ' / other ' + h(byWeek[wk].Workout));\n\n// CTL trajectory\nconst withCtl = sessions.filter(s => s.ctl != null && s.date).sort((a, b) => (a.date < b.date ? -1 : 1));\nconst ctlLine = withCtl.length ? 'CTL: ' + Math.round(withCtl[0].ctl) + ' → ' + Math.round(withCtl[withCtl.length - 1].ctl) + ' over ' + weeks.length + ' weeks' : 'No CTL data';\n\n// Run cadence (avg_cadence is half-spm — ×2), last 28d vs prior, duration-weighted\nconst cut28 = DateTime.now().minus({ days: 28 }).toFormat('yyyy-MM-dd');\nconst runs = sessions.filter(s => normSport(s.sport) === 'Run' && s.avg_cadence > 0 && (s.duration_min || 0) >= 10);\nconst wAvg = arr => { const d = arr.reduce((t, s) => t + s.duration_min, 0); return d ? arr.reduce((t, s) => t + s.avg_cadence * 2 * s.duration_min, 0) / d : null; };\nconst cadNow = wAvg(runs.filter(s => (s.date || '') >= cut28)), cadPrior = wAvg(runs.filter(s => (s.date || '') < cut28));\nconst cadLine = cadNow ? 'Run cadence: ' + Math.round(cadNow) + ' spm last 28d' + (cadPrior ? ' (prior 28d: ' + Math.round(cadPrior) + ')' : '') + ' — target 175-180' : 'No run cadence data';\n\n// Grades\nconst graded = sessions.filter(s => s.grade);\nconst gd = {}; graded.forEach(s => { gd[s.grade] = (gd[s.grade] || 0) + 1; });\nconst gradeLine = graded.length ? 'Session grades: ' + ['A', 'B', 'C', 'F'].filter(g => gd[g]).map(g => g + '×' + gd[g]).join(' · ') : 'No graded sessions';\n\n// Swim frequency vs 2/wk target\nconst swimN = sessions.filter(s => normSport(s.sport) === 'Swim').length;\nconst swimLine = 'Swim sessions: ' + swimN + ' across ' + weeks.length + ' weeks (target 2/wk)';\n\n// Recovery: sleep + HRV, last 28d vs prior\nconst wvalid = wellness.filter(d => d && /^\\d{4}-\\d{2}-\\d{2}$/.test(d.id || ''));\nconst wrecent = wvalid.filter(d => d.id >= cut28), wprior = wvalid.filter(d => d.id < cut28);\nconst avg = (arr, f) => { const v = arr.map(d => d[f]).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };\nconst sl = avg(wrecent, 'sleepSecs'), slp = avg(wprior, 'sleepSecs'), hv = avg(wrecent, 'hrv'), hvp = avg(wprior, 'hrv');\nconst fmtH = s => s == null ? '?' : Math.floor(s / 3600) + 'h' + String(Math.round((s % 3600) / 60)).padStart(2, '0');\nconst wellLine = (sl != null || hv != null) ? 'Recovery: sleep ' + fmtH(sl) + '/night last 28d (prior ' + fmtH(slp) + ') · HRV ' + (hv ? Math.round(hv) : '?') + ' (prior ' + (hvp ? Math.round(hvp) : '?') + ')' : 'No wellness data';\n\nconst Wr = Math.max(0, Math.ceil(DateTime.fromISO(athlete['Race Date']).diff(DateTime.now(), 'weeks').weeks));\nconst reviewContext = ['VOLUME BY WEEK:', ...volLines, '', ctlLine, cadLine, gradeLine, swimLine, wellLine].join('\\n');\nreturn [{ json: { ...athlete, reviewContext, weeks_to_race: Wr, monthName: DateTime.now().toFormat('LLLL yyyy') } }];\n"
+      },
+      "id": "675f7c5c-6664-4c82-9b8e-d143ac1f3abe"
+    },
+    {
+      "name": "Monthly Review LLM",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        1200,
+        0
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an elite triathlon coach writing a MONTHLY REVIEW for your athlete. Daily and weekly messages already cover session detail — this is the zoom-out on trajectory.\n\n=== ATHLETE ===\n- Name: {{ $json.Name }}\n- Race: {{ $json['Race Name'] }} ({{ $json['Race Date'] }}) — {{ $json.weeks_to_race }} weeks away\n- Fitness Profile: {{ $json['Fitness Profile'] }}\n\n=== GOAL & RACE TARGETS ===\n{{ $json.Goal }}\n\n=== TRAINING PRINCIPLES ===\n{{ $json['Training Principles'] }}\n\n=== LAST 8 WEEKS (aggregated data) ===\n{{ $json.reviewContext }}\n\n=== INSTRUCTIONS ===\nWrite the monthly review covering, in order:\n1. What improved — concrete numbers (volume, CTL, grades, recovery).\n2. What stalled or declined — name THE biggest limiter for the next 4 weeks (e.g. run cadence stuck ~150 vs 175-180 target, swim frequency below 2/wk, volume below target, declining sleep).\n3. Trajectory vs race targets, per discipline: swim 1:58/100m, bike ~75-80% FTP for 90min, run 5:00/km — on track / at risk / off track, one line each.\n4. One clear focus sentence for the next 4 weeks.\n\nRULES:\n- Header line exactly: 📆 Monthly Review — {{ $json.monthName }}\n- Plain text, ZERO markdown. Literal • for bullets.\n- ~12-16 lines total. Specific numbers over adjectives. No generic praise, no moralizing.\n- Output ONLY the Telegram message text. No JSON, no code blocks, no preamble.",
+        "batching": {}
+      },
+      "id": "83f43020-ed27-49a3-9d93-19fc9d9997a4"
+    },
+    {
+      "name": "OpenRouter Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        180
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "nhbNqmgyP4cAeQ6B",
+          "name": "OpenRouter account"
+        }
+      },
+      "parameters": {
+        "model": "anthropic/claude-opus-4.7",
+        "options": {}
+      },
+      "id": "1609f34e-c0aa-46a9-8bbf-bc36c22560a2"
+    },
+    {
+      "name": "Send Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1400,
+        0
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "9IpAp35yJmIQJpeA",
+          "name": "Telegram account"
+        }
+      },
+      "parameters": {
+        "chatId": "1865798034",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "404f20eb-c943-448e-8b3d-e8eb49a34390",
+      "webhookId": "ce014731-11e3-4e2a-aa3a-02ca1c7f0946"
+    },
+    {
+      "name": "When Called",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        180
+      ],
+      "parameters": {},
+      "id": "446394fc-9bd8-4e10-b171-526e195fd2c4"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "First Sunday?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "First Sunday?": {
+      "main": [
+        [
+          {
+            "node": "Get Athlete",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Get Athlete": {
+      "main": [
+        [
+          {
+            "node": "Get Review Sessions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Review Sessions": {
+      "main": [
+        [
+          {
+            "node": "Get Wellness 8wk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Wellness 8wk": {
+      "main": [
+        [
+          {
+            "node": "Build Review Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Review Context": {
+      "main": [
+        [
+          {
+            "node": "Monthly Review LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monthly Review LLM": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Monthly Review LLM",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Called": {
+      "main": [
+        [
+          {
+            "node": "Get Athlete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "psyVgPiGJoO5QOa4"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "0633de12-a567-41bd-8160-ae32cd39f1eb",
+  "activeVersionId": "0633de12-a567-41bd-8160-ae32cd39f1eb",
+  "versionCounter": 2,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-07-12T12:08:10.570Z",
+      "createdAt": "2026-07-12T12:08:10.570Z",
+      "role": "workflow:owner",
+      "workflowId": "AA2oAY6ZPu5i1c7I",
+      "projectId": "51zk01zmzcv1m5vw",
+      "project": {
+        "updatedAt": "2026-01-03T12:23:57.574Z",
+        "createdAt": "2026-01-03T12:23:52.619Z",
+        "id": "51zk01zmzcv1m5vw",
+        "name": "arthur pfalzgraf <arthur.pfalzgraf@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-07-12T12:10:35.874Z",
+    "createdAt": "2026-07-12T12:10:35.874Z",
+    "versionId": "0633de12-a567-41bd-8160-ae32cd39f1eb",
+    "workflowId": "AA2oAY6ZPu5i1c7I",
+    "nodes": [
+      {
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "triggerAtDay": [
+                  0
+                ],
+                "triggerAtHour": 19,
+                "triggerAtMinute": 30
+              }
+            ]
+          }
+        },
+        "id": "cfa554ce-0e72-4798-9f2c-d2c52bdc9000"
+      },
+      {
+        "name": "First Sunday?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          200,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "first-sunday",
+                "leftValue": "={{ $now.day }}",
+                "rightValue": 7,
+                "operator": {
+                  "type": "number",
+                  "operation": "lte"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "e447246c-180e-4dec-b24c-73a5c4bb986d"
+      },
+      {
+        "name": "Get Athlete",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          400,
+          0
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
+          }
+        },
+        "parameters": {
+          "method": "GET",
+          "url": "https://coach-db.arthurpfz.com/athletes/1",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {}
+        },
+        "id": "63236387-f742-4093-b9b2-fb17449b06d3"
+      },
+      {
+        "name": "Get Review Sessions",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          600,
+          0
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6GNzKYNE1JAz77RL",
+            "name": "Tricoach DB"
+          }
+        },
+        "parameters": {
+          "method": "GET",
+          "url": "https://coach-db.arthurpfz.com/sessions",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "athlete_id",
+                "value": "1"
+              },
+              {
+                "name": "date_from",
+                "value": "={{ $today.minus({ days: 56 }).toFormat('yyyy-MM-dd') }}"
+              },
+              {
+                "name": "limit",
+                "value": "300"
+              },
+              {
+                "name": "wrap",
+                "value": "1"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "cc7af638-6e4c-4d34-9e54-2dfcddf9ca09"
+      },
+      {
+        "name": "Get Wellness 8wk",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          800,
+          0
+        ],
+        "alwaysOutputData": true,
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "ms91wbaCvecB3tqQ",
+            "name": "Intervals.icu API"
+          }
+        },
+        "parameters": {
+          "method": "GET",
+          "url": "=https://intervals.icu/api/v1/athlete/{{ $('Get Athlete').item.json['Intervals.icu Athlete ID'] }}/wellness",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "oldest",
+                "value": "={{ $today.minus({ days: 55 }).toFormat('yyyy-MM-dd') }}"
+              },
+              {
+                "name": "newest",
+                "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true,
+                "neverError": true
+              }
+            }
+          }
+        },
+        "id": "f305b802-b05b-4c10-9c91-0b9661f350f3"
+      },
+      {
+        "name": "Build Review Context",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1000,
+          0
+        ],
+        "parameters": {
+          "jsCode": "// 8-week zoom-out: volume table, CTL, cadence, grades, swim count, recovery.\nconst athlete = $('Get Athlete').first().json;\nconst wrapped = $('Get Review Sessions').first().json;\nconst sessions = Array.isArray(wrapped.sessions) ? wrapped.sessions : [];\nconst wresp = $input.first().json;\nconst wellness = Array.isArray(wresp.body) ? wresp.body : [];\n\nconst normSport = s => { const sp = (s || '').toLowerCase(); if (sp.includes('swim')) return 'Swim'; if (sp.includes('run')) return 'Run'; if (sp.includes('ride') || sp.includes('bike') || sp.includes('cycl') || sp.includes('virtual')) return 'Ride'; return 'Workout'; };\n\n// Volume by ISO week\nconst byWeek = {};\nfor (const s of sessions) {\n  if (!s.date) continue;\n  const wk = DateTime.fromISO(s.date).startOf('week').toFormat('yyyy-MM-dd');\n  byWeek[wk] = byWeek[wk] || { total: 0, Swim: 0, Run: 0, Ride: 0, Workout: 0, n: 0 };\n  const b = byWeek[wk];\n  b.total += (s.duration_min || 0); b[normSport(s.sport)] += (s.duration_min || 0); b.n++;\n}\nconst weeks = Object.keys(byWeek).sort();\nconst h = m => (m / 60).toFixed(1);\nconst volLines = weeks.map(wk => 'Wk of ' + wk.slice(5) + ': ' + h(byWeek[wk].total) + 'h (' + byWeek[wk].n + ' sessions) — swim ' + h(byWeek[wk].Swim) + ' / bike ' + h(byWeek[wk].Ride) + ' / run ' + h(byWeek[wk].Run) + ' / other ' + h(byWeek[wk].Workout));\n\n// CTL trajectory\nconst withCtl = sessions.filter(s => s.ctl != null && s.date).sort((a, b) => (a.date < b.date ? -1 : 1));\nconst ctlLine = withCtl.length ? 'CTL: ' + Math.round(withCtl[0].ctl) + ' → ' + Math.round(withCtl[withCtl.length - 1].ctl) + ' over ' + weeks.length + ' weeks' : 'No CTL data';\n\n// Run cadence (avg_cadence is half-spm — ×2), last 28d vs prior, duration-weighted\nconst cut28 = DateTime.now().minus({ days: 28 }).toFormat('yyyy-MM-dd');\nconst runs = sessions.filter(s => normSport(s.sport) === 'Run' && s.avg_cadence > 0 && (s.duration_min || 0) >= 10);\nconst wAvg = arr => { const d = arr.reduce((t, s) => t + s.duration_min, 0); return d ? arr.reduce((t, s) => t + s.avg_cadence * 2 * s.duration_min, 0) / d : null; };\nconst cadNow = wAvg(runs.filter(s => (s.date || '') >= cut28)), cadPrior = wAvg(runs.filter(s => (s.date || '') < cut28));\nconst cadLine = cadNow ? 'Run cadence: ' + Math.round(cadNow) + ' spm last 28d' + (cadPrior ? ' (prior 28d: ' + Math.round(cadPrior) + ')' : '') + ' — target 175-180' : 'No run cadence data';\n\n// Grades\nconst graded = sessions.filter(s => s.grade);\nconst gd = {}; graded.forEach(s => { gd[s.grade] = (gd[s.grade] || 0) + 1; });\nconst gradeLine = graded.length ? 'Session grades: ' + ['A', 'B', 'C', 'F'].filter(g => gd[g]).map(g => g + '×' + gd[g]).join(' · ') : 'No graded sessions';\n\n// Swim frequency vs 2/wk target\nconst swimN = sessions.filter(s => normSport(s.sport) === 'Swim').length;\nconst swimLine = 'Swim sessions: ' + swimN + ' across ' + weeks.length + ' weeks (target 2/wk)';\n\n// Recovery: sleep + HRV, last 28d vs prior\nconst wvalid = wellness.filter(d => d && /^\\d{4}-\\d{2}-\\d{2}$/.test(d.id || ''));\nconst wrecent = wvalid.filter(d => d.id >= cut28), wprior = wvalid.filter(d => d.id < cut28);\nconst avg = (arr, f) => { const v = arr.map(d => d[f]).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };\nconst sl = avg(wrecent, 'sleepSecs'), slp = avg(wprior, 'sleepSecs'), hv = avg(wrecent, 'hrv'), hvp = avg(wprior, 'hrv');\nconst fmtH = s => s == null ? '?' : Math.floor(s / 3600) + 'h' + String(Math.round((s % 3600) / 60)).padStart(2, '0');\nconst wellLine = (sl != null || hv != null) ? 'Recovery: sleep ' + fmtH(sl) + '/night last 28d (prior ' + fmtH(slp) + ') · HRV ' + (hv ? Math.round(hv) : '?') + ' (prior ' + (hvp ? Math.round(hvp) : '?') + ')' : 'No wellness data';\n\nconst Wr = Math.max(0, Math.ceil(DateTime.fromISO(athlete['Race Date']).diff(DateTime.now(), 'weeks').weeks));\nconst reviewContext = ['VOLUME BY WEEK:', ...volLines, '', ctlLine, cadLine, gradeLine, swimLine, wellLine].join('\\n');\nreturn [{ json: { ...athlete, reviewContext, weeks_to_race: Wr, monthName: DateTime.now().toFormat('LLLL yyyy') } }];\n"
+        },
+        "id": "675f7c5c-6664-4c82-9b8e-d143ac1f3abe"
+      },
+      {
+        "name": "Monthly Review LLM",
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.8,
+        "position": [
+          1200,
+          0
+        ],
+        "parameters": {
+          "promptType": "define",
+          "text": "=You are an elite triathlon coach writing a MONTHLY REVIEW for your athlete. Daily and weekly messages already cover session detail — this is the zoom-out on trajectory.\n\n=== ATHLETE ===\n- Name: {{ $json.Name }}\n- Race: {{ $json['Race Name'] }} ({{ $json['Race Date'] }}) — {{ $json.weeks_to_race }} weeks away\n- Fitness Profile: {{ $json['Fitness Profile'] }}\n\n=== GOAL & RACE TARGETS ===\n{{ $json.Goal }}\n\n=== TRAINING PRINCIPLES ===\n{{ $json['Training Principles'] }}\n\n=== LAST 8 WEEKS (aggregated data) ===\n{{ $json.reviewContext }}\n\n=== INSTRUCTIONS ===\nWrite the monthly review covering, in order:\n1. What improved — concrete numbers (volume, CTL, grades, recovery).\n2. What stalled or declined — name THE biggest limiter for the next 4 weeks (e.g. run cadence stuck ~150 vs 175-180 target, swim frequency below 2/wk, volume below target, declining sleep).\n3. Trajectory vs race targets, per discipline: swim 1:58/100m, bike ~75-80% FTP for 90min, run 5:00/km — on track / at risk / off track, one line each.\n4. One clear focus sentence for the next 4 weeks.\n\nRULES:\n- Header line exactly: 📆 Monthly Review — {{ $json.monthName }}\n- Plain text, ZERO markdown. Literal • for bullets.\n- ~12-16 lines total. Specific numbers over adjectives. No generic praise, no moralizing.\n- Output ONLY the Telegram message text. No JSON, no code blocks, no preamble.",
+          "batching": {}
+        },
+        "id": "83f43020-ed27-49a3-9d93-19fc9d9997a4"
+      },
+      {
+        "name": "OpenRouter Chat Model",
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+        "typeVersion": 1,
+        "position": [
+          1200,
+          180
+        ],
+        "credentials": {
+          "openRouterApi": {
+            "id": "nhbNqmgyP4cAeQ6B",
+            "name": "OpenRouter account"
+          }
+        },
+        "parameters": {
+          "model": "anthropic/claude-opus-4.7",
+          "options": {}
+        },
+        "id": "1609f34e-c0aa-46a9-8bbf-bc36c22560a2"
+      },
+      {
+        "name": "Send Telegram",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1400,
+          0
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "9IpAp35yJmIQJpeA",
+            "name": "Telegram account"
+          }
+        },
+        "parameters": {
+          "chatId": "1865798034",
+          "text": "={{ $json.text }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "id": "404f20eb-c943-448e-8b3d-e8eb49a34390",
+        "webhookId": "ce014731-11e3-4e2a-aa3a-02ca1c7f0946"
+      },
+      {
+        "name": "When Called",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1,
+        "position": [
+          200,
+          180
+        ],
+        "parameters": {},
+        "id": "446394fc-9bd8-4e10-b171-526e195fd2c4"
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "First Sunday?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "First Sunday?": {
+        "main": [
+          [
+            {
+              "node": "Get Athlete",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Get Athlete": {
+        "main": [
+          [
+            {
+              "node": "Get Review Sessions",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Review Sessions": {
+        "main": [
+          [
+            {
+              "node": "Get Wellness 8wk",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Wellness 8wk": {
+        "main": [
+          [
+            {
+              "node": "Build Review Context",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Review Context": {
+        "main": [
+          [
+            {
+              "node": "Monthly Review LLM",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Monthly Review LLM": {
+        "main": [
+          [
+            {
+              "node": "Send Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenRouter Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Monthly Review LLM",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "When Called": {
+        "main": [
+          [
+            {
+              "node": "Get Athlete",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "arthur pfalzgraf",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-07-12T12:10:36.040Z",
+        "id": 819,
+        "workflowId": "AA2oAY6ZPu5i1c7I",
+        "versionId": "0633de12-a567-41bd-8160-ae32cd39f1eb",
+        "event": "activated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      },
+      {
+        "createdAt": "2026-07-12T12:10:36.001Z",
+        "id": 818,
+        "workflowId": "AA2oAY6ZPu5i1c7I",
+        "versionId": "0633de12-a567-41bd-8160-ae32cd39f1eb",
+        "event": "deactivated",
+        "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
+      }
+    ]
+  }
+}
