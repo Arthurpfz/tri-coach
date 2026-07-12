@@ -28,7 +28,7 @@ This is an **automated triathlon coaching system** that creates personalized wee
 ### Data Flow
 
 ```
-Sunday 8:05 PM → Generate Weekly Plan → POST /weekly-plans → Send to Telegram
+Sunday 8:45 PM → Generate Weekly Plan → POST /weekly-plans → Send to Telegram (after daily recap + stats)
 Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI Analysis
               → PUT /athletes/:id (last_coaching_date) → Telegram feedback
 ```
@@ -205,7 +205,7 @@ Watch: Late-ride power decay vs fueling
 
 ### 2. Coach Tri - Sunday Planner
 - **ID:** lUcAtn2oxCPkNkJ1
-- **Schedule:** Weekly on Sunday at 20:05 (Europe/Berlin); also on-demand via `/program` (Feedback Handler → `When Called` Execute Workflow Trigger)
+- **Schedule:** Weekly on Sunday at 20:45 (Europe/Berlin) — intentionally after the 20:10 daily recap + 20:30 stats so the plan lands last; also on-demand via `/program` (Feedback Handler → `When Called` Execute Workflow Trigger)
 - **Purpose:** Generate personalized weekly training plan for next week
 - **Status:** ✅ Active
 - **AI Model:** Claude Opus 4.7 (OpenRouter `anthropic/claude-opus-4.7`)
@@ -439,7 +439,7 @@ The session is judged purely on **execution quality vs the athlete's fitness pro
 ### Schedule Times (Europe/Berlin)
 - **Daily Check-in:** 20:10 (8:10 PM)
 - **Weekly Stats:** 20:30 (8:30 PM)
-- **Weekly Planning:** Sunday 20:05 (8:05 PM)
+- **Weekly Planning:** Sunday 20:45 (8:45 PM)
 
 ### Credentials Used
 - Tricoach DB (ID: 6GNzKYNE1JAz77RL, httpHeaderAuth with `X-API-Key`)
@@ -636,6 +636,14 @@ This will show:
 ---
 
 ## Changelog
+
+### 2026-06-29 (later) — Sunday Planner moved to 20:45 (plan lands last)
+- The new weekly plan fired at 20:05, *before* the 20:10 daily recap — odd ordering. Moved Sunday Planner (`lUcAtn2oxCPkNkJ1`) schedule trigger to **20:45**, so the Sunday sequence is daily recap (20:10) → weekly stats (20:30) → next week's plan (20:45). Only the cron minute changed; the `/program` on-demand path is untouched. Deployed via `PUT /workflows`, confirmed active.
+
+### 2026-06-29 — Short swims no longer dropped by the 10-min filter
+- **BUG:** Arthur's June 28 open-water swim (mid-ride, COROS, **568s moving / 429m**) was never analyzed or sent. Root cause: `Filter Activities` `moving_time >= 600` floor (a false-start guard) dropped it — 32s under cutoff. Both Daily Checkin and `/refresh` skipped it silently; it had synced to Intervals.icu fine.
+- **Fix:** `drop-short` condition in `Filter Activities` rewritten to a boolean expr exempting swims — `(type contains "swim") || moving_time >= 600` — in both Daily Checkin (`hrSGUqoAwkWQ4gKl`) and Backfill (`rHIyZMIJNAOqZvM2`). Ride/run still held to the 10-min floor. Deployed via `PUT /workflows`, both confirmed `active`.
+- **Verified end-to-end:** temp webhook→Execute Workflow bridge triggered Backfill; swim now passes the filter → saved (session id 370, OpenWaterSwim) → analyzed (Grade B, "too short + no HR" honest call) → Telegram sent with 📅 prefix. Temp bridge deleted after.
 
 ### 2026-06-10 (evening) — Plan adherence loop + CTL trend in Sunday Planner
 - **BUG FIX (data layer):** Daily Checkin/Backfill `Save Analysis` had been PATCHing `plan_session_id` for weeks, but `db/server.js` had no such column and it wasn't in `PATCH_FIELDS` — silently dropped. Added column (auto-migrated) + PATCH support. Also: `date_to` filter on `GET /sessions` (the planner was already sending it — silently ignored), `DELETE /weekly-plans/:id`, and removed a leftover test plan row (`week 2099-01-01`) that broke `/weekly-plans/latest`. Deployed via PR #7 + `tricoach-db-deploy-raw`.
