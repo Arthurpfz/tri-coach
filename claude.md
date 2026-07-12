@@ -637,6 +637,22 @@ This will show:
 
 ## Changelog
 
+### 2026-07-12 (later) — Multi-session days: all sessions now analyzed, graded as a day
+- **BUG: only one session per day ever analyzed** — user had to `/refresh` (sometimes repeatedly) to get the rest. TWO root causes:
+  1. Daily Checkin (`hrSGUqoAwkWQ4gKl`) still had the nested `Loop Over Activities` splitInBatches with loop-back wiring — the same "triplet bug" pattern removed from Backfill in May. **Fix:** node deleted, `Check Activities Exist → Get Activity Details` direct per-item cascade (mirrors Backfill), `Get Activity Details` URL now `{{ $json.id }}`.
+  2. **The deeper one, in BOTH workflows:** `Build Trend Stats` + `Build Sport Metrics` Code nodes ran in default `runOnceForAllItems` mode with `.first()` refs and single-item returns — N items in, 1 item out. Everything downstream (streams, LLM, Telegram) ran once regardless of session count. **Fix:** both switched to `runOnceForEachItem` with `.item` pairing. Also `Get Activity Streams` now uses `fullResponse + neverError` so array/empty responses can't split or drop items (a swim's empty torque response previously vanished from the batch on mixed days).
+- **Same-day context + fair grading for short sessions** (`Hardcore Analysis` prompt, both workflows):
+  - New `OTHER SESSIONS TODAY` section — lists the day's other DB sessions (sport · min · km · grade). `Get Matched Sessions` dropped `has_analysis=1` so just-saved same-run sessions appear (ALREADY MATCHED behavior unchanged — it filters on `plan_session_id`).
+  - New `MULTI-SESSION DAYS & SHORT SESSIONS` rules: judge a session as part of the day's whole (short pool + open-water = good swim day), NEVER fail for brevity, short swims (<15min) grade neutrally.
+- **Sport normalization in trend/metrics:** `normSport()` in both Code nodes — OpenWaterSwim now gets Swim-family trend stats (7 sessions vs OWS-only before) and swim form metrics.
+- **Verified e2e** via temp webhook bridge (deleted after): nulled the Jul 9 pool+OWS pair → one Backfill run analyzed BOTH (2 items through every node, 2 Telegrams), each prompt showed the other session, pool regraded C→B, Jul 11 9-min OWS regraded F→B. Daily Checkin restructure is wiring-identical to Backfill; first live run = tonight's 20:10 cron (error handler alerts if it fails).
+
+### 2026-07-12 — Open-water swims missing from per-sport volume breakdown
+- **BUG:** Weekly Stats (`2W0SIHwzyAWJW62Q` `Format Stats`) and `/strikes` (`gAnJ0r3x0sFxqWxY` `Format Strikes`) bucketed minutes into `Run/Swim/Ride/Workout` by exact sport-name match, special-casing only `VirtualRide → Ride`. Intervals.icu labels open water as `OpenWaterSwim`, which ≠ `Swim`, so those minutes never landed on the 🏊 Swim row (they still counted in the total 🔥 hours). Arthur flagged open water "not counted as training." Daily Checkin was unaffected — every `OpenWaterSwim` was saved, analyzed, and graded.
+- **Fix:** replaced exact-match with a substring normalizer in both nodes — `swim`→Swim, `run`→Run (checked before ride so VirtualRun works), `ride|bike|cycl|virtual`→Ride, else Workout. Deployed via `PUT /workflows`, both HTTP 200 + active.
+- **Verified** against live sessions (week of 2026-07-06): 🏊 Swim 0:43 → 2:56 (5 open-water swims, +2:13 previously invisible). Confirmed live end-to-end via `/strikes` on Telegram same day.
+- **Sunday Planner too:** `Build Prompt Context` (`lUcAtn2oxCPkNkJ1`) adherence sport-fallback had the same exact-match gap — added a `normSport()` helper so `OpenWaterSwim` matches a planned `Swim` (and `VirtualRide`/`bike` a `Ride`) when `plan_session_id` is null. Deployed HTTP 200 + active; verified on live week 2026-07-06 data (no regression — this week's swims already matched via persisted `plan_session_id`; the fix covers the null-`plan_session_id` fallback).
+
 ### 2026-06-29 (later) — Sunday Planner moved to 20:45 (plan lands last)
 - The new weekly plan fired at 20:05, *before* the 20:10 daily recap — odd ordering. Moved Sunday Planner (`lUcAtn2oxCPkNkJ1`) schedule trigger to **20:45**, so the Sunday sequence is daily recap (20:10) → weekly stats (20:30) → next week's plan (20:45). Only the cron minute changed; the `/program` on-demand path is untouched. Deployed via `PUT /workflows`, confirmed active.
 

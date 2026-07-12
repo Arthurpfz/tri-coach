@@ -1,31 +1,46 @@
 {
-    "updatedAt": "2026-07-12T11:16:46.542Z",
-    "createdAt": "2026-01-25T09:37:00.424Z",
-    "id": "hrSGUqoAwkWQ4gKl",
-    "name": "Coach Tri - Daily Checkin (Intervals.icu)",
+    "updatedAt": "2026-07-12T11:16:47.723Z",
+    "createdAt": "2026-05-01T08:56:54.752Z",
+    "id": "rHIyZMIJNAOqZvM2",
+    "name": "Coach Tri - Backfill (/refresh)",
     "description": null,
     "active": true,
     "isArchived": false,
     "nodes": [
         {
+            "id": "trigger",
+            "name": "When Called",
+            "type": "n8n-nodes-base.executeWorkflowTrigger",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {}
+        },
+        {
+            "id": "send-ack",
+            "name": "Send Ack",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                200,
+                0
+            ],
             "parameters": {
-                "rule": {
-                    "interval": [
-                        {
-                            "triggerAtHour": 20,
-                            "triggerAtMinute": 10
-                        }
-                    ]
+                "chatId": "={{ $json.chat_id || \"1865798034\" }}",
+                "text": "\ud83d\udd04 Catching up last 7 days\u2026",
+                "additionalFields": {
+                    "appendAttribution": false
                 }
             },
-            "type": "n8n-nodes-base.scheduleTrigger",
-            "typeVersion": 1.3,
-            "position": [
-                -520,
-                240
-            ],
-            "id": "schedule-trigger",
-            "name": "Schedule Trigger"
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            },
+            "webhookId": "610a7d38-35e1-4094-a16a-88789b6bc066"
         },
         {
             "id": "search-users",
@@ -33,8 +48,8 @@
             "type": "n8n-nodes-base.httpRequest",
             "typeVersion": 4.3,
             "position": [
-                -320,
-                240
+                400,
+                0
             ],
             "parameters": {
                 "method": "GET",
@@ -57,8 +72,8 @@
             "type": "n8n-nodes-base.splitInBatches",
             "typeVersion": 3,
             "position": [
-                -120,
-                240
+                600,
+                0
             ],
             "id": "loop-users",
             "name": "Loop Over Users"
@@ -72,11 +87,11 @@
                     "parameters": [
                         {
                             "name": "oldest",
-                            "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+                            "value": "={{ $today.minus({days: 7}).toFormat(\"yyyy-MM-dd\") }}"
                         },
                         {
                             "name": "newest",
-                            "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+                            "value": "={{ $today.toFormat(\"yyyy-MM-dd\") }}"
                         }
                     ]
                 },
@@ -87,8 +102,8 @@
             "type": "n8n-nodes-base.httpRequest",
             "typeVersion": 4.3,
             "position": [
-                80,
-                240
+                800,
+                0
             ],
             "id": "get-activities",
             "name": "Get Activities",
@@ -100,17 +115,44 @@
             }
         },
         {
+            "id": "filter-activities",
+            "name": "Filter Activities",
+            "type": "n8n-nodes-base.filter",
+            "typeVersion": 2.2,
+            "position": [
+                1000,
+                0
+            ],
             "parameters": {
                 "conditions": {
                     "options": {
                         "caseSensitive": true,
                         "leftValue": "",
-                        "typeValidation": "strict"
+                        "typeValidation": "strict",
+                        "version": 2
                     },
                     "conditions": [
                         {
-                            "id": "check-activities-exist",
-                            "leftValue": "={{ $input.all().length }}",
+                            "id": "drop-zepp",
+                            "leftValue": "={{ $json.source }}",
+                            "rightValue": "ZEPP",
+                            "operator": {
+                                "type": "string",
+                                "operation": "notEquals"
+                            }
+                        },
+                        {
+                            "id": "drop-short",
+                            "leftValue": "={{ (($json.type||\"\").toLowerCase().includes(\"swim\")) || $json.moving_time >= 600 }}",
+                            "rightValue": true,
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "equals"
+                            }
+                        },
+                        {
+                            "id": "drop-empty",
+                            "leftValue": "={{ $json.distance }}",
                             "rightValue": 0,
                             "operator": {
                                 "type": "number",
@@ -121,15 +163,7 @@
                     "combinator": "and"
                 },
                 "options": {}
-            },
-            "type": "n8n-nodes-base.if",
-            "typeVersion": 2.3,
-            "position": [
-                480,
-                240
-            ],
-            "id": "check-activities",
-            "name": "Check Activities Exist"
+            }
         },
         {
             "parameters": {
@@ -142,8 +176,8 @@
             "type": "n8n-nodes-base.httpRequest",
             "typeVersion": 4.3,
             "position": [
-                1080,
-                160
+                1600,
+                0
             ],
             "id": "get-activity-details",
             "name": "Get Activity Details",
@@ -151,189 +185,6 @@
                 "httpBasicAuth": {
                     "id": "ms91wbaCvecB3tqQ",
                     "name": "Intervals.icu API"
-                }
-            }
-        },
-        {
-            "parameters": {
-                "assignments": {
-                    "assignments": [
-                        {
-                            "id": "calc-monday",
-                            "name": "Monday_date",
-                            "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}",
-                            "type": "string"
-                        }
-                    ]
-                },
-                "options": {}
-            },
-            "type": "n8n-nodes-base.set",
-            "typeVersion": 3.4,
-            "position": [
-                1280,
-                160
-            ],
-            "id": "calculate-monday",
-            "name": "Calculate Monday"
-        },
-        {
-            "id": "search-plan",
-            "name": "Search Plan",
-            "type": "n8n-nodes-base.httpRequest",
-            "typeVersion": 4.3,
-            "position": [
-                1480,
-                160
-            ],
-            "parameters": {
-                "method": "GET",
-                "url": "https://coach-db.arthurpfz.com/weekly-plans/latest",
-                "authentication": "genericCredentialType",
-                "genericAuthType": "httpHeaderAuth",
-                "options": {},
-                "sendQuery": true,
-                "queryParameters": {
-                    "parameters": [
-                        {
-                            "name": "athlete_id",
-                            "value": "={{ $('Loop Over Users').item.json.id }}"
-                        }
-                    ]
-                }
-            },
-            "credentials": {
-                "httpHeaderAuth": {
-                    "id": "6GNzKYNE1JAz77RL",
-                    "name": "Tricoach DB"
-                }
-            }
-        },
-        {
-            "parameters": {
-                "promptType": "define",
-                "text": "=You are an elite endurance coach analyzing a single training session.\n\nGRADE REFLECTS SESSION QUALITY ONLY \u2014 how cleanly this session of its kind was executed against the athlete's fitness profile (HR zones, FTP, CSS, cadence targets) AND the day's conditions (terrain, weather). It is NOT a plan-adherence score. An unplanned long ride executed cleanly is an A. A sloppy planned interval set is a C.\n\n=== ATHLETE ===\n- Name: {{ $('Loop Over Users').item.json.Name }}\n- Phase: {{ $('Loop Over Users').item.json['Training Phase'] }}\n- Profile: {{ $('Loop Over Users').item.json['Fitness Profile'] }}\n- Health: {{ $('Loop Over Users').item.json['Health Status'] }}\n\n=== THIS WEEK'S PLAN (indicative \u2014 not a contract) ===\nFocus: {{ $('Search Plan').item.json.Focus }}\nSessions:\n{{ JSON.stringify($('Search Plan').item.json.sessions || [], null, 2) }}\n\nThe plan is a Sunday suggestion. The athlete is free to swap, skip, or add sessions. Do NOT grade against it. Use it only as soft context if a meaningful relationship exists (e.g. swapped a planned swim for a ride). Be neutral.\n\n=== ALREADY MATCHED THIS WEEK ===\n{{ (($('Get Matched Sessions').item.json.sessions || []).filter(s => s.plan_session_id).map(s => '- plan_session_id=' + s.plan_session_id + ' (' + (s.sport||'?') + ', ' + (s.date||'') + ')').join('\\n')) || '(none yet)' }}\n\n=== OTHER SESSIONS TODAY (same-day context) ===\n{{ (($('Get Matched Sessions').item.json.sessions || []).filter(s => (s.date||'') === DateTime.fromISO($('Get Activity Details').item.json.start_date_local).toFormat('yyyy-MM-dd') && s.intervals_id !== $('Get Activity Details').item.json.id).map(s => '- ' + (s.sport||'?') + ' \u00b7 ' + (s.duration_min||'?') + 'min \u00b7 ' + (s.distance_km||0) + 'km' + (s.grade ? ' \u00b7 Grade ' + s.grade : '')).join('\\n')) || '(none \u2014 only session today)' }}\n\n=== 30-DAY TREND (same sport) ===\n{{ $json.trendSummary }}\n\n=== TODAY'S ACTIVITY ===\nActivity: {{ $('Get Activity Details').item.json.type }} - {{ $('Get Activity Details').item.json.name }}\nSource: {{ $('Get Activity Details').item.json.source }}\nDate (weekday): {{ DateTime.fromISO($('Get Activity Details').item.json.start_date_local).toFormat('cccc, yyyy-MM-dd') }}\nDuration: {{ Math.round($('Get Activity Details').item.json.moving_time / 60) }}min\nDistance: {{ $('Get Activity Details').item.json.distance ? ($('Get Activity Details').item.json.distance / 1000).toFixed(2) + 'km' : 'N/A' }}\n\n{{ $('Get Activity Details').item.json.total_elevation_gain ? 'Elevation gain: ' + Math.round($('Get Activity Details').item.json.total_elevation_gain) + 'm' : '' }}\n{{ $('Get Activity Details').item.json.average_temp ? 'Avg temp: ' + Math.round($('Get Activity Details').item.json.average_temp) + '\u00b0C' : '' }}\n{{ $('Get Activity Details').item.json.average_wind_speed ? 'Wind: ' + ($('Get Activity Details').item.json.average_wind_speed * 3.6).toFixed(1) + 'km/h' + ($('Get Activity Details').item.json.headwind_percent ? ' (' + Math.round($('Get Activity Details').item.json.headwind_percent) + '% headwind)' : '') : '' }}\n\n{{ $('Get Activity Details').item.json.avg_watts ? 'Power: ' + Math.round($('Get Activity Details').item.json.avg_watts) + 'W avg / ' + Math.round($('Get Activity Details').item.json.weighted_avg_watts) + 'W NP / VI ' + $('Get Activity Details').item.json.variability_index.toFixed(2) : '' }}\n{{ $('Get Activity Details').item.json.average_heartrate ? 'HR: ' + Math.round($('Get Activity Details').item.json.average_heartrate) + 'bpm avg / ' + Math.round($('Get Activity Details').item.json.max_heartrate) + 'bpm max / LTHR ' + $('Get Activity Details').item.json.lthr : '' }}\n{{ $('Get Activity Details').item.json.icu_hr_zone_times ? 'HR zones (Z1-Z5+): ' + $('Get Activity Details').item.json.icu_hr_zone_times.map(t => Math.round(t/60) + 'min').join(' / ') : '' }}\n{{ $('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence ? 'Cadence: ' + Math.round(($('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence) * ($('Get Activity Details').item.json.type === 'Run' ? 2 : 1)) + ($('Get Activity Details').item.json.type === 'Run' ? 'spm' : 'rpm') : '' }}\n{{ $('Get Activity Details').item.json.average_speed && $('Get Activity Details').item.json.type === 'Run' ? 'Pace: ' + Math.floor(1000 / $('Get Activity Details').item.json.average_speed / 60) + ':' + String(Math.round((1000 / $('Get Activity Details').item.json.average_speed) % 60)).padStart(2, '0') + '/km' : '' }}\nTSS: {{ $('Get Activity Details').item.json.icu_training_load ? Math.round($('Get Activity Details').item.json.icu_training_load) : 'N/A' }}\nIF: {{ $('Get Activity Details').item.json.intensity ? $('Get Activity Details').item.json.intensity.toFixed(2) : 'N/A' }}\n\n=== PLAN MATCHING (tracking only \u2014 does NOT affect grade or wording) ===\n1. If today's activity clearly corresponds to one of the unmatched sessions of the same sport in the pool, set plan_session_id to that id.\n2. If today is a session's pinned_day and the sport matches, prefer that session.\n3. Otherwise set plan_session_id to null. This is fine \u2014 it just means today wasn't in the suggestion pool.\n4. Never re-use a plan_session_id already in ALREADY MATCHED.\n5. Whether plan_session_id is null or not has ZERO bearing on grade or message tone.\n\n=== GRADE RUBRIC (session quality only, vs fitness profile + conditions) ===\nA \u2014 Clean execution. Zones held, pacing controlled, cadence in target, no major flags.\nB \u2014 Solid with one notable flag (mild cardiac drift, minor zone leak, slightly off cadence).\nC \u2014 Significant execution issues (poor pacing, big zone leaks, mechanical inefficiency, decoupling).\nF \u2014 Broken session (abandoned, injury risk, severe overreach, data corruption).\n\nA long unplanned Z2 ride that holds zones cleanly is an A. A planned Z2 ride that bleeds 30% into Z3 is a C. The plan is irrelevant; the session is what's graded.\n\n=== MULTI-SESSION DAYS & SHORT SESSIONS ===\n- If OTHER SESSIONS TODAY lists sessions, judge this one as part of the day's whole training, not in isolation. Combined same-sport volume counts: a short pool set plus an open-water swim that sum to solid volume = a good swim day \u2014 say so in a bullet when relevant.\n- NEVER fail a session for being short. Grade what was done (zones, technique, effort), not the duration. Reserve F for genuinely broken sessions (abandoned mid-effort, injury risk, corrupt data). A clean 10min open-water dip is a B, not an F.\n- Short swims (<15min) with little/no HR data: describe what's measurable, grade neutrally (B if clean, C only for real execution faults).\n\n=== CONDITIONS-AWARE FLAGGING (read carefully) ===\nMany \"issues\" have benign environmental causes. Before flagging cadence, HR, or pacing problems, check the environmental data above:\n- Cadence drops on Ride: if elevation_gain > 500m, low cadence is expected on climbs \u2014 do NOT flag as inefficiency.\n- HR runs hot: if avg_temp > 28\u00b0C, expect cardiac drift \u2014 do NOT call it overreach.\n- Power vs HR mismatch: if headwind_percent > 40%, power required to maintain HR drops \u2014 adjust expectations.\n- Rough wind: if average_wind_speed > 5 m/s, pacing variability is environmental, not athletic.\nBe specific in your reasoning when conditions matter: \"68rpm with 1100m of climbing \u2014 expected\" rather than blanket \"low cadence\".\n\n=== SESSION INTENT (infer before grading \u2014 OVERRIDES the rubric where stated) ===\nInfer what kind of session this was from its structure BEFORE applying the rubric \u2014 grade execution against the inferred intent, never against an assumed steady Z2.\n\nWEDNESDAY RIDE = RAPHA GROUP RIDE (hard rule):\nIf Date (weekday) is Wednesday and the sport is Ride, this IS the athlete's recurring Rapha group ride. Its design is: Z2 base with deliberate sprint/surge efforts in the middle. For this ride you MUST:\n- Treat Z4-Z5 spikes and high max HR as the designed sprint block \u2014 they are NOT zone leakage, NOT 'uncontrolled surges'. Never penalize them.\n- EXCLUDE torque CV, VI, and average cadence from grading entirely \u2014 group dynamics (coasting, drafting, surging) distort all three. Do not mention them as faults.\n- Grade on: Z2 discipline outside the sprint block, commitment in the efforts, and HR recovery after surges. A Rapha ride with a solid Z2 base and committed sprints is an A or B by default.\n\nOther rides: repeated short Z4-Z5 surges over a Z2 base with high coasting time also indicate a group/mixed ride \u2014 apply the same logic. Steady solo-structured sessions keep the full rubric as-is.\n\n=== TREND USAGE (REQUIRED when comparable data exists) ===\nThe 30-day trend section gives you color. When the trend has \u22652 valid sessions, you MUST surface at least one trend-anchored insight in the bullets if any of these are true:\n- Today's avg_hr differs from 30d avg HR by >5bpm\n- Today's avg_power differs from 30d avg power by >5%\n- Today's duration is the longest or shortest of last 30d for this sport\n- Today's decoupling/EF is meaningfully different from the 30d mean\n- Today's grade extends or breaks a streak (e.g. \"first A in 4 rides\", \"third C in a row\")\n\nPhrase as concrete deltas: \"HR 149bpm \u2014 +22 vs your 30d Ride avg of 127bpm, ran significantly harder\" rather than \"HR was high\".\n\nIf the trend section says \"(no comparable...)\" you have no trend data \u2014 skip this rule.\n\nTrend deltas do NOT change the grade rubric. Trend is color, not currency.\n\n=== SPORT-SPECIFIC FORM METRICS ===\n{{ $json.sportMetrics }}\n\n=== FORM COACHING RULES ===\nWhen Sport-Specific Form Metrics are present, give technique-level coaching in addition to zone/pacing analysis:\n- Run: if cadence < 165 spm, prescribe cadence increase (\"aim 170-175 spm \u2014 shortens stride, reduces overstride\"). If stride length is short for the pace, may indicate overstride compensating for low cadence. Don't invent GCT/oscillation values \u2014 the prompt explicitly notes they're unavailable.\n- Swim: if SWOLF > 40, push stroke economy (\"longer glide, drop SR by 2\"). If DPS < 1.3, target distance per stroke. Suggest breathing pattern adjustments (e.g. breathe every 3 vs every 2) if HR runs high at moderate effort.\n- Ride: if torque variability CV > 0.40, comment on pedaling consistency (\"torque CV 0.48 \u2014 choppy pedaling, work on smooth stroke through the dead spot\"). If icu_cadence_z2 < 40% of moving time, note that the avg cadence number hides long stretches at inefficient RPMs. Do NOT mention L/R balance or pedaling smoothness % \u2014 single-sided meter, data doesn't exist.\n\nBe honest about missing data. NEVER invent Running Dynamics, L/R balance, or per-leg pedaling metrics. The metrics block tells you what's available.\n\n=== ANALYSIS FORMAT (EXACTLY 3 BULLETS \u2014 no more, no less) ===\n[sport-emoji] [Sport] \u00b7 [duration]min \u00b7 [distance]km \u00b7 [avg HR]bpm \u00b7 TSS [tss]\nGrade: [A/B/C/F] \u2014 [one reason about session quality, \u22648 words]\n\n\u2022 [insight 1 \u2014 the most important physiological/execution flag, with specific numbers]\n\u2022 [insight 2 \u2014 secondary flag OR trend delta if material; weave the trend INTO this bullet, do NOT add a 4th]\n\u2022 Limiter: [the one thing holding back progress]\n\nTomorrow: [session prescription \u226412 words]\nWatch: [one metric to track next time \u22648 words]\n\nIf trend usage is required (rule above), fold the trend insight into bullet 1 OR bullet 2 \u2014 never as a separate bullet. Examples:\n- \"HR 149bpm \u2014 9 below your 30d Ride avg of 158bpm, but 37% above Z2 ceiling: pacing control was the issue, not effort\"\n- \"Cadence 68rpm \u2014 same low pattern as your 30d Ride avg, mechanically inefficient on flat terrain\"\n\nNEVER output more than 3 bullets. NEVER omit the Limiter bullet.\n\nEMOJI MAP: \ud83c\udfc3 Run \u00b7 \ud83c\udfca Swim \u00b7 \ud83d\udeb4 Ride/VirtualRide \u00b7 \ud83d\udcaa Workout \u00b7 \u26f7\ufe0f NordicSki \u00b7 \ud83d\udeb6 Walk \u00b7 \ud83e\udd7e Hike\n\nRULES (enforce strictly):\n- NEVER prefix the message with \"\u26a0\ufe0f Off-plan\" or any plan-adherence warning. Header is just session info.\n- NEVER use \"off-plan\", \"deviated from plan\", \"no planned X today\", or similar phrasing.\n- Do NOT scold or moralize about the athlete deviating from the plan.\n- Mention the plan only if it's genuinely useful context. Default to silence about the plan.\n- Grade reasoning must reference session quality (zones, pacing, cadence, drift, decoupling), never plan adherence.\n- When flagging mechanical/physiological issues, account for terrain (elevation_gain) and conditions (temp, wind).\n- EXACTLY 3 bullets. The third bullet MUST start with \"Limiter:\". No 4th bullet under any circumstance.\n- When the trend rule applies, the trend insight goes INSIDE bullet 1 or 2 \u2014 not as a separate bullet.\n- ZERO markdown \u2014 no **, no *, no __. Plain text only.\n- Bullets are the literal \u2022 character.\n- Max 8 lines total (1 header + 1 grade + blank + 3 bullets + Tomorrow + Watch = 8).\n- Use only metrics provided above. Never invent numbers.\n- Tone: rigorous, direct, descriptive. Describe; do not judge adherence.\n- No preamble, no signoff.\n\n=== OUTPUT (JSON ONLY) ===\n{\"plan_session_id\":\"<id from pool, or null>\",\"grade\":\"A|B|C|F\",\"message\":\"<full Telegram text with \\n for newlines>\"}\n\nRules:\n- grade matches the Grade: line in the message.\n- message must NOT start with \"\u26a0\ufe0f Off-plan\" \u2014 ever. Just the session header line.\n- Do NOT wrap in code blocks.",
-                "batching": {}
-            },
-            "type": "@n8n/n8n-nodes-langchain.chainLlm",
-            "typeVersion": 1.8,
-            "position": [
-                1680,
-                160
-            ],
-            "id": "llm-chain",
-            "name": "Hardcore Analysis"
-        },
-        {
-            "parameters": {
-                "model": "anthropic/claude-sonnet-4.6",
-                "options": {
-                    "maxTokens": 1000,
-                    "temperature": 0.7
-                }
-            },
-            "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-            "typeVersion": 1,
-            "position": [
-                1480,
-                360
-            ],
-            "id": "openrouter-model",
-            "name": "Claude 3.7 Sonnet",
-            "credentials": {
-                "openRouterApi": {
-                    "id": "nhbNqmgyP4cAeQ6B",
-                    "name": "OpenRouter account"
-                }
-            }
-        },
-        {
-            "parameters": {
-                "chatId": "1865798034",
-                "text": "={{ $('Parse Grade').item.json.message }}",
-                "additionalFields": {
-                    "appendAttribution": false
-                }
-            },
-            "type": "n8n-nodes-base.telegram",
-            "typeVersion": 1.2,
-            "position": [
-                2240,
-                160
-            ],
-            "id": "send-telegram",
-            "name": "Send Telegram",
-            "credentials": {
-                "telegramApi": {
-                    "id": "9IpAp35yJmIQJpeA",
-                    "name": "Telegram account"
-                }
-            },
-            "webhookId": "2e5b6406-041e-4e69-a8f2-961e31381504"
-        },
-        {
-            "parameters": {
-                "conditions": {
-                    "options": {
-                        "caseSensitive": true,
-                        "leftValue": "",
-                        "typeValidation": "strict",
-                        "version": 3
-                    },
-                    "conditions": [
-                        {
-                            "id": "idempotency-check",
-                            "leftValue": "={{ $json['Last Coaching Date'] }}",
-                            "rightValue": "={{ $today.toFormat('yyyy-MM-dd') }}",
-                            "operator": {
-                                "type": "string",
-                                "operation": "equals"
-                            }
-                        }
-                    ],
-                    "combinator": "and"
-                },
-                "options": {}
-            },
-            "type": "n8n-nodes-base.if",
-            "typeVersion": 2.3,
-            "position": [
-                -20,
-                420
-            ],
-            "id": "already-coached-today-icu",
-            "name": "Already Coached Today?"
-        },
-        {
-            "id": "update-coaching-date-icu",
-            "name": "Update Coaching Date",
-            "type": "n8n-nodes-base.httpRequest",
-            "typeVersion": 4.3,
-            "position": [
-                1880,
-                160
-            ],
-            "parameters": {
-                "method": "PUT",
-                "url": "=https://coach-db.arthurpfz.com/athletes/{{ $('Loop Over Users').item.json.id }}",
-                "authentication": "genericCredentialType",
-                "genericAuthType": "httpHeaderAuth",
-                "options": {},
-                "sendBody": true,
-                "contentType": "json",
-                "bodyParameters": {
-                    "parameters": [
-                        {
-                            "name": "last_coaching_date",
-                            "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
-                        }
-                    ]
-                }
-            },
-            "credentials": {
-                "httpHeaderAuth": {
-                    "id": "6GNzKYNE1JAz77RL",
-                    "name": "Tricoach DB"
                 }
             }
         },
@@ -533,8 +384,8 @@
             "type": "n8n-nodes-base.httpRequest",
             "typeVersion": 4.3,
             "position": [
-                1280,
-                160
+                1800,
+                0
             ],
             "id": "save-session-node",
             "name": "Save Session",
@@ -547,99 +398,31 @@
             "onError": "continueRegularOutput"
         },
         {
-            "parameters": {
-                "method": "PATCH",
-                "url": "=https://coach-db.arthurpfz.com/sessions/{{ $('Save Session').item.json.id }}",
-                "authentication": "genericCredentialType",
-                "genericAuthType": "httpHeaderAuth",
-                "sendBody": true,
-                "options": {},
-                "specifyBody": "json",
-                "jsonBody": "={{ JSON.stringify({\n  analysis: $('Parse Grade').item.json.message,\n  analyzed_at: $now.toISO(),\n  grade: $('Parse Grade').item.json.grade,\n  plan_session_id: $('Parse Grade').item.json.plan_session_id || null\n}) }}"
-            },
-            "type": "n8n-nodes-base.httpRequest",
-            "typeVersion": 4.3,
+            "id": "already-analyzed",
+            "name": "Already Analyzed?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
             "position": [
-                2040,
-                160
-            ],
-            "id": "save-analysis-node",
-            "name": "Save Analysis",
-            "credentials": {
-                "httpHeaderAuth": {
-                    "id": "6GNzKYNE1JAz77RL",
-                    "name": "Tricoach DB"
-                }
-            },
-            "onError": "continueRegularOutput"
-        },
-        {
-            "id": "send-rest-day-telegram",
-            "name": "Send Rest-Day Telegram",
-            "type": "n8n-nodes-base.telegram",
-            "typeVersion": 1.2,
-            "position": [
-                1080,
-                360
-            ],
-            "parameters": {
-                "chatId": "1865798034",
-                "text": "\ud83d\udecc No activity logged today. Rest well \u2014 recovery is part of the plan.",
-                "additionalFields": {
-                    "appendAttribution": false
-                }
-            },
-            "credentials": {
-                "telegramApi": {
-                    "id": "9IpAp35yJmIQJpeA",
-                    "name": "Telegram account"
-                }
-            },
-            "webhookId": "0d1a6d04-20db-417c-85ff-2d00df519242"
-        },
-        {
-            "id": "filter-activities",
-            "name": "Filter Activities",
-            "type": "n8n-nodes-base.filter",
-            "typeVersion": 2.2,
-            "position": [
-                280,
-                240
+                2000,
+                0
             ],
             "parameters": {
                 "conditions": {
                     "options": {
                         "caseSensitive": true,
                         "leftValue": "",
-                        "typeValidation": "strict",
+                        "typeValidation": "loose",
                         "version": 2
                     },
                     "conditions": [
                         {
-                            "id": "drop-zepp",
-                            "leftValue": "={{ $json.source }}",
-                            "rightValue": "ZEPP",
+                            "id": "analyzed-check",
+                            "leftValue": "={{ $json.analyzed_at }}",
+                            "rightValue": "",
                             "operator": {
                                 "type": "string",
-                                "operation": "notEquals"
-                            }
-                        },
-                        {
-                            "id": "drop-short",
-                            "leftValue": "={{ (($json.type||\"\").toLowerCase().includes(\"swim\")) || $json.moving_time >= 600 }}",
-                            "rightValue": true,
-                            "operator": {
-                                "type": "boolean",
-                                "operation": "equals"
-                            }
-                        },
-                        {
-                            "id": "drop-empty",
-                            "leftValue": "={{ $json.distance }}",
-                            "rightValue": 0,
-                            "operator": {
-                                "type": "number",
-                                "operation": "gt"
+                                "operation": "empty",
+                                "singleValue": true
                             }
                         }
                     ],
@@ -649,13 +432,106 @@
             }
         },
         {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "calc-monday",
+                            "name": "Monday_date",
+                            "value": "={{ DateTime.fromISO($(\"Get Activity Details\").item.json.start_date_local).startOf(\"week\").toFormat(\"yyyy-MM-dd\") }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                2200,
+                0
+            ],
+            "id": "calculate-monday",
+            "name": "Calculate Monday"
+        },
+        {
+            "id": "search-plan",
+            "name": "Search Plan",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                2400,
+                0
+            ],
+            "parameters": {
+                "method": "GET",
+                "url": "https://coach-db.arthurpfz.com/weekly-plans/latest",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "options": {},
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "athlete_id",
+                            "value": "={{ $('Loop Over Users').item.json.id }}"
+                        }
+                    ]
+                }
+            },
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "6GNzKYNE1JAz77RL",
+                    "name": "Tricoach DB"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=You are an elite endurance coach analyzing a single training session.\n\nGRADE REFLECTS SESSION QUALITY ONLY \u2014 how cleanly this session of its kind was executed against the athlete's fitness profile (HR zones, FTP, CSS, cadence targets) AND the day's conditions (terrain, weather). It is NOT a plan-adherence score. An unplanned long ride executed cleanly is an A. A sloppy planned interval set is a C.\n\n=== ATHLETE ===\n- Name: {{ $('Loop Over Users').item.json.Name }}\n- Phase: {{ $('Loop Over Users').item.json['Training Phase'] }}\n- Profile: {{ $('Loop Over Users').item.json['Fitness Profile'] }}\n- Health: {{ $('Loop Over Users').item.json['Health Status'] }}\n\n=== THIS WEEK'S PLAN (indicative \u2014 not a contract) ===\nFocus: {{ $('Search Plan').item.json.Focus }}\nSessions:\n{{ JSON.stringify($('Search Plan').item.json.sessions || [], null, 2) }}\n\nThe plan is a Sunday suggestion. The athlete is free to swap, skip, or add sessions. Do NOT grade against it. Use it only as soft context if a meaningful relationship exists (e.g. swapped a planned swim for a ride). Be neutral.\n\n=== ALREADY MATCHED THIS WEEK ===\n{{ (($('Get Matched Sessions').item.json.sessions || []).filter(s => s.plan_session_id).map(s => '- plan_session_id=' + s.plan_session_id + ' (' + (s.sport||'?') + ', ' + (s.date||'') + ')').join('\\n')) || '(none yet)' }}\n\n=== OTHER SESSIONS TODAY (same-day context) ===\n{{ (($('Get Matched Sessions').item.json.sessions || []).filter(s => (s.date||'') === DateTime.fromISO($('Get Activity Details').item.json.start_date_local).toFormat('yyyy-MM-dd') && s.intervals_id !== $('Get Activity Details').item.json.id).map(s => '- ' + (s.sport||'?') + ' \u00b7 ' + (s.duration_min||'?') + 'min \u00b7 ' + (s.distance_km||0) + 'km' + (s.grade ? ' \u00b7 Grade ' + s.grade : '')).join('\\n')) || '(none \u2014 only session today)' }}\n\n=== 30-DAY TREND (same sport) ===\n{{ $json.trendSummary }}\n\n=== TODAY'S ACTIVITY ===\nActivity: {{ $('Get Activity Details').item.json.type }} - {{ $('Get Activity Details').item.json.name }}\nSource: {{ $('Get Activity Details').item.json.source }}\nDate (weekday): {{ DateTime.fromISO($('Get Activity Details').item.json.start_date_local).toFormat('cccc, yyyy-MM-dd') }}\nDuration: {{ Math.round($('Get Activity Details').item.json.moving_time / 60) }}min\nDistance: {{ $('Get Activity Details').item.json.distance ? ($('Get Activity Details').item.json.distance / 1000).toFixed(2) + 'km' : 'N/A' }}\n\n{{ $('Get Activity Details').item.json.total_elevation_gain ? 'Elevation gain: ' + Math.round($('Get Activity Details').item.json.total_elevation_gain) + 'm' : '' }}\n{{ $('Get Activity Details').item.json.average_temp ? 'Avg temp: ' + Math.round($('Get Activity Details').item.json.average_temp) + '\u00b0C' : '' }}\n{{ $('Get Activity Details').item.json.average_wind_speed ? 'Wind: ' + ($('Get Activity Details').item.json.average_wind_speed * 3.6).toFixed(1) + 'km/h' + ($('Get Activity Details').item.json.headwind_percent ? ' (' + Math.round($('Get Activity Details').item.json.headwind_percent) + '% headwind)' : '') : '' }}\n\n{{ $('Get Activity Details').item.json.avg_watts ? 'Power: ' + Math.round($('Get Activity Details').item.json.avg_watts) + 'W avg / ' + Math.round($('Get Activity Details').item.json.weighted_avg_watts) + 'W NP / VI ' + $('Get Activity Details').item.json.variability_index.toFixed(2) : '' }}\n{{ $('Get Activity Details').item.json.average_heartrate ? 'HR: ' + Math.round($('Get Activity Details').item.json.average_heartrate) + 'bpm avg / ' + Math.round($('Get Activity Details').item.json.max_heartrate) + 'bpm max / LTHR ' + $('Get Activity Details').item.json.lthr : '' }}\n{{ $('Get Activity Details').item.json.icu_hr_zone_times ? 'HR zones (Z1-Z5+): ' + $('Get Activity Details').item.json.icu_hr_zone_times.map(t => Math.round(t/60) + 'min').join(' / ') : '' }}\n{{ $('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence ? 'Cadence: ' + Math.round(($('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence) * ($('Get Activity Details').item.json.type === 'Run' ? 2 : 1)) + ($('Get Activity Details').item.json.type === 'Run' ? 'spm' : 'rpm') : '' }}\n{{ $('Get Activity Details').item.json.average_speed && $('Get Activity Details').item.json.type === 'Run' ? 'Pace: ' + Math.floor(1000 / $('Get Activity Details').item.json.average_speed / 60) + ':' + String(Math.round((1000 / $('Get Activity Details').item.json.average_speed) % 60)).padStart(2, '0') + '/km' : '' }}\nTSS: {{ $('Get Activity Details').item.json.icu_training_load ? Math.round($('Get Activity Details').item.json.icu_training_load) : 'N/A' }}\nIF: {{ $('Get Activity Details').item.json.intensity ? $('Get Activity Details').item.json.intensity.toFixed(2) : 'N/A' }}\n\n=== PLAN MATCHING (tracking only \u2014 does NOT affect grade or wording) ===\n1. If today's activity clearly corresponds to one of the unmatched sessions of the same sport in the pool, set plan_session_id to that id.\n2. If today is a session's pinned_day and the sport matches, prefer that session.\n3. Otherwise set plan_session_id to null. This is fine \u2014 it just means today wasn't in the suggestion pool.\n4. Never re-use a plan_session_id already in ALREADY MATCHED.\n5. Whether plan_session_id is null or not has ZERO bearing on grade or message tone.\n\n=== GRADE RUBRIC (session quality only, vs fitness profile + conditions) ===\nA \u2014 Clean execution. Zones held, pacing controlled, cadence in target, no major flags.\nB \u2014 Solid with one notable flag (mild cardiac drift, minor zone leak, slightly off cadence).\nC \u2014 Significant execution issues (poor pacing, big zone leaks, mechanical inefficiency, decoupling).\nF \u2014 Broken session (abandoned, injury risk, severe overreach, data corruption).\n\nA long unplanned Z2 ride that holds zones cleanly is an A. A planned Z2 ride that bleeds 30% into Z3 is a C. The plan is irrelevant; the session is what's graded.\n\n=== MULTI-SESSION DAYS & SHORT SESSIONS ===\n- If OTHER SESSIONS TODAY lists sessions, judge this one as part of the day's whole training, not in isolation. Combined same-sport volume counts: a short pool set plus an open-water swim that sum to solid volume = a good swim day \u2014 say so in a bullet when relevant.\n- NEVER fail a session for being short. Grade what was done (zones, technique, effort), not the duration. Reserve F for genuinely broken sessions (abandoned mid-effort, injury risk, corrupt data). A clean 10min open-water dip is a B, not an F.\n- Short swims (<15min) with little/no HR data: describe what's measurable, grade neutrally (B if clean, C only for real execution faults).\n\n=== CONDITIONS-AWARE FLAGGING (read carefully) ===\nMany \"issues\" have benign environmental causes. Before flagging cadence, HR, or pacing problems, check the environmental data above:\n- Cadence drops on Ride: if elevation_gain > 500m, low cadence is expected on climbs \u2014 do NOT flag as inefficiency.\n- HR runs hot: if avg_temp > 28\u00b0C, expect cardiac drift \u2014 do NOT call it overreach.\n- Power vs HR mismatch: if headwind_percent > 40%, power required to maintain HR drops \u2014 adjust expectations.\n- Rough wind: if average_wind_speed > 5 m/s, pacing variability is environmental, not athletic.\nBe specific in your reasoning when conditions matter: \"68rpm with 1100m of climbing \u2014 expected\" rather than blanket \"low cadence\".\n\n=== SESSION INTENT (infer before grading \u2014 OVERRIDES the rubric where stated) ===\nInfer what kind of session this was from its structure BEFORE applying the rubric \u2014 grade execution against the inferred intent, never against an assumed steady Z2.\n\nWEDNESDAY RIDE = RAPHA GROUP RIDE (hard rule):\nIf Date (weekday) is Wednesday and the sport is Ride, this IS the athlete's recurring Rapha group ride. Its design is: Z2 base with deliberate sprint/surge efforts in the middle. For this ride you MUST:\n- Treat Z4-Z5 spikes and high max HR as the designed sprint block \u2014 they are NOT zone leakage, NOT 'uncontrolled surges'. Never penalize them.\n- EXCLUDE torque CV, VI, and average cadence from grading entirely \u2014 group dynamics (coasting, drafting, surging) distort all three. Do not mention them as faults.\n- Grade on: Z2 discipline outside the sprint block, commitment in the efforts, and HR recovery after surges. A Rapha ride with a solid Z2 base and committed sprints is an A or B by default.\n\nOther rides: repeated short Z4-Z5 surges over a Z2 base with high coasting time also indicate a group/mixed ride \u2014 apply the same logic. Steady solo-structured sessions keep the full rubric as-is.\n\n=== TREND USAGE (REQUIRED when comparable data exists) ===\nThe 30-day trend section gives you color. When the trend has \u22652 valid sessions, you MUST surface at least one trend-anchored insight in the bullets if any of these are true:\n- Today's avg_hr differs from 30d avg HR by >5bpm\n- Today's avg_power differs from 30d avg power by >5%\n- Today's duration is the longest or shortest of last 30d for this sport\n- Today's decoupling/EF is meaningfully different from the 30d mean\n- Today's grade extends or breaks a streak (e.g. \"first A in 4 rides\", \"third C in a row\")\n\nPhrase as concrete deltas: \"HR 149bpm \u2014 +22 vs your 30d Ride avg of 127bpm, ran significantly harder\" rather than \"HR was high\".\n\nIf the trend section says \"(no comparable...)\" you have no trend data \u2014 skip this rule.\n\nTrend deltas do NOT change the grade rubric. Trend is color, not currency.\n\n=== SPORT-SPECIFIC FORM METRICS ===\n{{ $json.sportMetrics }}\n\n=== FORM COACHING RULES ===\nWhen Sport-Specific Form Metrics are present, give technique-level coaching in addition to zone/pacing analysis:\n- Run: if cadence < 165 spm, prescribe cadence increase (\"aim 170-175 spm \u2014 shortens stride, reduces overstride\"). If stride length is short for the pace, may indicate overstride compensating for low cadence. Don't invent GCT/oscillation values \u2014 the prompt explicitly notes they're unavailable.\n- Swim: if SWOLF > 40, push stroke economy (\"longer glide, drop SR by 2\"). If DPS < 1.3, target distance per stroke. Suggest breathing pattern adjustments (e.g. breathe every 3 vs every 2) if HR runs high at moderate effort.\n- Ride: if torque variability CV > 0.40, comment on pedaling consistency (\"torque CV 0.48 \u2014 choppy pedaling, work on smooth stroke through the dead spot\"). If icu_cadence_z2 < 40% of moving time, note that the avg cadence number hides long stretches at inefficient RPMs. Do NOT mention L/R balance or pedaling smoothness % \u2014 single-sided meter, data doesn't exist.\n\nBe honest about missing data. NEVER invent Running Dynamics, L/R balance, or per-leg pedaling metrics. The metrics block tells you what's available.\n\n=== ANALYSIS FORMAT (EXACTLY 3 BULLETS \u2014 no more, no less) ===\n[sport-emoji] [Sport] \u00b7 [duration]min \u00b7 [distance]km \u00b7 [avg HR]bpm \u00b7 TSS [tss]\nGrade: [A/B/C/F] \u2014 [one reason about session quality, \u22648 words]\n\n\u2022 [insight 1 \u2014 the most important physiological/execution flag, with specific numbers]\n\u2022 [insight 2 \u2014 secondary flag OR trend delta if material; weave the trend INTO this bullet, do NOT add a 4th]\n\u2022 Limiter: [the one thing holding back progress]\n\nTomorrow: [session prescription \u226412 words]\nWatch: [one metric to track next time \u22648 words]\n\nIf trend usage is required (rule above), fold the trend insight into bullet 1 OR bullet 2 \u2014 never as a separate bullet. Examples:\n- \"HR 149bpm \u2014 9 below your 30d Ride avg of 158bpm, but 37% above Z2 ceiling: pacing control was the issue, not effort\"\n- \"Cadence 68rpm \u2014 same low pattern as your 30d Ride avg, mechanically inefficient on flat terrain\"\n\nNEVER output more than 3 bullets. NEVER omit the Limiter bullet.\n\nEMOJI MAP: \ud83c\udfc3 Run \u00b7 \ud83c\udfca Swim \u00b7 \ud83d\udeb4 Ride/VirtualRide \u00b7 \ud83d\udcaa Workout \u00b7 \u26f7\ufe0f NordicSki \u00b7 \ud83d\udeb6 Walk \u00b7 \ud83e\udd7e Hike\n\nRULES (enforce strictly):\n- NEVER prefix the message with \"\u26a0\ufe0f Off-plan\" or any plan-adherence warning. Header is just session info.\n- NEVER use \"off-plan\", \"deviated from plan\", \"no planned X today\", or similar phrasing.\n- Do NOT scold or moralize about the athlete deviating from the plan.\n- Mention the plan only if it's genuinely useful context. Default to silence about the plan.\n- Grade reasoning must reference session quality (zones, pacing, cadence, drift, decoupling), never plan adherence.\n- When flagging mechanical/physiological issues, account for terrain (elevation_gain) and conditions (temp, wind).\n- EXACTLY 3 bullets. The third bullet MUST start with \"Limiter:\". No 4th bullet under any circumstance.\n- When the trend rule applies, the trend insight goes INSIDE bullet 1 or 2 \u2014 not as a separate bullet.\n- ZERO markdown \u2014 no **, no *, no __. Plain text only.\n- Bullets are the literal \u2022 character.\n- Max 8 lines total (1 header + 1 grade + blank + 3 bullets + Tomorrow + Watch = 8).\n- Use only metrics provided above. Never invent numbers.\n- Tone: rigorous, direct, descriptive. Describe; do not judge adherence.\n- No preamble, no signoff.\n\n=== OUTPUT (JSON ONLY) ===\n{\"plan_session_id\":\"<id from pool, or null>\",\"grade\":\"A|B|C|F\",\"message\":\"<full Telegram text with \\n for newlines>\"}\n\nRules:\n- grade matches the Grade: line in the message.\n- message must NOT start with \"\u26a0\ufe0f Off-plan\" \u2014 ever. Just the session header line.\n- Do NOT wrap in code blocks.",
+                "batching": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.8,
+            "position": [
+                2600,
+                0
+            ],
+            "id": "llm-chain",
+            "name": "Hardcore Analysis"
+        },
+        {
+            "parameters": {
+                "model": "anthropic/claude-sonnet-4.6",
+                "options": {
+                    "maxTokens": 1000,
+                    "temperature": 0.7
+                }
+            },
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+            "typeVersion": 1,
+            "position": [
+                2600,
+                200
+            ],
+            "id": "openrouter-model",
+            "name": "Claude 3.7 Sonnet",
+            "credentials": {
+                "openRouterApi": {
+                    "id": "nhbNqmgyP4cAeQ6B",
+                    "name": "OpenRouter account"
+                }
+            }
+        },
+        {
             "id": "parse-grade-node",
             "name": "Parse Grade",
             "type": "n8n-nodes-base.set",
             "typeVersion": 3.4,
             "position": [
-                1880,
-                160
+                2800,
+                0
             ],
             "parameters": {
                 "assignments": {
@@ -685,6 +561,57 @@
         },
         {
             "parameters": {
+                "method": "PATCH",
+                "url": "=https://coach-db.arthurpfz.com/sessions/{{ $('Save Session').item.json.id }}",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "options": {},
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify({\n  analysis: $('Parse Grade').item.json.message,\n  analyzed_at: $now.toISO(),\n  grade: $('Parse Grade').item.json.grade,\n  plan_session_id: $('Parse Grade').item.json.plan_session_id || null\n}) }}"
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                3000,
+                0
+            ],
+            "id": "save-analysis-node",
+            "name": "Save Analysis",
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "6GNzKYNE1JAz77RL",
+                    "name": "Tricoach DB"
+                }
+            },
+            "onError": "continueRegularOutput"
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $(\"When Called\").item.json.chat_id || \"1865798034\" }}",
+                "text": "=\ud83d\udcc5 {{ $('Get Activity Details').item.json.start_date_local.slice(0,10) }}\n\n{{ $('Parse Grade').item.json.message }}",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                3200,
+                0
+            ],
+            "id": "send-telegram",
+            "name": "Send Telegram",
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            },
+            "webhookId": "2e5b6406-041e-4e69-a8f2-961e31381504"
+        },
+        {
+            "parameters": {
                 "method": "GET",
                 "url": "https://coach-db.arthurpfz.com/sessions",
                 "authentication": "genericCredentialType",
@@ -698,7 +625,11 @@
                         },
                         {
                             "name": "date_from",
-                            "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}"
+                            "value": "={{ $('Calculate Monday').item.json.Monday_date }}"
+                        },
+                        {
+                            "name": "date_to",
+                            "value": "={{ DateTime.fromISO($('Calculate Monday').item.json.Monday_date).plus({ days: 6 }).toFormat('yyyy-MM-dd') }}"
                         },
                         {
                             "name": "wrap",
@@ -711,10 +642,10 @@
             "type": "n8n-nodes-base.httpRequest",
             "typeVersion": 4.2,
             "position": [
-                1700,
-                160
+                2620,
+                0
             ],
-            "id": "get-matched-di-mov6sbdd",
+            "id": "get-matched-bf-mov6sboo",
             "name": "Get Matched Sessions",
             "credentials": {
                 "httpHeaderAuth": {
@@ -724,13 +655,13 @@
             }
         },
         {
-            "id": "get-trend-sessions-peryz4",
+            "id": "get-trend-sessions-nsrenu",
             "name": "Get Trend Sessions",
             "type": "n8n-nodes-base.httpRequest",
             "typeVersion": 4.3,
             "position": [
-                1800,
-                360
+                2720,
+                200
             ],
             "parameters": {
                 "method": "GET",
@@ -772,13 +703,13 @@
             }
         },
         {
-            "id": "build-trend-stats-kf255o",
+            "id": "build-trend-stats-z589kn",
             "name": "Build Trend Stats",
             "type": "n8n-nodes-base.code",
             "typeVersion": 2,
             "position": [
-                1900,
-                360
+                2820,
+                200
             ],
             "parameters": {
                 "jsCode": "// Build Trend Stats v2 \u2014 filters garbage sessions before aggregating.\n// Garbage = duration_min < 10 OR (sport in cycling/running and distance_km is null/<=0)\nconst wrapped = $json;\nconst all = Array.isArray(wrapped.sessions) ? wrapped.sessions : [];\nconst normSport = t => { const x = (t||'').toLowerCase(); if (x.includes('swim')) return 'Swim'; if (x.includes('run')) return 'Run'; if (x.includes('ride')||x.includes('bike')||x.includes('cycl')||x.includes('virtual')) return 'Ride'; return t; };\nconst sport = normSport($('Get Activity Details').item.json.type);\nconst sessions = all.filter(s => {\n  if (normSport(s.sport) !== sport) return false;\n  if (!s.duration_min || s.duration_min < 10) return false;\n  // For distance-based sports, drop null/zero distance records (incomplete uploads)\n  if (['Ride','Run','Swim','Walk','Hike'].includes(sport)) {\n    if (!s.distance_km || s.distance_km <= 0) return false;\n  }\n  return true;\n});\n\nif (sessions.length === 0) {\n  return { json: { trendSummary: '(no comparable ' + sport + ' sessions in last 30d)' } };\n}\n\nconst numAvg = (arr, k) => {\n  const vals = arr.map(s => parseFloat(s[k])).filter(v => !isNaN(v) && v !== 0);\n  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;\n};\nconst round1 = n => n == null ? null : Math.round(n * 10) / 10;\n\nconst stats = {\n  count: sessions.length,\n  avg_duration: numAvg(sessions, 'duration_min'),\n  avg_distance: numAvg(sessions, 'distance_km'),\n  avg_tss: numAvg(sessions, 'tss'),\n  avg_hr: numAvg(sessions, 'avg_hr'),\n  avg_power: numAvg(sessions, 'avg_power'),\n  avg_decoupling: numAvg(sessions, 'decoupling'),\n  avg_ef: numAvg(sessions, 'efficiency_factor'),\n};\nconst longest = sessions.reduce((m, s) => (s.duration_min || 0) > (m?.duration_min || 0) ? s : m, null);\nconst grades = sessions.filter(s => s.grade).map(s => s.grade);\nconst gradeBreakdown = ['A','B','C','F'].map(g => g + ':' + grades.filter(x => x === g).length).join(' ');\n\nconst lines = [];\nlines.push(sport + ' sessions (last 30d, valid only): ' + stats.count);\nconst avgParts = [];\nif (stats.avg_duration) avgParts.push(Math.round(stats.avg_duration) + 'min');\nif (stats.avg_distance) avgParts.push(round1(stats.avg_distance) + 'km');\nif (stats.avg_tss) avgParts.push('TSS ' + Math.round(stats.avg_tss));\nif (stats.avg_hr) avgParts.push('HR ' + Math.round(stats.avg_hr) + 'bpm');\nif (avgParts.length) lines.push('Avg: ' + avgParts.join(' \u00b7 '));\nif (stats.avg_power) lines.push('Avg power: ' + Math.round(stats.avg_power) + 'W');\nif (stats.avg_decoupling) lines.push('Avg decoupling: ' + round1(stats.avg_decoupling));\nif (stats.avg_ef) lines.push('Avg efficiency factor: ' + round1(stats.avg_ef));\nif (longest && longest.duration_min) lines.push('Longest: ' + longest.duration_min + 'min on ' + longest.date);\nif (grades.length) lines.push('Grade distribution (A/B/C/F): ' + gradeBreakdown);\n\nreturn { json: { trendSummary: lines.join('\\n') } };",
@@ -786,13 +717,13 @@
             }
         },
         {
-            "id": "get-activity-streams-rfz2og",
+            "id": "get-activity-streams-nek6m1",
             "name": "Get Activity Streams",
             "type": "n8n-nodes-base.httpRequest",
             "typeVersion": 4.3,
             "position": [
-                2000,
-                560
+                2920,
+                400
             ],
             "parameters": {
                 "method": "GET",
@@ -827,13 +758,13 @@
             "alwaysOutputData": true
         },
         {
-            "id": "build-sport-metrics-g89xlp",
+            "id": "build-sport-metrics-25jcwq",
             "name": "Build Sport Metrics",
             "type": "n8n-nodes-base.code",
             "typeVersion": 2,
             "position": [
-                2100,
-                560
+                3020,
+                400
             ],
             "parameters": {
                 "jsCode": "// Build Sport Metrics v2 \u2014 handles ICU streams single-object response.\nconst normSport = t => { const x = (t||'').toLowerCase(); if (x.includes('swim')) return 'Swim'; if (x.includes('run')) return 'Run'; if (x.includes('ride')||x.includes('bike')||x.includes('cycl')||x.includes('virtual')) return 'Ride'; return t; };\nconst sport = normSport($('Get Activity Details').item.json.type);\nconst a = $('Get Activity Details').item.json;\nconst trendSummary = $('Build Trend Stats').item.json.trendSummary || '';\n\n// Streams: ICU returns either an array of {type, data} OR a single\n// {type, data, allNull, ...} when one type was requested. Normalize.\nlet torqueData = null;\ntry {\n  const resp = $input.item.json;\n  const body = resp && resp.body !== undefined ? resp.body : resp;\n  let candidates = [];\n  if (Array.isArray(body)) candidates = body;\n  else if (body && typeof body === 'object' && body.type) candidates = [body];\n  else if (Array.isArray(body?.data) && body.data[0]?.type) candidates = body.data;\n  const torque = candidates.find(s => s && s.type === 'torque');\n  if (torque && Array.isArray(torque.data) && !torque.allNull) {\n    torqueData = torque.data.filter(v => typeof v === 'number' && v > 0);\n  }\n} catch (e) {}\n\nconst lines = [];\n\nif (sport === 'Run') {\n  const cadenceSpm = a.average_cadence ? Math.round(a.average_cadence * 2) : null;\n  const stride = a.average_stride;\n  if (cadenceSpm) lines.push('Cadence: ' + cadenceSpm + ' spm (total stride rate)');\n  if (stride) lines.push('Stride length: ' + stride.toFixed(2) + ' m');\n  if (a.average_speed) {\n    const paceSec = 1000 / a.average_speed;\n    const min = Math.floor(paceSec / 60);\n    const sec = Math.round(paceSec % 60);\n    lines.push('Pace: ' + min + ':' + String(sec).padStart(2, '0') + '/km');\n  }\n  lines.push('Targets: cadence 170-180 spm at endurance pace; stride length 0.85-1.10 m at Z2');\n  lines.push('Note: Running Dynamics (GCT, vertical oscillation, vertical ratio) NOT available \u2014 COROS PACE 3 wrist-only does not capture these. Stride/cadence-based form coaching only.');\n} else if (sport === 'Swim') {\n  const sr = a.average_cadence;\n  const dps = a.average_stride;\n  const poolLen = a.pool_length;\n  const lengths = a.lengths;\n  const movingSec = a.moving_time;\n  if (sr) lines.push('Stroke rate (SR): ' + sr.toFixed(1) + ' spm');\n  if (dps) lines.push('Distance per stroke (DPS): ' + dps.toFixed(2) + ' m');\n  if (poolLen && lengths) lines.push('Pool: ' + poolLen + 'm \u00d7 ' + lengths + ' lengths');\n  if (movingSec && lengths && sr) {\n    const secsPerLength = movingSec / lengths;\n    const strokesPerLength = sr * secsPerLength / 60;\n    const swolf = Math.round(secsPerLength + strokesPerLength);\n    lines.push('SWOLF: ~' + swolf + ' (' + Math.round(secsPerLength) + 's + ' + Math.round(strokesPerLength) + ' strokes per length)');\n  }\n  lines.push('Targets: SWOLF <38 strong, 38-45 moderate, >45 work needed. DPS 1.4-1.8m freestyle. Lower SR with high DPS = efficient.');\n} else if (sport === 'Ride') {\n  if (typeof a.icu_cadence_z2 === 'number') lines.push('Cadence Z2 time: ' + a.icu_cadence_z2 + 'min in efficient cadence band (out of ' + Math.round(a.moving_time/60) + 'min total)');\n  if (typeof a.polarization_index === 'number') lines.push('Polarization index: ' + a.polarization_index.toFixed(2) + ' (lower = more monotone effort, higher = polarized Z1+Z4)');\n  if (typeof a.icu_joules_above_ftp === 'number' && a.icu_joules_above_ftp > 0) {\n    lines.push('Anaerobic work: ' + Math.round(a.icu_joules_above_ftp / 1000) + ' kJ above FTP');\n  }\n  if (torqueData && torqueData.length > 100) {\n    const mean = torqueData.reduce((s, v) => s + v, 0) / torqueData.length;\n    const variance = torqueData.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / torqueData.length;\n    const std = Math.sqrt(variance);\n    const cv = mean > 0 ? std / mean : 0;\n    lines.push('Torque variability (CV): ' + cv.toFixed(2) + ' across ' + torqueData.length + ' pedaling samples (avg torque ' + Math.round(mean) + 'Nm; <0.30 smooth, 0.30-0.50 moderate, >0.50 choppy)');\n  }\n  lines.push('Note: L/R balance and pedaling smoothness % NOT available \u2014 SRAM Apex AXS is a single-sided crank-arm meter (only measures non-drive side).');\n}\n\nif (lines.length === 0) lines.push('(no sport-specific form metrics for ' + sport + ')');\n\nreturn { json: { trendSummary, sportMetrics: lines.join('\\n') } };",
@@ -842,7 +773,18 @@
         }
     ],
     "connections": {
-        "Schedule Trigger": {
+        "When Called": {
+            "main": [
+                [
+                    {
+                        "node": "Send Ack",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Ack": {
             "main": [
                 [
                     {
@@ -868,7 +810,7 @@
             "main": [
                 [
                     {
-                        "node": "Already Coached Today?",
+                        "node": "Get Activities",
                         "type": "main",
                         "index": 0
                     }
@@ -893,18 +835,11 @@
                 ]
             ]
         },
-        "Check Activities Exist": {
+        "Filter Activities": {
             "main": [
                 [
                     {
                         "node": "Get Activity Details",
-                        "type": "main",
-                        "index": 0
-                    }
-                ],
-                [
-                    {
-                        "node": "Send Rest-Day Telegram",
                         "type": "main",
                         "index": 0
                     }
@@ -920,6 +855,29 @@
                         "index": 0
                     }
                 ]
+            ]
+        },
+        "Save Session": {
+            "main": [
+                [
+                    {
+                        "node": "Already Analyzed?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Already Analyzed?": {
+            "main": [
+                [
+                    {
+                        "node": "Calculate Monday",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
             ]
         },
         "Calculate Monday": {
@@ -966,39 +924,11 @@
                 ]
             ]
         },
-        "Already Coached Today?": {
-            "main": [
-                [],
-                [
-                    {
-                        "node": "Update Coaching Date",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Send Telegram": {
-            "main": [
-                []
-            ]
-        },
-        "Update Coaching Date": {
+        "Parse Grade": {
             "main": [
                 [
                     {
-                        "node": "Get Activities",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Save Session": {
-            "main": [
-                [
-                    {
-                        "node": "Calculate Monday",
+                        "node": "Save Analysis",
                         "type": "main",
                         "index": 0
                     }
@@ -1016,26 +946,9 @@
                 ]
             ]
         },
-        "Filter Activities": {
+        "Send Telegram": {
             "main": [
-                [
-                    {
-                        "node": "Check Activities Exist",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Parse Grade": {
-            "main": [
-                [
-                    {
-                        "node": "Save Analysis",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
+                []
             ]
         },
         "Get Matched Sessions": {
@@ -1095,35 +1008,24 @@
         }
     },
     "settings": {
-        "executionOrder": "v1",
-        "callerPolicy": "workflowsFromSameOwner",
-        "availableInMCP": true,
-        "errorWorkflow": "psyVgPiGJoO5QOa4"
+        "errorWorkflow": "psyVgPiGJoO5QOa4",
+        "availableInMCP": true
     },
-    "staticData": {
-        "node:Schedule Trigger": {
-            "recurrenceRules": [
-                null
-            ],
-            "recurrenceRuleSignatures": [
-                null
-            ]
-        }
-    },
+    "staticData": null,
     "meta": null,
     "nodeGroups": [],
-    "pinData": {},
-    "versionId": "dfc4910a-8044-43cc-a963-8c3157facd72",
-    "activeVersionId": "dfc4910a-8044-43cc-a963-8c3157facd72",
-    "versionCounter": 202,
-    "triggerCount": 1,
+    "pinData": null,
+    "versionId": "71d36fe6-b4e8-4c3a-ac89-1bd6a3362184",
+    "activeVersionId": "71d36fe6-b4e8-4c3a-ac89-1bd6a3362184",
+    "versionCounter": 58,
+    "triggerCount": 0,
     "sourceWorkflowId": null,
     "shared": [
         {
-            "updatedAt": "2026-01-25T09:37:00.426Z",
-            "createdAt": "2026-01-25T09:37:00.426Z",
+            "updatedAt": "2026-05-01T08:56:54.754Z",
+            "createdAt": "2026-05-01T08:56:54.754Z",
             "role": "workflow:owner",
-            "workflowId": "hrSGUqoAwkWQ4gKl",
+            "workflowId": "rHIyZMIJNAOqZvM2",
             "projectId": "51zk01zmzcv1m5vw",
             "project": {
                 "updatedAt": "2026-01-03T12:23:57.574Z",
@@ -1140,30 +1042,45 @@
     ],
     "tags": [],
     "activeVersion": {
-        "updatedAt": "2026-07-12T11:16:46.545Z",
-        "createdAt": "2026-07-12T11:16:46.545Z",
-        "versionId": "dfc4910a-8044-43cc-a963-8c3157facd72",
-        "workflowId": "hrSGUqoAwkWQ4gKl",
+        "updatedAt": "2026-07-12T11:16:47.724Z",
+        "createdAt": "2026-07-12T11:16:47.724Z",
+        "versionId": "71d36fe6-b4e8-4c3a-ac89-1bd6a3362184",
+        "workflowId": "rHIyZMIJNAOqZvM2",
         "nodes": [
             {
+                "id": "trigger",
+                "name": "When Called",
+                "type": "n8n-nodes-base.executeWorkflowTrigger",
+                "typeVersion": 1,
+                "position": [
+                    0,
+                    0
+                ],
+                "parameters": {}
+            },
+            {
+                "id": "send-ack",
+                "name": "Send Ack",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    200,
+                    0
+                ],
                 "parameters": {
-                    "rule": {
-                        "interval": [
-                            {
-                                "triggerAtHour": 20,
-                                "triggerAtMinute": 10
-                            }
-                        ]
+                    "chatId": "={{ $json.chat_id || \"1865798034\" }}",
+                    "text": "\ud83d\udd04 Catching up last 7 days\u2026",
+                    "additionalFields": {
+                        "appendAttribution": false
                     }
                 },
-                "type": "n8n-nodes-base.scheduleTrigger",
-                "typeVersion": 1.3,
-                "position": [
-                    -520,
-                    240
-                ],
-                "id": "schedule-trigger",
-                "name": "Schedule Trigger"
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                },
+                "webhookId": "610a7d38-35e1-4094-a16a-88789b6bc066"
             },
             {
                 "id": "search-users",
@@ -1171,8 +1088,8 @@
                 "type": "n8n-nodes-base.httpRequest",
                 "typeVersion": 4.3,
                 "position": [
-                    -320,
-                    240
+                    400,
+                    0
                 ],
                 "parameters": {
                     "method": "GET",
@@ -1195,8 +1112,8 @@
                 "type": "n8n-nodes-base.splitInBatches",
                 "typeVersion": 3,
                 "position": [
-                    -120,
-                    240
+                    600,
+                    0
                 ],
                 "id": "loop-users",
                 "name": "Loop Over Users"
@@ -1210,11 +1127,11 @@
                         "parameters": [
                             {
                                 "name": "oldest",
-                                "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+                                "value": "={{ $today.minus({days: 7}).toFormat(\"yyyy-MM-dd\") }}"
                             },
                             {
                                 "name": "newest",
-                                "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+                                "value": "={{ $today.toFormat(\"yyyy-MM-dd\") }}"
                             }
                         ]
                     },
@@ -1225,8 +1142,8 @@
                 "type": "n8n-nodes-base.httpRequest",
                 "typeVersion": 4.3,
                 "position": [
-                    80,
-                    240
+                    800,
+                    0
                 ],
                 "id": "get-activities",
                 "name": "Get Activities",
@@ -1238,17 +1155,44 @@
                 }
             },
             {
+                "id": "filter-activities",
+                "name": "Filter Activities",
+                "type": "n8n-nodes-base.filter",
+                "typeVersion": 2.2,
+                "position": [
+                    1000,
+                    0
+                ],
                 "parameters": {
                     "conditions": {
                         "options": {
                             "caseSensitive": true,
                             "leftValue": "",
-                            "typeValidation": "strict"
+                            "typeValidation": "strict",
+                            "version": 2
                         },
                         "conditions": [
                             {
-                                "id": "check-activities-exist",
-                                "leftValue": "={{ $input.all().length }}",
+                                "id": "drop-zepp",
+                                "leftValue": "={{ $json.source }}",
+                                "rightValue": "ZEPP",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "notEquals"
+                                }
+                            },
+                            {
+                                "id": "drop-short",
+                                "leftValue": "={{ (($json.type||\"\").toLowerCase().includes(\"swim\")) || $json.moving_time >= 600 }}",
+                                "rightValue": true,
+                                "operator": {
+                                    "type": "boolean",
+                                    "operation": "equals"
+                                }
+                            },
+                            {
+                                "id": "drop-empty",
+                                "leftValue": "={{ $json.distance }}",
                                 "rightValue": 0,
                                 "operator": {
                                     "type": "number",
@@ -1259,15 +1203,7 @@
                         "combinator": "and"
                     },
                     "options": {}
-                },
-                "type": "n8n-nodes-base.if",
-                "typeVersion": 2.3,
-                "position": [
-                    480,
-                    240
-                ],
-                "id": "check-activities",
-                "name": "Check Activities Exist"
+                }
             },
             {
                 "parameters": {
@@ -1280,8 +1216,8 @@
                 "type": "n8n-nodes-base.httpRequest",
                 "typeVersion": 4.3,
                 "position": [
-                    1080,
-                    160
+                    1600,
+                    0
                 ],
                 "id": "get-activity-details",
                 "name": "Get Activity Details",
@@ -1289,189 +1225,6 @@
                     "httpBasicAuth": {
                         "id": "ms91wbaCvecB3tqQ",
                         "name": "Intervals.icu API"
-                    }
-                }
-            },
-            {
-                "parameters": {
-                    "assignments": {
-                        "assignments": [
-                            {
-                                "id": "calc-monday",
-                                "name": "Monday_date",
-                                "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}",
-                                "type": "string"
-                            }
-                        ]
-                    },
-                    "options": {}
-                },
-                "type": "n8n-nodes-base.set",
-                "typeVersion": 3.4,
-                "position": [
-                    1280,
-                    160
-                ],
-                "id": "calculate-monday",
-                "name": "Calculate Monday"
-            },
-            {
-                "id": "search-plan",
-                "name": "Search Plan",
-                "type": "n8n-nodes-base.httpRequest",
-                "typeVersion": 4.3,
-                "position": [
-                    1480,
-                    160
-                ],
-                "parameters": {
-                    "method": "GET",
-                    "url": "https://coach-db.arthurpfz.com/weekly-plans/latest",
-                    "authentication": "genericCredentialType",
-                    "genericAuthType": "httpHeaderAuth",
-                    "options": {},
-                    "sendQuery": true,
-                    "queryParameters": {
-                        "parameters": [
-                            {
-                                "name": "athlete_id",
-                                "value": "={{ $('Loop Over Users').item.json.id }}"
-                            }
-                        ]
-                    }
-                },
-                "credentials": {
-                    "httpHeaderAuth": {
-                        "id": "6GNzKYNE1JAz77RL",
-                        "name": "Tricoach DB"
-                    }
-                }
-            },
-            {
-                "parameters": {
-                    "promptType": "define",
-                    "text": "=You are an elite endurance coach analyzing a single training session.\n\nGRADE REFLECTS SESSION QUALITY ONLY \u2014 how cleanly this session of its kind was executed against the athlete's fitness profile (HR zones, FTP, CSS, cadence targets) AND the day's conditions (terrain, weather). It is NOT a plan-adherence score. An unplanned long ride executed cleanly is an A. A sloppy planned interval set is a C.\n\n=== ATHLETE ===\n- Name: {{ $('Loop Over Users').item.json.Name }}\n- Phase: {{ $('Loop Over Users').item.json['Training Phase'] }}\n- Profile: {{ $('Loop Over Users').item.json['Fitness Profile'] }}\n- Health: {{ $('Loop Over Users').item.json['Health Status'] }}\n\n=== THIS WEEK'S PLAN (indicative \u2014 not a contract) ===\nFocus: {{ $('Search Plan').item.json.Focus }}\nSessions:\n{{ JSON.stringify($('Search Plan').item.json.sessions || [], null, 2) }}\n\nThe plan is a Sunday suggestion. The athlete is free to swap, skip, or add sessions. Do NOT grade against it. Use it only as soft context if a meaningful relationship exists (e.g. swapped a planned swim for a ride). Be neutral.\n\n=== ALREADY MATCHED THIS WEEK ===\n{{ (($('Get Matched Sessions').item.json.sessions || []).filter(s => s.plan_session_id).map(s => '- plan_session_id=' + s.plan_session_id + ' (' + (s.sport||'?') + ', ' + (s.date||'') + ')').join('\\n')) || '(none yet)' }}\n\n=== OTHER SESSIONS TODAY (same-day context) ===\n{{ (($('Get Matched Sessions').item.json.sessions || []).filter(s => (s.date||'') === DateTime.fromISO($('Get Activity Details').item.json.start_date_local).toFormat('yyyy-MM-dd') && s.intervals_id !== $('Get Activity Details').item.json.id).map(s => '- ' + (s.sport||'?') + ' \u00b7 ' + (s.duration_min||'?') + 'min \u00b7 ' + (s.distance_km||0) + 'km' + (s.grade ? ' \u00b7 Grade ' + s.grade : '')).join('\\n')) || '(none \u2014 only session today)' }}\n\n=== 30-DAY TREND (same sport) ===\n{{ $json.trendSummary }}\n\n=== TODAY'S ACTIVITY ===\nActivity: {{ $('Get Activity Details').item.json.type }} - {{ $('Get Activity Details').item.json.name }}\nSource: {{ $('Get Activity Details').item.json.source }}\nDate (weekday): {{ DateTime.fromISO($('Get Activity Details').item.json.start_date_local).toFormat('cccc, yyyy-MM-dd') }}\nDuration: {{ Math.round($('Get Activity Details').item.json.moving_time / 60) }}min\nDistance: {{ $('Get Activity Details').item.json.distance ? ($('Get Activity Details').item.json.distance / 1000).toFixed(2) + 'km' : 'N/A' }}\n\n{{ $('Get Activity Details').item.json.total_elevation_gain ? 'Elevation gain: ' + Math.round($('Get Activity Details').item.json.total_elevation_gain) + 'm' : '' }}\n{{ $('Get Activity Details').item.json.average_temp ? 'Avg temp: ' + Math.round($('Get Activity Details').item.json.average_temp) + '\u00b0C' : '' }}\n{{ $('Get Activity Details').item.json.average_wind_speed ? 'Wind: ' + ($('Get Activity Details').item.json.average_wind_speed * 3.6).toFixed(1) + 'km/h' + ($('Get Activity Details').item.json.headwind_percent ? ' (' + Math.round($('Get Activity Details').item.json.headwind_percent) + '% headwind)' : '') : '' }}\n\n{{ $('Get Activity Details').item.json.avg_watts ? 'Power: ' + Math.round($('Get Activity Details').item.json.avg_watts) + 'W avg / ' + Math.round($('Get Activity Details').item.json.weighted_avg_watts) + 'W NP / VI ' + $('Get Activity Details').item.json.variability_index.toFixed(2) : '' }}\n{{ $('Get Activity Details').item.json.average_heartrate ? 'HR: ' + Math.round($('Get Activity Details').item.json.average_heartrate) + 'bpm avg / ' + Math.round($('Get Activity Details').item.json.max_heartrate) + 'bpm max / LTHR ' + $('Get Activity Details').item.json.lthr : '' }}\n{{ $('Get Activity Details').item.json.icu_hr_zone_times ? 'HR zones (Z1-Z5+): ' + $('Get Activity Details').item.json.icu_hr_zone_times.map(t => Math.round(t/60) + 'min').join(' / ') : '' }}\n{{ $('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence ? 'Cadence: ' + Math.round(($('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence) * ($('Get Activity Details').item.json.type === 'Run' ? 2 : 1)) + ($('Get Activity Details').item.json.type === 'Run' ? 'spm' : 'rpm') : '' }}\n{{ $('Get Activity Details').item.json.average_speed && $('Get Activity Details').item.json.type === 'Run' ? 'Pace: ' + Math.floor(1000 / $('Get Activity Details').item.json.average_speed / 60) + ':' + String(Math.round((1000 / $('Get Activity Details').item.json.average_speed) % 60)).padStart(2, '0') + '/km' : '' }}\nTSS: {{ $('Get Activity Details').item.json.icu_training_load ? Math.round($('Get Activity Details').item.json.icu_training_load) : 'N/A' }}\nIF: {{ $('Get Activity Details').item.json.intensity ? $('Get Activity Details').item.json.intensity.toFixed(2) : 'N/A' }}\n\n=== PLAN MATCHING (tracking only \u2014 does NOT affect grade or wording) ===\n1. If today's activity clearly corresponds to one of the unmatched sessions of the same sport in the pool, set plan_session_id to that id.\n2. If today is a session's pinned_day and the sport matches, prefer that session.\n3. Otherwise set plan_session_id to null. This is fine \u2014 it just means today wasn't in the suggestion pool.\n4. Never re-use a plan_session_id already in ALREADY MATCHED.\n5. Whether plan_session_id is null or not has ZERO bearing on grade or message tone.\n\n=== GRADE RUBRIC (session quality only, vs fitness profile + conditions) ===\nA \u2014 Clean execution. Zones held, pacing controlled, cadence in target, no major flags.\nB \u2014 Solid with one notable flag (mild cardiac drift, minor zone leak, slightly off cadence).\nC \u2014 Significant execution issues (poor pacing, big zone leaks, mechanical inefficiency, decoupling).\nF \u2014 Broken session (abandoned, injury risk, severe overreach, data corruption).\n\nA long unplanned Z2 ride that holds zones cleanly is an A. A planned Z2 ride that bleeds 30% into Z3 is a C. The plan is irrelevant; the session is what's graded.\n\n=== MULTI-SESSION DAYS & SHORT SESSIONS ===\n- If OTHER SESSIONS TODAY lists sessions, judge this one as part of the day's whole training, not in isolation. Combined same-sport volume counts: a short pool set plus an open-water swim that sum to solid volume = a good swim day \u2014 say so in a bullet when relevant.\n- NEVER fail a session for being short. Grade what was done (zones, technique, effort), not the duration. Reserve F for genuinely broken sessions (abandoned mid-effort, injury risk, corrupt data). A clean 10min open-water dip is a B, not an F.\n- Short swims (<15min) with little/no HR data: describe what's measurable, grade neutrally (B if clean, C only for real execution faults).\n\n=== CONDITIONS-AWARE FLAGGING (read carefully) ===\nMany \"issues\" have benign environmental causes. Before flagging cadence, HR, or pacing problems, check the environmental data above:\n- Cadence drops on Ride: if elevation_gain > 500m, low cadence is expected on climbs \u2014 do NOT flag as inefficiency.\n- HR runs hot: if avg_temp > 28\u00b0C, expect cardiac drift \u2014 do NOT call it overreach.\n- Power vs HR mismatch: if headwind_percent > 40%, power required to maintain HR drops \u2014 adjust expectations.\n- Rough wind: if average_wind_speed > 5 m/s, pacing variability is environmental, not athletic.\nBe specific in your reasoning when conditions matter: \"68rpm with 1100m of climbing \u2014 expected\" rather than blanket \"low cadence\".\n\n=== SESSION INTENT (infer before grading \u2014 OVERRIDES the rubric where stated) ===\nInfer what kind of session this was from its structure BEFORE applying the rubric \u2014 grade execution against the inferred intent, never against an assumed steady Z2.\n\nWEDNESDAY RIDE = RAPHA GROUP RIDE (hard rule):\nIf Date (weekday) is Wednesday and the sport is Ride, this IS the athlete's recurring Rapha group ride. Its design is: Z2 base with deliberate sprint/surge efforts in the middle. For this ride you MUST:\n- Treat Z4-Z5 spikes and high max HR as the designed sprint block \u2014 they are NOT zone leakage, NOT 'uncontrolled surges'. Never penalize them.\n- EXCLUDE torque CV, VI, and average cadence from grading entirely \u2014 group dynamics (coasting, drafting, surging) distort all three. Do not mention them as faults.\n- Grade on: Z2 discipline outside the sprint block, commitment in the efforts, and HR recovery after surges. A Rapha ride with a solid Z2 base and committed sprints is an A or B by default.\n\nOther rides: repeated short Z4-Z5 surges over a Z2 base with high coasting time also indicate a group/mixed ride \u2014 apply the same logic. Steady solo-structured sessions keep the full rubric as-is.\n\n=== TREND USAGE (REQUIRED when comparable data exists) ===\nThe 30-day trend section gives you color. When the trend has \u22652 valid sessions, you MUST surface at least one trend-anchored insight in the bullets if any of these are true:\n- Today's avg_hr differs from 30d avg HR by >5bpm\n- Today's avg_power differs from 30d avg power by >5%\n- Today's duration is the longest or shortest of last 30d for this sport\n- Today's decoupling/EF is meaningfully different from the 30d mean\n- Today's grade extends or breaks a streak (e.g. \"first A in 4 rides\", \"third C in a row\")\n\nPhrase as concrete deltas: \"HR 149bpm \u2014 +22 vs your 30d Ride avg of 127bpm, ran significantly harder\" rather than \"HR was high\".\n\nIf the trend section says \"(no comparable...)\" you have no trend data \u2014 skip this rule.\n\nTrend deltas do NOT change the grade rubric. Trend is color, not currency.\n\n=== SPORT-SPECIFIC FORM METRICS ===\n{{ $json.sportMetrics }}\n\n=== FORM COACHING RULES ===\nWhen Sport-Specific Form Metrics are present, give technique-level coaching in addition to zone/pacing analysis:\n- Run: if cadence < 165 spm, prescribe cadence increase (\"aim 170-175 spm \u2014 shortens stride, reduces overstride\"). If stride length is short for the pace, may indicate overstride compensating for low cadence. Don't invent GCT/oscillation values \u2014 the prompt explicitly notes they're unavailable.\n- Swim: if SWOLF > 40, push stroke economy (\"longer glide, drop SR by 2\"). If DPS < 1.3, target distance per stroke. Suggest breathing pattern adjustments (e.g. breathe every 3 vs every 2) if HR runs high at moderate effort.\n- Ride: if torque variability CV > 0.40, comment on pedaling consistency (\"torque CV 0.48 \u2014 choppy pedaling, work on smooth stroke through the dead spot\"). If icu_cadence_z2 < 40% of moving time, note that the avg cadence number hides long stretches at inefficient RPMs. Do NOT mention L/R balance or pedaling smoothness % \u2014 single-sided meter, data doesn't exist.\n\nBe honest about missing data. NEVER invent Running Dynamics, L/R balance, or per-leg pedaling metrics. The metrics block tells you what's available.\n\n=== ANALYSIS FORMAT (EXACTLY 3 BULLETS \u2014 no more, no less) ===\n[sport-emoji] [Sport] \u00b7 [duration]min \u00b7 [distance]km \u00b7 [avg HR]bpm \u00b7 TSS [tss]\nGrade: [A/B/C/F] \u2014 [one reason about session quality, \u22648 words]\n\n\u2022 [insight 1 \u2014 the most important physiological/execution flag, with specific numbers]\n\u2022 [insight 2 \u2014 secondary flag OR trend delta if material; weave the trend INTO this bullet, do NOT add a 4th]\n\u2022 Limiter: [the one thing holding back progress]\n\nTomorrow: [session prescription \u226412 words]\nWatch: [one metric to track next time \u22648 words]\n\nIf trend usage is required (rule above), fold the trend insight into bullet 1 OR bullet 2 \u2014 never as a separate bullet. Examples:\n- \"HR 149bpm \u2014 9 below your 30d Ride avg of 158bpm, but 37% above Z2 ceiling: pacing control was the issue, not effort\"\n- \"Cadence 68rpm \u2014 same low pattern as your 30d Ride avg, mechanically inefficient on flat terrain\"\n\nNEVER output more than 3 bullets. NEVER omit the Limiter bullet.\n\nEMOJI MAP: \ud83c\udfc3 Run \u00b7 \ud83c\udfca Swim \u00b7 \ud83d\udeb4 Ride/VirtualRide \u00b7 \ud83d\udcaa Workout \u00b7 \u26f7\ufe0f NordicSki \u00b7 \ud83d\udeb6 Walk \u00b7 \ud83e\udd7e Hike\n\nRULES (enforce strictly):\n- NEVER prefix the message with \"\u26a0\ufe0f Off-plan\" or any plan-adherence warning. Header is just session info.\n- NEVER use \"off-plan\", \"deviated from plan\", \"no planned X today\", or similar phrasing.\n- Do NOT scold or moralize about the athlete deviating from the plan.\n- Mention the plan only if it's genuinely useful context. Default to silence about the plan.\n- Grade reasoning must reference session quality (zones, pacing, cadence, drift, decoupling), never plan adherence.\n- When flagging mechanical/physiological issues, account for terrain (elevation_gain) and conditions (temp, wind).\n- EXACTLY 3 bullets. The third bullet MUST start with \"Limiter:\". No 4th bullet under any circumstance.\n- When the trend rule applies, the trend insight goes INSIDE bullet 1 or 2 \u2014 not as a separate bullet.\n- ZERO markdown \u2014 no **, no *, no __. Plain text only.\n- Bullets are the literal \u2022 character.\n- Max 8 lines total (1 header + 1 grade + blank + 3 bullets + Tomorrow + Watch = 8).\n- Use only metrics provided above. Never invent numbers.\n- Tone: rigorous, direct, descriptive. Describe; do not judge adherence.\n- No preamble, no signoff.\n\n=== OUTPUT (JSON ONLY) ===\n{\"plan_session_id\":\"<id from pool, or null>\",\"grade\":\"A|B|C|F\",\"message\":\"<full Telegram text with \\n for newlines>\"}\n\nRules:\n- grade matches the Grade: line in the message.\n- message must NOT start with \"\u26a0\ufe0f Off-plan\" \u2014 ever. Just the session header line.\n- Do NOT wrap in code blocks.",
-                    "batching": {}
-                },
-                "type": "@n8n/n8n-nodes-langchain.chainLlm",
-                "typeVersion": 1.8,
-                "position": [
-                    1680,
-                    160
-                ],
-                "id": "llm-chain",
-                "name": "Hardcore Analysis"
-            },
-            {
-                "parameters": {
-                    "model": "anthropic/claude-sonnet-4.6",
-                    "options": {
-                        "maxTokens": 1000,
-                        "temperature": 0.7
-                    }
-                },
-                "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-                "typeVersion": 1,
-                "position": [
-                    1480,
-                    360
-                ],
-                "id": "openrouter-model",
-                "name": "Claude 3.7 Sonnet",
-                "credentials": {
-                    "openRouterApi": {
-                        "id": "nhbNqmgyP4cAeQ6B",
-                        "name": "OpenRouter account"
-                    }
-                }
-            },
-            {
-                "parameters": {
-                    "chatId": "1865798034",
-                    "text": "={{ $('Parse Grade').item.json.message }}",
-                    "additionalFields": {
-                        "appendAttribution": false
-                    }
-                },
-                "type": "n8n-nodes-base.telegram",
-                "typeVersion": 1.2,
-                "position": [
-                    2240,
-                    160
-                ],
-                "id": "send-telegram",
-                "name": "Send Telegram",
-                "credentials": {
-                    "telegramApi": {
-                        "id": "9IpAp35yJmIQJpeA",
-                        "name": "Telegram account"
-                    }
-                },
-                "webhookId": "2e5b6406-041e-4e69-a8f2-961e31381504"
-            },
-            {
-                "parameters": {
-                    "conditions": {
-                        "options": {
-                            "caseSensitive": true,
-                            "leftValue": "",
-                            "typeValidation": "strict",
-                            "version": 3
-                        },
-                        "conditions": [
-                            {
-                                "id": "idempotency-check",
-                                "leftValue": "={{ $json['Last Coaching Date'] }}",
-                                "rightValue": "={{ $today.toFormat('yyyy-MM-dd') }}",
-                                "operator": {
-                                    "type": "string",
-                                    "operation": "equals"
-                                }
-                            }
-                        ],
-                        "combinator": "and"
-                    },
-                    "options": {}
-                },
-                "type": "n8n-nodes-base.if",
-                "typeVersion": 2.3,
-                "position": [
-                    -20,
-                    420
-                ],
-                "id": "already-coached-today-icu",
-                "name": "Already Coached Today?"
-            },
-            {
-                "id": "update-coaching-date-icu",
-                "name": "Update Coaching Date",
-                "type": "n8n-nodes-base.httpRequest",
-                "typeVersion": 4.3,
-                "position": [
-                    1880,
-                    160
-                ],
-                "parameters": {
-                    "method": "PUT",
-                    "url": "=https://coach-db.arthurpfz.com/athletes/{{ $('Loop Over Users').item.json.id }}",
-                    "authentication": "genericCredentialType",
-                    "genericAuthType": "httpHeaderAuth",
-                    "options": {},
-                    "sendBody": true,
-                    "contentType": "json",
-                    "bodyParameters": {
-                        "parameters": [
-                            {
-                                "name": "last_coaching_date",
-                                "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
-                            }
-                        ]
-                    }
-                },
-                "credentials": {
-                    "httpHeaderAuth": {
-                        "id": "6GNzKYNE1JAz77RL",
-                        "name": "Tricoach DB"
                     }
                 }
             },
@@ -1671,8 +1424,8 @@
                 "type": "n8n-nodes-base.httpRequest",
                 "typeVersion": 4.3,
                 "position": [
-                    1280,
-                    160
+                    1800,
+                    0
                 ],
                 "id": "save-session-node",
                 "name": "Save Session",
@@ -1685,99 +1438,31 @@
                 "onError": "continueRegularOutput"
             },
             {
-                "parameters": {
-                    "method": "PATCH",
-                    "url": "=https://coach-db.arthurpfz.com/sessions/{{ $('Save Session').item.json.id }}",
-                    "authentication": "genericCredentialType",
-                    "genericAuthType": "httpHeaderAuth",
-                    "sendBody": true,
-                    "options": {},
-                    "specifyBody": "json",
-                    "jsonBody": "={{ JSON.stringify({\n  analysis: $('Parse Grade').item.json.message,\n  analyzed_at: $now.toISO(),\n  grade: $('Parse Grade').item.json.grade,\n  plan_session_id: $('Parse Grade').item.json.plan_session_id || null\n}) }}"
-                },
-                "type": "n8n-nodes-base.httpRequest",
-                "typeVersion": 4.3,
+                "id": "already-analyzed",
+                "name": "Already Analyzed?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
                 "position": [
-                    2040,
-                    160
-                ],
-                "id": "save-analysis-node",
-                "name": "Save Analysis",
-                "credentials": {
-                    "httpHeaderAuth": {
-                        "id": "6GNzKYNE1JAz77RL",
-                        "name": "Tricoach DB"
-                    }
-                },
-                "onError": "continueRegularOutput"
-            },
-            {
-                "id": "send-rest-day-telegram",
-                "name": "Send Rest-Day Telegram",
-                "type": "n8n-nodes-base.telegram",
-                "typeVersion": 1.2,
-                "position": [
-                    1080,
-                    360
-                ],
-                "parameters": {
-                    "chatId": "1865798034",
-                    "text": "\ud83d\udecc No activity logged today. Rest well \u2014 recovery is part of the plan.",
-                    "additionalFields": {
-                        "appendAttribution": false
-                    }
-                },
-                "credentials": {
-                    "telegramApi": {
-                        "id": "9IpAp35yJmIQJpeA",
-                        "name": "Telegram account"
-                    }
-                },
-                "webhookId": "0d1a6d04-20db-417c-85ff-2d00df519242"
-            },
-            {
-                "id": "filter-activities",
-                "name": "Filter Activities",
-                "type": "n8n-nodes-base.filter",
-                "typeVersion": 2.2,
-                "position": [
-                    280,
-                    240
+                    2000,
+                    0
                 ],
                 "parameters": {
                     "conditions": {
                         "options": {
                             "caseSensitive": true,
                             "leftValue": "",
-                            "typeValidation": "strict",
+                            "typeValidation": "loose",
                             "version": 2
                         },
                         "conditions": [
                             {
-                                "id": "drop-zepp",
-                                "leftValue": "={{ $json.source }}",
-                                "rightValue": "ZEPP",
+                                "id": "analyzed-check",
+                                "leftValue": "={{ $json.analyzed_at }}",
+                                "rightValue": "",
                                 "operator": {
                                     "type": "string",
-                                    "operation": "notEquals"
-                                }
-                            },
-                            {
-                                "id": "drop-short",
-                                "leftValue": "={{ (($json.type||\"\").toLowerCase().includes(\"swim\")) || $json.moving_time >= 600 }}",
-                                "rightValue": true,
-                                "operator": {
-                                    "type": "boolean",
-                                    "operation": "equals"
-                                }
-                            },
-                            {
-                                "id": "drop-empty",
-                                "leftValue": "={{ $json.distance }}",
-                                "rightValue": 0,
-                                "operator": {
-                                    "type": "number",
-                                    "operation": "gt"
+                                    "operation": "empty",
+                                    "singleValue": true
                                 }
                             }
                         ],
@@ -1787,13 +1472,106 @@
                 }
             },
             {
+                "parameters": {
+                    "assignments": {
+                        "assignments": [
+                            {
+                                "id": "calc-monday",
+                                "name": "Monday_date",
+                                "value": "={{ DateTime.fromISO($(\"Get Activity Details\").item.json.start_date_local).startOf(\"week\").toFormat(\"yyyy-MM-dd\") }}",
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "type": "n8n-nodes-base.set",
+                "typeVersion": 3.4,
+                "position": [
+                    2200,
+                    0
+                ],
+                "id": "calculate-monday",
+                "name": "Calculate Monday"
+            },
+            {
+                "id": "search-plan",
+                "name": "Search Plan",
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.3,
+                "position": [
+                    2400,
+                    0
+                ],
+                "parameters": {
+                    "method": "GET",
+                    "url": "https://coach-db.arthurpfz.com/weekly-plans/latest",
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpHeaderAuth",
+                    "options": {},
+                    "sendQuery": true,
+                    "queryParameters": {
+                        "parameters": [
+                            {
+                                "name": "athlete_id",
+                                "value": "={{ $('Loop Over Users').item.json.id }}"
+                            }
+                        ]
+                    }
+                },
+                "credentials": {
+                    "httpHeaderAuth": {
+                        "id": "6GNzKYNE1JAz77RL",
+                        "name": "Tricoach DB"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "promptType": "define",
+                    "text": "=You are an elite endurance coach analyzing a single training session.\n\nGRADE REFLECTS SESSION QUALITY ONLY \u2014 how cleanly this session of its kind was executed against the athlete's fitness profile (HR zones, FTP, CSS, cadence targets) AND the day's conditions (terrain, weather). It is NOT a plan-adherence score. An unplanned long ride executed cleanly is an A. A sloppy planned interval set is a C.\n\n=== ATHLETE ===\n- Name: {{ $('Loop Over Users').item.json.Name }}\n- Phase: {{ $('Loop Over Users').item.json['Training Phase'] }}\n- Profile: {{ $('Loop Over Users').item.json['Fitness Profile'] }}\n- Health: {{ $('Loop Over Users').item.json['Health Status'] }}\n\n=== THIS WEEK'S PLAN (indicative \u2014 not a contract) ===\nFocus: {{ $('Search Plan').item.json.Focus }}\nSessions:\n{{ JSON.stringify($('Search Plan').item.json.sessions || [], null, 2) }}\n\nThe plan is a Sunday suggestion. The athlete is free to swap, skip, or add sessions. Do NOT grade against it. Use it only as soft context if a meaningful relationship exists (e.g. swapped a planned swim for a ride). Be neutral.\n\n=== ALREADY MATCHED THIS WEEK ===\n{{ (($('Get Matched Sessions').item.json.sessions || []).filter(s => s.plan_session_id).map(s => '- plan_session_id=' + s.plan_session_id + ' (' + (s.sport||'?') + ', ' + (s.date||'') + ')').join('\\n')) || '(none yet)' }}\n\n=== OTHER SESSIONS TODAY (same-day context) ===\n{{ (($('Get Matched Sessions').item.json.sessions || []).filter(s => (s.date||'') === DateTime.fromISO($('Get Activity Details').item.json.start_date_local).toFormat('yyyy-MM-dd') && s.intervals_id !== $('Get Activity Details').item.json.id).map(s => '- ' + (s.sport||'?') + ' \u00b7 ' + (s.duration_min||'?') + 'min \u00b7 ' + (s.distance_km||0) + 'km' + (s.grade ? ' \u00b7 Grade ' + s.grade : '')).join('\\n')) || '(none \u2014 only session today)' }}\n\n=== 30-DAY TREND (same sport) ===\n{{ $json.trendSummary }}\n\n=== TODAY'S ACTIVITY ===\nActivity: {{ $('Get Activity Details').item.json.type }} - {{ $('Get Activity Details').item.json.name }}\nSource: {{ $('Get Activity Details').item.json.source }}\nDate (weekday): {{ DateTime.fromISO($('Get Activity Details').item.json.start_date_local).toFormat('cccc, yyyy-MM-dd') }}\nDuration: {{ Math.round($('Get Activity Details').item.json.moving_time / 60) }}min\nDistance: {{ $('Get Activity Details').item.json.distance ? ($('Get Activity Details').item.json.distance / 1000).toFixed(2) + 'km' : 'N/A' }}\n\n{{ $('Get Activity Details').item.json.total_elevation_gain ? 'Elevation gain: ' + Math.round($('Get Activity Details').item.json.total_elevation_gain) + 'm' : '' }}\n{{ $('Get Activity Details').item.json.average_temp ? 'Avg temp: ' + Math.round($('Get Activity Details').item.json.average_temp) + '\u00b0C' : '' }}\n{{ $('Get Activity Details').item.json.average_wind_speed ? 'Wind: ' + ($('Get Activity Details').item.json.average_wind_speed * 3.6).toFixed(1) + 'km/h' + ($('Get Activity Details').item.json.headwind_percent ? ' (' + Math.round($('Get Activity Details').item.json.headwind_percent) + '% headwind)' : '') : '' }}\n\n{{ $('Get Activity Details').item.json.avg_watts ? 'Power: ' + Math.round($('Get Activity Details').item.json.avg_watts) + 'W avg / ' + Math.round($('Get Activity Details').item.json.weighted_avg_watts) + 'W NP / VI ' + $('Get Activity Details').item.json.variability_index.toFixed(2) : '' }}\n{{ $('Get Activity Details').item.json.average_heartrate ? 'HR: ' + Math.round($('Get Activity Details').item.json.average_heartrate) + 'bpm avg / ' + Math.round($('Get Activity Details').item.json.max_heartrate) + 'bpm max / LTHR ' + $('Get Activity Details').item.json.lthr : '' }}\n{{ $('Get Activity Details').item.json.icu_hr_zone_times ? 'HR zones (Z1-Z5+): ' + $('Get Activity Details').item.json.icu_hr_zone_times.map(t => Math.round(t/60) + 'min').join(' / ') : '' }}\n{{ $('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence ? 'Cadence: ' + Math.round(($('Get Activity Details').item.json.average_cadence || $('Get Activity Details').item.json.avg_run_cadence) * ($('Get Activity Details').item.json.type === 'Run' ? 2 : 1)) + ($('Get Activity Details').item.json.type === 'Run' ? 'spm' : 'rpm') : '' }}\n{{ $('Get Activity Details').item.json.average_speed && $('Get Activity Details').item.json.type === 'Run' ? 'Pace: ' + Math.floor(1000 / $('Get Activity Details').item.json.average_speed / 60) + ':' + String(Math.round((1000 / $('Get Activity Details').item.json.average_speed) % 60)).padStart(2, '0') + '/km' : '' }}\nTSS: {{ $('Get Activity Details').item.json.icu_training_load ? Math.round($('Get Activity Details').item.json.icu_training_load) : 'N/A' }}\nIF: {{ $('Get Activity Details').item.json.intensity ? $('Get Activity Details').item.json.intensity.toFixed(2) : 'N/A' }}\n\n=== PLAN MATCHING (tracking only \u2014 does NOT affect grade or wording) ===\n1. If today's activity clearly corresponds to one of the unmatched sessions of the same sport in the pool, set plan_session_id to that id.\n2. If today is a session's pinned_day and the sport matches, prefer that session.\n3. Otherwise set plan_session_id to null. This is fine \u2014 it just means today wasn't in the suggestion pool.\n4. Never re-use a plan_session_id already in ALREADY MATCHED.\n5. Whether plan_session_id is null or not has ZERO bearing on grade or message tone.\n\n=== GRADE RUBRIC (session quality only, vs fitness profile + conditions) ===\nA \u2014 Clean execution. Zones held, pacing controlled, cadence in target, no major flags.\nB \u2014 Solid with one notable flag (mild cardiac drift, minor zone leak, slightly off cadence).\nC \u2014 Significant execution issues (poor pacing, big zone leaks, mechanical inefficiency, decoupling).\nF \u2014 Broken session (abandoned, injury risk, severe overreach, data corruption).\n\nA long unplanned Z2 ride that holds zones cleanly is an A. A planned Z2 ride that bleeds 30% into Z3 is a C. The plan is irrelevant; the session is what's graded.\n\n=== MULTI-SESSION DAYS & SHORT SESSIONS ===\n- If OTHER SESSIONS TODAY lists sessions, judge this one as part of the day's whole training, not in isolation. Combined same-sport volume counts: a short pool set plus an open-water swim that sum to solid volume = a good swim day \u2014 say so in a bullet when relevant.\n- NEVER fail a session for being short. Grade what was done (zones, technique, effort), not the duration. Reserve F for genuinely broken sessions (abandoned mid-effort, injury risk, corrupt data). A clean 10min open-water dip is a B, not an F.\n- Short swims (<15min) with little/no HR data: describe what's measurable, grade neutrally (B if clean, C only for real execution faults).\n\n=== CONDITIONS-AWARE FLAGGING (read carefully) ===\nMany \"issues\" have benign environmental causes. Before flagging cadence, HR, or pacing problems, check the environmental data above:\n- Cadence drops on Ride: if elevation_gain > 500m, low cadence is expected on climbs \u2014 do NOT flag as inefficiency.\n- HR runs hot: if avg_temp > 28\u00b0C, expect cardiac drift \u2014 do NOT call it overreach.\n- Power vs HR mismatch: if headwind_percent > 40%, power required to maintain HR drops \u2014 adjust expectations.\n- Rough wind: if average_wind_speed > 5 m/s, pacing variability is environmental, not athletic.\nBe specific in your reasoning when conditions matter: \"68rpm with 1100m of climbing \u2014 expected\" rather than blanket \"low cadence\".\n\n=== SESSION INTENT (infer before grading \u2014 OVERRIDES the rubric where stated) ===\nInfer what kind of session this was from its structure BEFORE applying the rubric \u2014 grade execution against the inferred intent, never against an assumed steady Z2.\n\nWEDNESDAY RIDE = RAPHA GROUP RIDE (hard rule):\nIf Date (weekday) is Wednesday and the sport is Ride, this IS the athlete's recurring Rapha group ride. Its design is: Z2 base with deliberate sprint/surge efforts in the middle. For this ride you MUST:\n- Treat Z4-Z5 spikes and high max HR as the designed sprint block \u2014 they are NOT zone leakage, NOT 'uncontrolled surges'. Never penalize them.\n- EXCLUDE torque CV, VI, and average cadence from grading entirely \u2014 group dynamics (coasting, drafting, surging) distort all three. Do not mention them as faults.\n- Grade on: Z2 discipline outside the sprint block, commitment in the efforts, and HR recovery after surges. A Rapha ride with a solid Z2 base and committed sprints is an A or B by default.\n\nOther rides: repeated short Z4-Z5 surges over a Z2 base with high coasting time also indicate a group/mixed ride \u2014 apply the same logic. Steady solo-structured sessions keep the full rubric as-is.\n\n=== TREND USAGE (REQUIRED when comparable data exists) ===\nThe 30-day trend section gives you color. When the trend has \u22652 valid sessions, you MUST surface at least one trend-anchored insight in the bullets if any of these are true:\n- Today's avg_hr differs from 30d avg HR by >5bpm\n- Today's avg_power differs from 30d avg power by >5%\n- Today's duration is the longest or shortest of last 30d for this sport\n- Today's decoupling/EF is meaningfully different from the 30d mean\n- Today's grade extends or breaks a streak (e.g. \"first A in 4 rides\", \"third C in a row\")\n\nPhrase as concrete deltas: \"HR 149bpm \u2014 +22 vs your 30d Ride avg of 127bpm, ran significantly harder\" rather than \"HR was high\".\n\nIf the trend section says \"(no comparable...)\" you have no trend data \u2014 skip this rule.\n\nTrend deltas do NOT change the grade rubric. Trend is color, not currency.\n\n=== SPORT-SPECIFIC FORM METRICS ===\n{{ $json.sportMetrics }}\n\n=== FORM COACHING RULES ===\nWhen Sport-Specific Form Metrics are present, give technique-level coaching in addition to zone/pacing analysis:\n- Run: if cadence < 165 spm, prescribe cadence increase (\"aim 170-175 spm \u2014 shortens stride, reduces overstride\"). If stride length is short for the pace, may indicate overstride compensating for low cadence. Don't invent GCT/oscillation values \u2014 the prompt explicitly notes they're unavailable.\n- Swim: if SWOLF > 40, push stroke economy (\"longer glide, drop SR by 2\"). If DPS < 1.3, target distance per stroke. Suggest breathing pattern adjustments (e.g. breathe every 3 vs every 2) if HR runs high at moderate effort.\n- Ride: if torque variability CV > 0.40, comment on pedaling consistency (\"torque CV 0.48 \u2014 choppy pedaling, work on smooth stroke through the dead spot\"). If icu_cadence_z2 < 40% of moving time, note that the avg cadence number hides long stretches at inefficient RPMs. Do NOT mention L/R balance or pedaling smoothness % \u2014 single-sided meter, data doesn't exist.\n\nBe honest about missing data. NEVER invent Running Dynamics, L/R balance, or per-leg pedaling metrics. The metrics block tells you what's available.\n\n=== ANALYSIS FORMAT (EXACTLY 3 BULLETS \u2014 no more, no less) ===\n[sport-emoji] [Sport] \u00b7 [duration]min \u00b7 [distance]km \u00b7 [avg HR]bpm \u00b7 TSS [tss]\nGrade: [A/B/C/F] \u2014 [one reason about session quality, \u22648 words]\n\n\u2022 [insight 1 \u2014 the most important physiological/execution flag, with specific numbers]\n\u2022 [insight 2 \u2014 secondary flag OR trend delta if material; weave the trend INTO this bullet, do NOT add a 4th]\n\u2022 Limiter: [the one thing holding back progress]\n\nTomorrow: [session prescription \u226412 words]\nWatch: [one metric to track next time \u22648 words]\n\nIf trend usage is required (rule above), fold the trend insight into bullet 1 OR bullet 2 \u2014 never as a separate bullet. Examples:\n- \"HR 149bpm \u2014 9 below your 30d Ride avg of 158bpm, but 37% above Z2 ceiling: pacing control was the issue, not effort\"\n- \"Cadence 68rpm \u2014 same low pattern as your 30d Ride avg, mechanically inefficient on flat terrain\"\n\nNEVER output more than 3 bullets. NEVER omit the Limiter bullet.\n\nEMOJI MAP: \ud83c\udfc3 Run \u00b7 \ud83c\udfca Swim \u00b7 \ud83d\udeb4 Ride/VirtualRide \u00b7 \ud83d\udcaa Workout \u00b7 \u26f7\ufe0f NordicSki \u00b7 \ud83d\udeb6 Walk \u00b7 \ud83e\udd7e Hike\n\nRULES (enforce strictly):\n- NEVER prefix the message with \"\u26a0\ufe0f Off-plan\" or any plan-adherence warning. Header is just session info.\n- NEVER use \"off-plan\", \"deviated from plan\", \"no planned X today\", or similar phrasing.\n- Do NOT scold or moralize about the athlete deviating from the plan.\n- Mention the plan only if it's genuinely useful context. Default to silence about the plan.\n- Grade reasoning must reference session quality (zones, pacing, cadence, drift, decoupling), never plan adherence.\n- When flagging mechanical/physiological issues, account for terrain (elevation_gain) and conditions (temp, wind).\n- EXACTLY 3 bullets. The third bullet MUST start with \"Limiter:\". No 4th bullet under any circumstance.\n- When the trend rule applies, the trend insight goes INSIDE bullet 1 or 2 \u2014 not as a separate bullet.\n- ZERO markdown \u2014 no **, no *, no __. Plain text only.\n- Bullets are the literal \u2022 character.\n- Max 8 lines total (1 header + 1 grade + blank + 3 bullets + Tomorrow + Watch = 8).\n- Use only metrics provided above. Never invent numbers.\n- Tone: rigorous, direct, descriptive. Describe; do not judge adherence.\n- No preamble, no signoff.\n\n=== OUTPUT (JSON ONLY) ===\n{\"plan_session_id\":\"<id from pool, or null>\",\"grade\":\"A|B|C|F\",\"message\":\"<full Telegram text with \\n for newlines>\"}\n\nRules:\n- grade matches the Grade: line in the message.\n- message must NOT start with \"\u26a0\ufe0f Off-plan\" \u2014 ever. Just the session header line.\n- Do NOT wrap in code blocks.",
+                    "batching": {}
+                },
+                "type": "@n8n/n8n-nodes-langchain.chainLlm",
+                "typeVersion": 1.8,
+                "position": [
+                    2600,
+                    0
+                ],
+                "id": "llm-chain",
+                "name": "Hardcore Analysis"
+            },
+            {
+                "parameters": {
+                    "model": "anthropic/claude-sonnet-4.6",
+                    "options": {
+                        "maxTokens": 1000,
+                        "temperature": 0.7
+                    }
+                },
+                "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+                "typeVersion": 1,
+                "position": [
+                    2600,
+                    200
+                ],
+                "id": "openrouter-model",
+                "name": "Claude 3.7 Sonnet",
+                "credentials": {
+                    "openRouterApi": {
+                        "id": "nhbNqmgyP4cAeQ6B",
+                        "name": "OpenRouter account"
+                    }
+                }
+            },
+            {
                 "id": "parse-grade-node",
                 "name": "Parse Grade",
                 "type": "n8n-nodes-base.set",
                 "typeVersion": 3.4,
                 "position": [
-                    1880,
-                    160
+                    2800,
+                    0
                 ],
                 "parameters": {
                     "assignments": {
@@ -1823,6 +1601,57 @@
             },
             {
                 "parameters": {
+                    "method": "PATCH",
+                    "url": "=https://coach-db.arthurpfz.com/sessions/{{ $('Save Session').item.json.id }}",
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpHeaderAuth",
+                    "sendBody": true,
+                    "options": {},
+                    "specifyBody": "json",
+                    "jsonBody": "={{ JSON.stringify({\n  analysis: $('Parse Grade').item.json.message,\n  analyzed_at: $now.toISO(),\n  grade: $('Parse Grade').item.json.grade,\n  plan_session_id: $('Parse Grade').item.json.plan_session_id || null\n}) }}"
+                },
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.3,
+                "position": [
+                    3000,
+                    0
+                ],
+                "id": "save-analysis-node",
+                "name": "Save Analysis",
+                "credentials": {
+                    "httpHeaderAuth": {
+                        "id": "6GNzKYNE1JAz77RL",
+                        "name": "Tricoach DB"
+                    }
+                },
+                "onError": "continueRegularOutput"
+            },
+            {
+                "parameters": {
+                    "chatId": "={{ $(\"When Called\").item.json.chat_id || \"1865798034\" }}",
+                    "text": "=\ud83d\udcc5 {{ $('Get Activity Details').item.json.start_date_local.slice(0,10) }}\n\n{{ $('Parse Grade').item.json.message }}",
+                    "additionalFields": {
+                        "appendAttribution": false
+                    }
+                },
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    3200,
+                    0
+                ],
+                "id": "send-telegram",
+                "name": "Send Telegram",
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                },
+                "webhookId": "2e5b6406-041e-4e69-a8f2-961e31381504"
+            },
+            {
+                "parameters": {
                     "method": "GET",
                     "url": "https://coach-db.arthurpfz.com/sessions",
                     "authentication": "genericCredentialType",
@@ -1836,7 +1665,11 @@
                             },
                             {
                                 "name": "date_from",
-                                "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}"
+                                "value": "={{ $('Calculate Monday').item.json.Monday_date }}"
+                            },
+                            {
+                                "name": "date_to",
+                                "value": "={{ DateTime.fromISO($('Calculate Monday').item.json.Monday_date).plus({ days: 6 }).toFormat('yyyy-MM-dd') }}"
                             },
                             {
                                 "name": "wrap",
@@ -1849,10 +1682,10 @@
                 "type": "n8n-nodes-base.httpRequest",
                 "typeVersion": 4.2,
                 "position": [
-                    1700,
-                    160
+                    2620,
+                    0
                 ],
-                "id": "get-matched-di-mov6sbdd",
+                "id": "get-matched-bf-mov6sboo",
                 "name": "Get Matched Sessions",
                 "credentials": {
                     "httpHeaderAuth": {
@@ -1862,13 +1695,13 @@
                 }
             },
             {
-                "id": "get-trend-sessions-peryz4",
+                "id": "get-trend-sessions-nsrenu",
                 "name": "Get Trend Sessions",
                 "type": "n8n-nodes-base.httpRequest",
                 "typeVersion": 4.3,
                 "position": [
-                    1800,
-                    360
+                    2720,
+                    200
                 ],
                 "parameters": {
                     "method": "GET",
@@ -1910,13 +1743,13 @@
                 }
             },
             {
-                "id": "build-trend-stats-kf255o",
+                "id": "build-trend-stats-z589kn",
                 "name": "Build Trend Stats",
                 "type": "n8n-nodes-base.code",
                 "typeVersion": 2,
                 "position": [
-                    1900,
-                    360
+                    2820,
+                    200
                 ],
                 "parameters": {
                     "jsCode": "// Build Trend Stats v2 \u2014 filters garbage sessions before aggregating.\n// Garbage = duration_min < 10 OR (sport in cycling/running and distance_km is null/<=0)\nconst wrapped = $json;\nconst all = Array.isArray(wrapped.sessions) ? wrapped.sessions : [];\nconst normSport = t => { const x = (t||'').toLowerCase(); if (x.includes('swim')) return 'Swim'; if (x.includes('run')) return 'Run'; if (x.includes('ride')||x.includes('bike')||x.includes('cycl')||x.includes('virtual')) return 'Ride'; return t; };\nconst sport = normSport($('Get Activity Details').item.json.type);\nconst sessions = all.filter(s => {\n  if (normSport(s.sport) !== sport) return false;\n  if (!s.duration_min || s.duration_min < 10) return false;\n  // For distance-based sports, drop null/zero distance records (incomplete uploads)\n  if (['Ride','Run','Swim','Walk','Hike'].includes(sport)) {\n    if (!s.distance_km || s.distance_km <= 0) return false;\n  }\n  return true;\n});\n\nif (sessions.length === 0) {\n  return { json: { trendSummary: '(no comparable ' + sport + ' sessions in last 30d)' } };\n}\n\nconst numAvg = (arr, k) => {\n  const vals = arr.map(s => parseFloat(s[k])).filter(v => !isNaN(v) && v !== 0);\n  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;\n};\nconst round1 = n => n == null ? null : Math.round(n * 10) / 10;\n\nconst stats = {\n  count: sessions.length,\n  avg_duration: numAvg(sessions, 'duration_min'),\n  avg_distance: numAvg(sessions, 'distance_km'),\n  avg_tss: numAvg(sessions, 'tss'),\n  avg_hr: numAvg(sessions, 'avg_hr'),\n  avg_power: numAvg(sessions, 'avg_power'),\n  avg_decoupling: numAvg(sessions, 'decoupling'),\n  avg_ef: numAvg(sessions, 'efficiency_factor'),\n};\nconst longest = sessions.reduce((m, s) => (s.duration_min || 0) > (m?.duration_min || 0) ? s : m, null);\nconst grades = sessions.filter(s => s.grade).map(s => s.grade);\nconst gradeBreakdown = ['A','B','C','F'].map(g => g + ':' + grades.filter(x => x === g).length).join(' ');\n\nconst lines = [];\nlines.push(sport + ' sessions (last 30d, valid only): ' + stats.count);\nconst avgParts = [];\nif (stats.avg_duration) avgParts.push(Math.round(stats.avg_duration) + 'min');\nif (stats.avg_distance) avgParts.push(round1(stats.avg_distance) + 'km');\nif (stats.avg_tss) avgParts.push('TSS ' + Math.round(stats.avg_tss));\nif (stats.avg_hr) avgParts.push('HR ' + Math.round(stats.avg_hr) + 'bpm');\nif (avgParts.length) lines.push('Avg: ' + avgParts.join(' \u00b7 '));\nif (stats.avg_power) lines.push('Avg power: ' + Math.round(stats.avg_power) + 'W');\nif (stats.avg_decoupling) lines.push('Avg decoupling: ' + round1(stats.avg_decoupling));\nif (stats.avg_ef) lines.push('Avg efficiency factor: ' + round1(stats.avg_ef));\nif (longest && longest.duration_min) lines.push('Longest: ' + longest.duration_min + 'min on ' + longest.date);\nif (grades.length) lines.push('Grade distribution (A/B/C/F): ' + gradeBreakdown);\n\nreturn { json: { trendSummary: lines.join('\\n') } };",
@@ -1924,13 +1757,13 @@
                 }
             },
             {
-                "id": "get-activity-streams-rfz2og",
+                "id": "get-activity-streams-nek6m1",
                 "name": "Get Activity Streams",
                 "type": "n8n-nodes-base.httpRequest",
                 "typeVersion": 4.3,
                 "position": [
-                    2000,
-                    560
+                    2920,
+                    400
                 ],
                 "parameters": {
                     "method": "GET",
@@ -1965,13 +1798,13 @@
                 "alwaysOutputData": true
             },
             {
-                "id": "build-sport-metrics-g89xlp",
+                "id": "build-sport-metrics-25jcwq",
                 "name": "Build Sport Metrics",
                 "type": "n8n-nodes-base.code",
                 "typeVersion": 2,
                 "position": [
-                    2100,
-                    560
+                    3020,
+                    400
                 ],
                 "parameters": {
                     "jsCode": "// Build Sport Metrics v2 \u2014 handles ICU streams single-object response.\nconst normSport = t => { const x = (t||'').toLowerCase(); if (x.includes('swim')) return 'Swim'; if (x.includes('run')) return 'Run'; if (x.includes('ride')||x.includes('bike')||x.includes('cycl')||x.includes('virtual')) return 'Ride'; return t; };\nconst sport = normSport($('Get Activity Details').item.json.type);\nconst a = $('Get Activity Details').item.json;\nconst trendSummary = $('Build Trend Stats').item.json.trendSummary || '';\n\n// Streams: ICU returns either an array of {type, data} OR a single\n// {type, data, allNull, ...} when one type was requested. Normalize.\nlet torqueData = null;\ntry {\n  const resp = $input.item.json;\n  const body = resp && resp.body !== undefined ? resp.body : resp;\n  let candidates = [];\n  if (Array.isArray(body)) candidates = body;\n  else if (body && typeof body === 'object' && body.type) candidates = [body];\n  else if (Array.isArray(body?.data) && body.data[0]?.type) candidates = body.data;\n  const torque = candidates.find(s => s && s.type === 'torque');\n  if (torque && Array.isArray(torque.data) && !torque.allNull) {\n    torqueData = torque.data.filter(v => typeof v === 'number' && v > 0);\n  }\n} catch (e) {}\n\nconst lines = [];\n\nif (sport === 'Run') {\n  const cadenceSpm = a.average_cadence ? Math.round(a.average_cadence * 2) : null;\n  const stride = a.average_stride;\n  if (cadenceSpm) lines.push('Cadence: ' + cadenceSpm + ' spm (total stride rate)');\n  if (stride) lines.push('Stride length: ' + stride.toFixed(2) + ' m');\n  if (a.average_speed) {\n    const paceSec = 1000 / a.average_speed;\n    const min = Math.floor(paceSec / 60);\n    const sec = Math.round(paceSec % 60);\n    lines.push('Pace: ' + min + ':' + String(sec).padStart(2, '0') + '/km');\n  }\n  lines.push('Targets: cadence 170-180 spm at endurance pace; stride length 0.85-1.10 m at Z2');\n  lines.push('Note: Running Dynamics (GCT, vertical oscillation, vertical ratio) NOT available \u2014 COROS PACE 3 wrist-only does not capture these. Stride/cadence-based form coaching only.');\n} else if (sport === 'Swim') {\n  const sr = a.average_cadence;\n  const dps = a.average_stride;\n  const poolLen = a.pool_length;\n  const lengths = a.lengths;\n  const movingSec = a.moving_time;\n  if (sr) lines.push('Stroke rate (SR): ' + sr.toFixed(1) + ' spm');\n  if (dps) lines.push('Distance per stroke (DPS): ' + dps.toFixed(2) + ' m');\n  if (poolLen && lengths) lines.push('Pool: ' + poolLen + 'm \u00d7 ' + lengths + ' lengths');\n  if (movingSec && lengths && sr) {\n    const secsPerLength = movingSec / lengths;\n    const strokesPerLength = sr * secsPerLength / 60;\n    const swolf = Math.round(secsPerLength + strokesPerLength);\n    lines.push('SWOLF: ~' + swolf + ' (' + Math.round(secsPerLength) + 's + ' + Math.round(strokesPerLength) + ' strokes per length)');\n  }\n  lines.push('Targets: SWOLF <38 strong, 38-45 moderate, >45 work needed. DPS 1.4-1.8m freestyle. Lower SR with high DPS = efficient.');\n} else if (sport === 'Ride') {\n  if (typeof a.icu_cadence_z2 === 'number') lines.push('Cadence Z2 time: ' + a.icu_cadence_z2 + 'min in efficient cadence band (out of ' + Math.round(a.moving_time/60) + 'min total)');\n  if (typeof a.polarization_index === 'number') lines.push('Polarization index: ' + a.polarization_index.toFixed(2) + ' (lower = more monotone effort, higher = polarized Z1+Z4)');\n  if (typeof a.icu_joules_above_ftp === 'number' && a.icu_joules_above_ftp > 0) {\n    lines.push('Anaerobic work: ' + Math.round(a.icu_joules_above_ftp / 1000) + ' kJ above FTP');\n  }\n  if (torqueData && torqueData.length > 100) {\n    const mean = torqueData.reduce((s, v) => s + v, 0) / torqueData.length;\n    const variance = torqueData.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / torqueData.length;\n    const std = Math.sqrt(variance);\n    const cv = mean > 0 ? std / mean : 0;\n    lines.push('Torque variability (CV): ' + cv.toFixed(2) + ' across ' + torqueData.length + ' pedaling samples (avg torque ' + Math.round(mean) + 'Nm; <0.30 smooth, 0.30-0.50 moderate, >0.50 choppy)');\n  }\n  lines.push('Note: L/R balance and pedaling smoothness % NOT available \u2014 SRAM Apex AXS is a single-sided crank-arm meter (only measures non-drive side).');\n}\n\nif (lines.length === 0) lines.push('(no sport-specific form metrics for ' + sport + ')');\n\nreturn { json: { trendSummary, sportMetrics: lines.join('\\n') } };",
@@ -1980,7 +1813,18 @@
             }
         ],
         "connections": {
-            "Schedule Trigger": {
+            "When Called": {
+                "main": [
+                    [
+                        {
+                            "node": "Send Ack",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Send Ack": {
                 "main": [
                     [
                         {
@@ -2006,7 +1850,7 @@
                 "main": [
                     [
                         {
-                            "node": "Already Coached Today?",
+                            "node": "Get Activities",
                             "type": "main",
                             "index": 0
                         }
@@ -2031,18 +1875,11 @@
                     ]
                 ]
             },
-            "Check Activities Exist": {
+            "Filter Activities": {
                 "main": [
                     [
                         {
                             "node": "Get Activity Details",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ],
-                    [
-                        {
-                            "node": "Send Rest-Day Telegram",
                             "type": "main",
                             "index": 0
                         }
@@ -2058,6 +1895,29 @@
                             "index": 0
                         }
                     ]
+                ]
+            },
+            "Save Session": {
+                "main": [
+                    [
+                        {
+                            "node": "Already Analyzed?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Already Analyzed?": {
+                "main": [
+                    [
+                        {
+                            "node": "Calculate Monday",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    []
                 ]
             },
             "Calculate Monday": {
@@ -2104,39 +1964,11 @@
                     ]
                 ]
             },
-            "Already Coached Today?": {
-                "main": [
-                    [],
-                    [
-                        {
-                            "node": "Update Coaching Date",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
-                ]
-            },
-            "Send Telegram": {
-                "main": [
-                    []
-                ]
-            },
-            "Update Coaching Date": {
+            "Parse Grade": {
                 "main": [
                     [
                         {
-                            "node": "Get Activities",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
-                ]
-            },
-            "Save Session": {
-                "main": [
-                    [
-                        {
-                            "node": "Calculate Monday",
+                            "node": "Save Analysis",
                             "type": "main",
                             "index": 0
                         }
@@ -2154,26 +1986,9 @@
                     ]
                 ]
             },
-            "Filter Activities": {
+            "Send Telegram": {
                 "main": [
-                    [
-                        {
-                            "node": "Check Activities Exist",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
-                ]
-            },
-            "Parse Grade": {
-                "main": [
-                    [
-                        {
-                            "node": "Save Analysis",
-                            "type": "main",
-                            "index": 0
-                        }
-                    ]
+                    []
                 ]
             },
             "Get Matched Sessions": {
@@ -2239,18 +2054,18 @@
         "autosaved": false,
         "workflowPublishHistory": [
             {
-                "createdAt": "2026-07-12T11:16:46.767Z",
-                "id": 800,
-                "workflowId": "hrSGUqoAwkWQ4gKl",
-                "versionId": "dfc4910a-8044-43cc-a963-8c3157facd72",
+                "createdAt": "2026-07-12T11:16:47.898Z",
+                "id": 802,
+                "workflowId": "rHIyZMIJNAOqZvM2",
+                "versionId": "71d36fe6-b4e8-4c3a-ac89-1bd6a3362184",
                 "event": "activated",
                 "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
             },
             {
-                "createdAt": "2026-07-12T11:16:46.723Z",
-                "id": 799,
-                "workflowId": "hrSGUqoAwkWQ4gKl",
-                "versionId": "dfc4910a-8044-43cc-a963-8c3157facd72",
+                "createdAt": "2026-07-12T11:16:47.864Z",
+                "id": 801,
+                "workflowId": "rHIyZMIJNAOqZvM2",
+                "versionId": "71d36fe6-b4e8-4c3a-ac89-1bd6a3362184",
                 "event": "deactivated",
                 "userId": "8e2bfcbe-606c-4de8-a637-7c7a3ab8ec9e"
             }
