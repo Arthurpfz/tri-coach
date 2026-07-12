@@ -184,7 +184,17 @@ Watch: Late-ride power decay vs fueling
 
 **Triplet bug (avoided):** initial design used a nested splitInBatches v3 for activities. With >1 activity, the loop-back wiring (`out1 → Get Activities`) accumulated items across cycles and dumped all duplicates at once, producing N×N analyses. Fixed by removing the inner loop entirely and relying on n8n's natural per-item cascade. Daily Checkin doesn't hit this because it almost always has 1 activity per day.
 
-**Wired to:** Feedback Handler (`gAnJ0r3x0sFxqWxY`) routes `/refresh` here via Execute Workflow node. Error workflow `psyVgPiGJoO5QOa4`.
+**Wired to:** Feedback Handler (`gAnJ0r3x0sFxqWxY`) routes `/refresh` here via Execute Workflow node. Error workflow `psyVgPiGJoO5QOa4`. Also invoked nightly by 1g (Nightly Reconciliation) with `{silent: true}`.
+
+**Silent mode (added 2026-07-12):** `Silent Mode?` IF gate between `When Called` and `Send Ack` — when the caller passes `silent: true`, the "🔄 Catching up…" ack is skipped and flow goes straight to `Search Users`. Per-session analysis Telegrams still send (chat IDs fall back to Arthur's chat). `/refresh` via Feedback Handler passes no `silent` flag → ack behaves as before.
+
+### 1g. Coach Tri - Nightly Reconciliation ⭐
+- **ID:** Lo3H8B1TRbkSE2ZM
+- **Schedule:** Daily at 07:45 (Europe/Berlin)
+- **Purpose:** Automates `/refresh` — catches late device syncs and multi-session days that the 20:10 Daily Checkin misses (root cause of the recurring "you didn't record my swim / open water" reports; see vault `wiki/outputs/skill-audit-2026-07.md`)
+- **Flow:** Schedule Trigger → Set Silent (`{silent: true}`) → Execute Workflow → Backfill (1e). Nothing missed = zero messages; missed sessions arrive as normal 📅-prefixed analyses next morning.
+- **Status:** ✅ Active (deployed 2026-07-12)
+- Error workflow `psyVgPiGJoO5QOa4`.
 
 ### 1f. Coach Tri - Feedback Handler (command router)
 - **ID:** gAnJ0r3x0sFxqWxY
