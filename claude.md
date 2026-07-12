@@ -70,8 +70,12 @@ Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI A
 - `Save Analysis` (PATCH `/sessions/:id`) writes Claude's coaching output into `analysis` + `analyzed_at` after the LLM runs, before Telegram
 - Rest-day branch: `Check Activities Exist → false → Send Rest-Day Telegram` ("🛌 No activity logged today...")
 - Telegram output rewritten as plain-text bulleted format (sport emoji header · Grade · 3 bullets · Tomorrow · Watch) — no markdown, ~6 lines, fits one Telegram screen
+
+**Readiness + auto test detection (added 2026-07-12, in Daily Checkin AND Backfill — nodes byte-identical):**
+- `Get Wellness` (ICU `/wellness`, 7-day window ending on the session date, `fullResponse+neverError` so the array response stays one item) → `Build Readiness` (Code, per-item) builds `readinessLine` — `Sleep 6h48 (score 68) · HRV 55 (7d avg 88) · RHR 58 (7d avg 63)` — consumed by the prompt's `=== READINESS ===` block. Rule: readiness colors tone + the Tomorrow line ONLY, never the grade.
+- `=== TEST DETECTION ===` prompt section: unambiguous fitness tests (400m swim TT → CSS = time/4; 20min max bike → FTP = 0.95×power; all-out 5K → run threshold) emit `detected_test` in the output JSON (`{"kind","value","evidence"}`, null when in doubt). `Parse Grade` extracts it → `Has Test? → Apply Test Update (Code) → Update Athlete Profile (PUT /athletes/:id) → Send Test Update` Telegram (`📈 FTP updated 261 → 268W (…)`). Apply Test Update regex-replaces the value everywhere it appears across the four free-text athlete fields (`fitness_profile`, `goal`, `constraints`, `health_status`) — patterns tested against live field text; percentages ("88-94% FTP") and race targets ("1:58/100m") are not touched.
 - **Data Source:** Intervals.icu API (full FIT file metrics + time-series streams)
-- **Credential ID:** JBZzr0E5U1GSy6OQ (HTTP Basic Auth)
+- **Credential ID:** ms91wbaCvecB3tqQ (HTTP Basic Auth)
 
 **IMPORTANT - Data Source Requirements:**
 - Activities must come from **direct device uploads** to Intervals.icu
@@ -153,6 +157,7 @@ Watch: Late-ride power decay vs fueling
   💪 Workout · 1:58
   ```
 - **Volume nudge (added 2026-06-06):** `Format Stats` appends a day-aware nudge toward the 6–8h goal. From midweek on (dow ≥ 3), if logged hours are <70% of the prorated pace to the 6h floor, it adds `⚡ Xh to go for your 6h floor — N days left.`; once ≥6h it switches to `✅ 6h goal hit — push toward 8h…`. Mon/Tue or on-pace → no nudge. Uses the fixed 6–8h band (not the planner's ramped target).
+- **Run cadence trend (added 2026-07-12):** `Get Sessions` now fetches 56 days (`limit=300`); `Format Stats` filters the running week client-side for the totals and appends `🦵 Run cadence 149 spm (-1 vs prior month · target 175-180)` — duration-weighted avg of runs ≥10min, last 28d vs prior 28d. **`avg_cadence` is stored as half-spm for runs — always ×2** (bike rpm is true as-is). Line omitted when no runs with cadence in the window. Same logic in `/strikes` (`Format Strikes`).
 - **Wired to** `errorWorkflow` (`psyVgPiGJoO5QOa4`)
 
 ### 1e. Coach Tri - Backfill (/refresh) ⭐
@@ -172,14 +177,24 @@ Watch: Late-ride power decay vs fueling
    - Save Session — `POST /sessions` returns `{id, analyzed_at}`
    - **Already Analyzed?** IF gate on `analyzed_at` is empty → run analysis; else skip silently
 6. Calculate Monday (of activity's start_date_local, not today — gets the right week's plan)
-7. Search Plan → Hardcore Analysis → Parse Grade → Save Analysis (PATCH) → Send Telegram (with 📅 date prefix)
+7. Search Plan → … → Get Wellness → Build Readiness → Hardcore Analysis → Parse Grade → Save Analysis (PATCH) → Send Telegram (with 📅 date prefix); `Has Test?` branch off Parse Grade for auto profile updates (see 1b)
 8. After Backfill returns to Feedback Handler → "✅ Refresh complete." sent reliably whether 0 or N analyses ran
 
 **Idempotency guarantee:** spamming `/refresh` is safe. Already-analyzed sessions short-circuit at the `analyzed_at` gate. The only side effect of a re-run is a fresh Save Session upsert that preserves `analysis`/`analyzed_at`/`grade`/`rpe`/`notes`/`user_feedback*` (see `PRESERVE_ON_UPSERT` in `db/server.js`).
 
 **Triplet bug (avoided):** initial design used a nested splitInBatches v3 for activities. With >1 activity, the loop-back wiring (`out1 → Get Activities`) accumulated items across cycles and dumped all duplicates at once, producing N×N analyses. Fixed by removing the inner loop entirely and relying on n8n's natural per-item cascade. Daily Checkin doesn't hit this because it almost always has 1 activity per day.
 
-**Wired to:** Feedback Handler (`gAnJ0r3x0sFxqWxY`) routes `/refresh` here via Execute Workflow node. Error workflow `psyVgPiGJoO5QOa4`.
+**Wired to:** Feedback Handler (`gAnJ0r3x0sFxqWxY`) routes `/refresh` here via Execute Workflow node. Error workflow `psyVgPiGJoO5QOa4`. Also invoked nightly by 1g (Nightly Reconciliation) with `{silent: true}`.
+
+**Silent mode (added 2026-07-12):** `Silent Mode?` IF gate between `When Called` and `Send Ack` — when the caller passes `silent: true`, the "🔄 Catching up…" ack is skipped and flow goes straight to `Search Users`. Per-session analysis Telegrams still send (chat IDs fall back to Arthur's chat). `/refresh` via Feedback Handler passes no `silent` flag → ack behaves as before.
+
+### 1g. Coach Tri - Nightly Reconciliation ⭐
+- **ID:** Lo3H8B1TRbkSE2ZM
+- **Schedule:** Daily at 07:45 (Europe/Berlin)
+- **Purpose:** Automates `/refresh` — catches late device syncs and multi-session days that the 20:10 Daily Checkin misses (root cause of the recurring "you didn't record my swim / open water" reports; see vault `wiki/outputs/skill-audit-2026-07.md`)
+- **Flow:** Schedule Trigger → Set Silent (`{silent: true}`) → Execute Workflow → Backfill (1e). Nothing missed = zero messages; missed sessions arrive as normal 📅-prefixed analyses next morning.
+- **Status:** ✅ Active (deployed 2026-07-12)
+- Error workflow `psyVgPiGJoO5QOa4`.
 
 ### 1f. Coach Tri - Feedback Handler (command router)
 - **ID:** gAnJ0r3x0sFxqWxY
@@ -193,11 +208,12 @@ Watch: Late-ride power decay vs fueling
 |---|---|---|
 | `/program` | Ack Program → Call Planner (sub-workflow `lUcAtn2oxCPkNkJ1`) → Program Done | On-demand Sunday Planner run. Acks immediately, fires Sunday Planner via its `When Called` Execute Workflow Trigger; planner sends the plan itself, then "✅ Plan delivered." |
 | `/refresh` | Call Backfill (sub-workflow `rHIyZMIJNAOqZvM2`) → Refresh Done | Last 7 days, idempotent re-analysis of unanalyzed sessions |
-| `/strikes` | Get Strikes Sessions → Format Strikes → Send Strikes | Same Code aggregation as Weekly Stats workflow (`2W0SIHwzyAWJW62Q`) — 🔥 per hour + per-sport breakdown for the running week |
+| `/strikes` | Get Strikes Sessions → Format Strikes → Send Strikes | Same Code aggregation as Weekly Stats workflow (`2W0SIHwzyAWJW62Q`) — 🔥 per hour + per-sport breakdown for the running week + 🦵 run cadence trend line (since 2026-07-12) |
 | `/training` | Get Training Plan → Format Training → Send Training | `GET /weekly-plans?athlete_id=1&week_start_date=<this Monday>` then formats sessions JSON as Telegram message |
 | `!<text>` | Save Feedback flow | Saves user feedback against the latest session (existing flow) |
 
 - **Note:** This bot has the only active Telegram webhook on CroissantTri — adding more triggers on the same bot would conflict (Telegram allows 1 webhook per bot). Add new commands by extending this workflow's IF chain, not by creating new trigger workflows.
+- **Command menu (added 2026-07-12):** the 4 slash commands are registered with Telegram via BotFather `/setcommands` (done manually — the bot token lives only in the n8n cloud credential, so it can't be automated from here). When adding/renaming a command, update BotFather too or the menu goes stale. `!feedback` is not a slash command and can't be listed.
 - **Lessons baked into this design (from /refresh build, 2026-05-01):**
   - Avoid nested `splitInBatches` v3 — its loop-back wiring accumulates items across cycles when there are >1 inputs (the "triplet bug"). Use n8n's natural per-item cascade for inner iteration.
   - When using Execute Workflow + a follow-up Telegram message, set `alwaysOutputData: true` on the call node so the follow-up fires reliably even when the sub-workflow processed 0 items.
@@ -214,10 +230,13 @@ Watch: Late-ride power decay vs fueling
 1. `Search records` — `GET /athletes/1`
 2. `Get Last Week Sessions` — `GET /sessions` for the last 4 weeks (`has_analysis=1`; CTL trend window — the running-week subset is the "last week" summary)
 3. `Get Last Week Plan` — `GET /weekly-plans` for the running week (adherence comparison; `alwaysOutputData` so a missing plan doesn't kill the run)
-4. `Build Prompt Context` (Code) — merges athlete + builds `lastWeekSummary`, `adherenceSummary` (planned blocks vs done — matched by `plan_session_id`, sport fallback for unmatched), `ctlLine` (CTL now vs ~4wk ago with direction), AND computes **live periodization**: `weeks_to_race` from `Race Date`, derived `phase` (Base/Build/Peak/Taper/Race Week) and `weekly_hours_target` (ramps 6→8h, holds, then tapers). Overrides the stale static `Training Phase`.
-5. `Basic LLM Chain` — Claude generates the plan from the athlete's DB `Goal`/`Training Principles`/`Constraints` + computed phase/volume + adherence + fitness trend
-6. `Parse Json` (Set) → `Build Plan Telegram` (Code, appends `📈 CTL …` trend line) + `Create a record` (`POST /weekly-plans`)
-7. `Send a text message` — Telegram
+4. `Get Wellness Week` (added 2026-07-12) — ICU `/wellness`, last 14 days (`alwaysOutputData`; array splits into ~14 items, fine since the next node runs once for all items)
+5. `Build Prompt Context` (Code) — merges athlete + builds `lastWeekSummary`, `adherenceSummary` (planned blocks vs done — matched by `plan_session_id`, sport fallback for unmatched), `ctlLine` (CTL now vs ~4wk ago with direction), `wellnessLine` (avg sleep + HRV last 7d vs prior 7d + RHR), `racePrep` (empty until W≤2 — see race-week module below), AND computes **live periodization**: `weeks_to_race` from `Race Date`, derived `phase` (Base/Build/Peak/Taper/Race Week) and `weekly_hours_target` (ramps 6→8h, holds, then tapers). Overrides the stale static `Training Phase`.
+6. `Basic LLM Chain` — Claude generates the plan from the athlete's DB `Goal`/`Training Principles`/`Constraints` + computed phase/volume + adherence + fitness trend + recovery
+7. `Parse Json` (Set) → `Build Plan Telegram` (Code, appends `📈 CTL …` trend line + `🏁 Race plan` section when present) + `Create a record` (`POST /weekly-plans`)
+8. `Send a text message` — Telegram
+
+**Wired to** `errorWorkflow` (`psyVgPiGJoO5QOa4`) since 2026-07-12 (was the only Coach Tri workflow without it).
 
 **Session schema (flex-pool, post-2026-06-06):** plan is a `sessions[]` array, each `{id, label, sport, duration_min, pinned_day, description}`. `pinned_day` is set ONLY when a constraint requires that day — currently **only the Wednesday Rapha ride**; everything else is `pinned_day: null`, a pickable pool. Telegram renders "📌 Pinned" + "🟦 Flex pool". No REST entries — rest = unused blocks.
 **Labels:** KEY, OPTIONAL (Easy), OPTIONAL (Intensity).
@@ -229,6 +248,17 @@ Watch: Late-ride power decay vs fueling
 - **Last-week adaptation** — Rule 7: C/F or low volume → trim; all A/B → hold/marginal increase; nothing logged → conservative. (One-week memory only, by design.)
 - **Plan adherence (added 2026-06-10)** — Daily Checkin/Backfill persist `plan_session_id` on sessions (column + PATCH support added same day; the workflows had been sending it for weeks but the API silently dropped it). The planner compares the running week's plan blocks vs done sessions and feeds `adherenceSummary` to the prompt — Rule 7 extension: skipped KEY sessions (especially swim) carry over and are named in the focus line; repeated sport substitution → rebalance, not scold.
 - **Fitness trend (added 2026-06-10)** — `ctlLine` from session `ctl` values (now vs ~4wk ago) goes to both the prompt (declining CTL → bias to consistency over intensity) and the Telegram message (`📈 CTL 18 (+0 vs 2wk ago — holding steady)`).
+- **Recovery (added 2026-07-12)** — `wellnessLine` (Zepp sleep/HRV/RHR via ICU wellness) in the prompt; Rule 7 extension: avg sleep <6h or HRV declining week-over-week → cap intensity at max 1 intensity block, bias completable Z2.
+- **Race-week module (added 2026-07-12)** — `racePrep` activates at `weeks_to_race ≤ 2`: W=2 → taper instructions (cut volume, race-pace touches, OW swims); W≤1 → race-week openers + a required extra output field `race_plan` (pacing from Goal targets + current FTP/CSS, transitions, nutrition, race-morning checklist) rendered as a `🏁 Race plan` Telegram section. Empty (verified) at W>2; W≤2 branch is logic-reviewed only — first real fire ~2026-08-30.
+
+### 3. Coach Tri - Monthly Review
+- **ID:** AA2oAY6ZPu5i1c7I
+- **Schedule:** Sundays 19:30 (Europe/Berlin) with a `First Sunday?` gate (`$now.day <= 7`) — effectively first Sunday of each month; also on-demand via its `When Called` Execute Workflow Trigger (bypasses the gate)
+- **Purpose:** Monthly zoom-out the daily/weekly messages don't give: 8-week volume table, CTL trajectory, run-cadence trend, grade distribution, swim frequency vs 2/wk, sleep/HRV month-over-month, per-discipline trajectory vs Erkner race targets, one focus for the next 4 weeks
+- **Status:** ✅ Active (created 2026-07-12, verified live same day)
+- **AI Model:** Claude Opus 4.7 (OpenRouter `anthropic/claude-opus-4.7`)
+- **Flow:** Schedule Trigger → First Sunday? → `GET /athletes/1` → `GET /sessions` (56d, wrap=1) → `Get Wellness 8wk` (ICU, fullResponse) → `Build Review Context` (Code — aggregates everything into `reviewContext`) → LLM → Telegram (`📆 Monthly Review — <Month>`, plain text, ~12-16 lines)
+- **Wired to** `errorWorkflow` (`psyVgPiGJoO5QOa4`)
 
 ---
 
@@ -264,7 +294,7 @@ The `PRESERVE_ON_UPSERT` set in `server.js` excludes `analysis`, `analyzed_at`, 
 
 **Current athlete (id=1):** Arthur Pfalzgraf
 - Intervals.icu Athlete ID: `i492254`
-- Intervals.icu API Key: stored in `.env` as `INTERVALS_API_KEY` (and in n8n credential `JBZzr0E5U1GSy6OQ`)
+- Intervals.icu API Key: stored in `.env` as `INTERVALS_API_KEY` (and in n8n credential `ms91wbaCvecB3tqQ`)
 
 ### Migration
 
@@ -293,7 +323,7 @@ Via CroissantRelayBot on Telegram or the webhook:
 - **Authentication:** HTTP Basic Auth
   - Username: `API_KEY` (literal string)
   - Password: User's personal API key
-- **Credential ID:** JBZzr0E5U1GSy6OQ
+- **Credential ID:** ms91wbaCvecB3tqQ
 - **API Endpoint Examples:**
   - Get Activities: `/athlete/{athleteId}/activities`
   - Get Activity Details: `/activity/{activityId}`
@@ -440,13 +470,14 @@ The session is judged purely on **execution quality vs the athlete's fitness pro
 - **Daily Check-in:** 20:10 (8:10 PM)
 - **Weekly Stats:** 20:30 (8:30 PM)
 - **Weekly Planning:** Sunday 20:45 (8:45 PM)
+- **Monthly Review:** first Sunday of month 19:30 (7:30 PM)
 
 ### Credentials Used
 - Tricoach DB (ID: 6GNzKYNE1JAz77RL, httpHeaderAuth with `X-API-Key`)
 - ~~Airtable Personal Access Token (ID: JMbdFoTWoGU3avK9)~~ — deprecated 2026-04-22
 - OpenRouter API (ID: nhbNqmgyP4cAeQ6B)
 - Telegram API (ID: 9IpAp35yJmIQJpeA)
-- Intervals.icu HTTP Basic Auth (ID: JBZzr0E5U1GSy6OQ)
+- Intervals.icu HTTP Basic Auth (ID: ms91wbaCvecB3tqQ)
 
 ### Active User
 - **Name:** Arthur Pfalzgraf
@@ -636,6 +667,22 @@ This will show:
 ---
 
 ## Changelog
+
+### 2026-07-12 (night) — Full e2e verification pass + rest-day branch fix
+- **BUG (pre-existing, found during e2e): rest-day Telegram never fired.** When Intervals.icu returned 0 activities (or ZEPP-only, filtered out), the chain died silently at `Get Activities`/`Filter Activities` — 0 items means downstream nodes never run, so `Check Activities Exist → false → Send Rest-Day Telegram` was structurally unreachable. **Fix (Daily Checkin only):** `alwaysOutputData: true` on `Get Activities` + `Filter Activities`, and `Check Activities Exist` leftValue changed to `$input.all().filter(i => i.json && i.json.id).length` so the empty passthrough item doesn't count as an activity. Verified live: 0-activity day now sends 🛌. Backfill intentionally untouched (no rest-day branch; 0 items = correctly silent).
+- **E2e matrix, all live:** Daily Checkin (temp trigger → gate passed, date updated, rest-day fired); Backfill (re-analysis of Jul 7 run — readiness in prompt + Tomorrow line, `detected_test` null path); test-detection **positive** path (temp harness with byte-identical node copies + no-op FTP 261 → parse → IF true → regex → PUT 200 → Telegram note; athlete fields byte-identical after); Sunday Planner (wellness line + adherence + racePrep empty at W=9, plan row saved); Weekly Stats (cadence line + week totals); Monthly Review (full run → Telegram). Feedback Handler `/strikes` runs the same code as Weekly Stats' verified `Format Stats` — Telegram trigger rejects synthetic posts, so live confirmation = Arthur sends `/strikes` once.
+- `last_coaching_date` reset to 2026-07-11 after tests so the 20:10 cron runs normally tonight. All temp workflows/triggers deleted; verified zero leftovers, all 7 workflows active with errorWorkflow set.
+
+### 2026-07-12 (evening) — Wellness/readiness, auto test detection, cadence trend, race-week module, Monthly Review
+Five features shipped in one pass (all deployed via `PUT /workflows`, all verified live same day):
+- **Readiness in daily analysis (Daily Checkin `hrSGUqoAwkWQ4gKl` + Backfill `rHIyZMIJNAOqZvM2`):** new `Get Wellness` (ICU `/wellness`, 7d window ending on session date, `fullResponse+neverError`) + `Build Readiness` nodes feed sleep/HRV/RHR vs 7d baselines into the prompt. Readiness colors tone + Tomorrow line only — never the grade. Verified live: re-analyzed the Jul 7 run via Backfill; LLM output "Tomorrow: Easy Z2 ride or full rest — HRV 55 vs 88 avg."
+- **Auto test detection → profile update (same two workflows):** prompt `TEST DETECTION` section emits `detected_test` (400m swim TT → CSS; 20min max bike → FTP = 0.95×power; all-out 5K → run threshold; null when in doubt). New branch `Has Test? → Apply Test Update → PUT /athletes/:id → Send Test Update` regex-replaces the value across the 4 free-text athlete fields + Telegram notice. Regexes tested against live field text (percentages + race targets untouched). Verified: normal run → `detected_test` empty, branch skipped.
+- **FTP normalized to 261W** across `fitness_profile`/`goal`/`constraints`/`health_status` (was inconsistent 276 vs 261; user chose 261 — "(retest due)" dropped, auto-update owns freshness now).
+- **Run cadence trend (Weekly Stats `2W0SIHwzyAWJW62Q` + `/strikes` in `gAnJ0r3x0sFxqWxY`):** session fetch widened to 56d/limit 300, week totals filtered client-side, new `🦵 Run cadence 149 spm (-1 vs prior month · target 175-180)` line — duration-weighted, runs ≥10min, 28d vs prior 28d, **avg_cadence×2 (stored half-spm for runs)**. Verified live via temp trigger.
+- **Sunday Planner (`lUcAtn2oxCPkNkJ1`):** new `Get Wellness Week` (14d) → `wellnessLine` + RECOVERY prompt block + Rule 7 extension (short sleep/declining HRV → cap intensity); race-week module (`racePrep`: taper at W=2, race week + `race_plan` output field at W≤1, `🏁 Race plan` Telegram section); `errorWorkflow` finally set. Verified live: plan for Jul 13 generated with focus line reacting to "Sleep 6h28, HRV declining"; racePrep correctly empty at W=9. W≤2 branch first fires ~2026-08-30 — watch it.
+- **NEW WORKFLOW: Coach Tri - Monthly Review (`AA2oAY6ZPu5i1c7I`)** — first Sunday of month 19:30 (day≤7 gate), 8-week zoom-out (volume table, CTL, cadence, grades, swim frequency, sleep/HRV month-over-month, trajectory vs race targets) via Opus 4.7 → Telegram. Has `When Called` trigger for manual runs (bypasses gate). Verified live end-to-end; next natural fire Aug 2.
+- **Verification technique:** temp webhook bridge workflow (created, repointed per target via PUT, deleted after) + temp `When Called` trigger on Weekly Stats (removed after). Execution node outputs inspected via `GET /executions/:id?includeData=true`.
+- **Corrected stale doc fact:** live Intervals.icu basic-auth credential is `ms91wbaCvecB3tqQ` (docs previously said JBZzr0E5U1GSy6OQ).
 
 ### 2026-07-12 (later) — Multi-session days: all sessions now analyzed, graded as a day
 - **BUG: only one session per day ever analyzed** — user had to `/refresh` (sometimes repeatedly) to get the rest. TWO root causes:
@@ -900,6 +947,7 @@ This will show:
 - **Feedback Handler Workflow:** gAnJ0r3x0sFxqWxY
 - **Error Handler Workflow:** psyVgPiGJoO5QOa4
 - **Sunday Planner Workflow:** lUcAtn2oxCPkNkJ1
+- **Monthly Review Workflow:** AA2oAY6ZPu5i1c7I
 - **Telegram Chat:** see `.env` (`TELEGRAM_CHAT_ID`)
 - **Last Coaching Date field ID:** fldLdvY3ZOiTuXkuy
 - **Intervals.icu Athlete ID:** i492254
@@ -932,4 +980,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-06-10 (plan adherence loop + CTL trend in Sunday Planner)*
+*Last Updated: 2026-07-12 (wellness/readiness, auto test detection, cadence trend, race-week module, Monthly Review)*
