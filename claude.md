@@ -213,6 +213,7 @@ Watch: Late-ride power decay vs fueling
 | `!<text>` | Save Feedback flow | Saves user feedback against the latest session (existing flow) |
 
 - **Note:** This bot has the only active Telegram webhook on CroissantTri — adding more triggers on the same bot would conflict (Telegram allows 1 webhook per bot). Add new commands by extending this workflow's IF chain, not by creating new trigger workflows.
+- **Command menu (added 2026-07-12):** the 4 slash commands are registered with Telegram via BotFather `/setcommands` (done manually — the bot token lives only in the n8n cloud credential, so it can't be automated from here). When adding/renaming a command, update BotFather too or the menu goes stale. `!feedback` is not a slash command and can't be listed.
 - **Lessons baked into this design (from /refresh build, 2026-05-01):**
   - Avoid nested `splitInBatches` v3 — its loop-back wiring accumulates items across cycles when there are >1 inputs (the "triplet bug"). Use n8n's natural per-item cascade for inner iteration.
   - When using Execute Workflow + a follow-up Telegram message, set `alwaysOutputData: true` on the call node so the follow-up fires reliably even when the sub-workflow processed 0 items.
