@@ -210,10 +210,11 @@ Watch: Late-ride power decay vs fueling
 | `/refresh` | Call Backfill (sub-workflow `rHIyZMIJNAOqZvM2`) → Refresh Done | Last 7 days, idempotent re-analysis of unanalyzed sessions |
 | `/strikes` | Get Strikes Sessions → Format Strikes → Send Strikes | Same Code aggregation as Weekly Stats workflow (`2W0SIHwzyAWJW62Q`) — 🔥 per hour + per-sport breakdown for the running week + 🦵 run cadence trend line (since 2026-07-12) |
 | `/training` | Get Training Plan → Format Training → Send Training | `GET /weekly-plans?athlete_id=1&week_start_date=<this Monday>` then formats sessions JSON as Telegram message |
+| `/progress` | Get Progress Wellness (ICU) → Get Progress Sessions → Format Progress → Progress Verdict (Sonnet 4.6) → Send Progress | 56d fetch → per-discipline scoreboard, last 28d vs prior 28d (duration-weighted): 🚴 EF **Z2-only** (IF≤70, non-Wed — Rapha excluded) + decoupling on **long steady** rides (≥90min non-Wed); 🏃 pace (all) + Speed@HR **Z2-only** (avg_hr≤150) + cadence; 🏊/🌊 Pool + OW split — pace, DPS (m/cycle), SWOLF (pool, lengths derived from `pool_length_m`); 🏁 Durability (longest ride/run vs 90km/21km race demand); 💤 Sleep/HRV/RHR (ICU wellness 28d avgs); 💪 CTL. Subset filters show own counts (`1v2`); zero-match → "none this block". One-line 🧠 LLM verdict. Added 2026-07-14, v2 same day |
 | `!<text>` | Save Feedback flow | Saves user feedback against the latest session (existing flow) |
 
 - **Note:** This bot has the only active Telegram webhook on CroissantTri — adding more triggers on the same bot would conflict (Telegram allows 1 webhook per bot). Add new commands by extending this workflow's IF chain, not by creating new trigger workflows.
-- **Command menu (added 2026-07-12):** the 4 slash commands are registered with Telegram via BotFather `/setcommands` (done manually — the bot token lives only in the n8n cloud credential, so it can't be automated from here). When adding/renaming a command, update BotFather too or the menu goes stale. `!feedback` is not a slash command and can't be listed.
+- **Command menu (added 2026-07-12):** the 5 slash commands are registered with Telegram via BotFather `/setcommands` (done manually — the bot token lives only in the n8n cloud credential, so it can't be automated from here). When adding/renaming a command, update BotFather too or the menu goes stale. `!feedback` is not a slash command and can't be listed.
 - **Lessons baked into this design (from /refresh build, 2026-05-01):**
   - Avoid nested `splitInBatches` v3 — its loop-back wiring accumulates items across cycles when there are >1 inputs (the "triplet bug"). Use n8n's natural per-item cascade for inner iteration.
   - When using Execute Workflow + a follow-up Telegram message, set `alwaysOutputData: true` on the call node so the follow-up fires reliably even when the sub-workflow processed 0 items.
@@ -668,6 +669,23 @@ This will show:
 
 ## Changelog
 
+### 2026-07-14 — `/progress` Telegram command (am I improving?)
+- **Feedback Handler (`gAnJ0r3x0sFxqWxY`):** new `Is /progress?` branch inserted after `Is /training?` — `Get Progress Sessions` (56d, limit 300, `alwaysOutputData`) → `Format Progress` (Code) → `Progress Verdict` (chainLlm + `Progress Verdict Model`, OpenRouter Sonnet 4.6) → `Send Progress`.
+- **Scoreboard logic:** last 28d vs prior 28d, duration-weighted per metric, nulls filtered per-metric. Ride: EF (stored `efficiency_factor`, fallback `avg_power/avg_hr`) + decoupling, ≥10min. Run: pace (min/km), Speed@HR (m/min per bpm — DB `efficiency_factor` is null for runs, computed from `avg_speed_ms/avg_hr`), cadence ×2 (half-spm), ≥10min. Swim: pace/100m from `moving_sec`/`distance_m`, **split Pool vs Open water** (mixing them fakes decline when OW volume rises — verified on live data), no min duration. CTL: latest vs last value before the 28d cut. Arrows ▲▼▬ (<1% = flat), session counts per sport (`n vs n`) for small-sample honesty.
+- **Verdict:** one-sentence Sonnet 4.6 verdict appended as `🧠` line; prompt carries the noise caveats (small n, pool≠OW, group-ride decoupling distorted).
+- **Verified e2e** via temp webhook harness (byte-identical node copies, chatId hardcoded, deleted after): 31 sessions → scoreboard correct → verdict generated → Telegram delivered. Prod IF-gate routing is pattern-identical to `/strikes`; live confirmation = Arthur sends `/progress` once.
+- **Owed by user:** add `progress` to BotFather `/setcommands` (bot token lives only in n8n credential).
+- **Doc drift found:** `.env` does NOT contain `TELEGRAM_CHAT_ID` (docs claim it does); chat id lives in the Feedback Handler `Check Auth` allowlist.
+- Update script archived at [update-progress-command.js](archive/update-progress-command.js).
+
+### 2026-07-14 (later) — `/progress` v2: intensity-honest metrics + durability + swim technique + recovery
+- **Why:** v1 averaged across all intensities — a harder/hotter recent block made Speed@HR look like fitness decline. Verified on live data: all-runs Speed@HR read **-7.2% ▼**; Z2-only (avg_hr≤150) reads **+9.7% ▲**. Same artifact risk on ride EF (Rapha sprints).
+- **Format Progress rewritten:** EF from Z2 rides only (`intensity_factor≤70` — NB stored 0–100 not 0–1 — AND non-Wednesday; HR≤145 fallback when IF null); decoupling from long steady rides only (≥90min, non-Wed); run Speed@HR from Z2 runs only; subset filters show own counts (`1v2`), zero recent matches → "— none this block (was X)" so a broken 80/20 block is visible, not hidden.
+- **New sections:** 🏁 Durability — longest ride/run per window vs Erkner demands (90km/21km); 🏊 DPS (m/cycle from `avg_speed_ms×60/avg_cadence`) + SWOLF (pool only; `lengths` column is null so derived from `distance_m/pool_length_m`); 💤 Recovery — Sleep/HRV/RHR 28d avgs from new `Get Progress Wellness` node (ICU `/wellness` 56d, `fullResponse+neverError`, chained BEFORE Get Progress Sessions so both stay single-execution; Format Progress reads it via `$('Get Progress Wellness')` in a try/catch).
+- **Verdict prompt** updated with race demands + instruction to call out "none this block" as broken polarization.
+- **Verified e2e** via temp webhook harness with real ICU wellness (HRV 50→80 ▲, Sleep 6h24→6h50 ▲): all 6 nodes success, Telegram delivered, temp deleted. Run-only caveat: local `.env` `INTERVALS_API_KEY` still stale (401) from the 2026-04-25 rotation — n8n credential is the working one.
+- Update script archived at [update-progress-v2.js](archive/update-progress-v2.js).
+
 ### 2026-07-12 (night) — Full e2e verification pass + rest-day branch fix
 - **BUG (pre-existing, found during e2e): rest-day Telegram never fired.** When Intervals.icu returned 0 activities (or ZEPP-only, filtered out), the chain died silently at `Get Activities`/`Filter Activities` — 0 items means downstream nodes never run, so `Check Activities Exist → false → Send Rest-Day Telegram` was structurally unreachable. **Fix (Daily Checkin only):** `alwaysOutputData: true` on `Get Activities` + `Filter Activities`, and `Check Activities Exist` leftValue changed to `$input.all().filter(i => i.json && i.json.id).length` so the empty passthrough item doesn't count as an activity. Verified live: 0-activity day now sends 🛌. Backfill intentionally untouched (no rest-day branch; 0 items = correctly silent).
 - **E2e matrix, all live:** Daily Checkin (temp trigger → gate passed, date updated, rest-day fired); Backfill (re-analysis of Jul 7 run — readiness in prompt + Tomorrow line, `detected_test` null path); test-detection **positive** path (temp harness with byte-identical node copies + no-op FTP 261 → parse → IF true → regex → PUT 200 → Telegram note; athlete fields byte-identical after); Sunday Planner (wellness line + adherence + racePrep empty at W=9, plan row saved); Weekly Stats (cadence line + week totals); Monthly Review (full run → Telegram). Feedback Handler `/strikes` runs the same code as Weekly Stats' verified `Format Stats` — Telegram trigger rejects synthetic posts, so live confirmation = Arthur sends `/strikes` once.
@@ -980,4 +998,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-07-12 (wellness/readiness, auto test detection, cadence trend, race-week module, Monthly Review)*
+*Last Updated: 2026-07-14 (`/progress` command — 4wk-vs-4wk improvement scoreboard + LLM verdict)*
