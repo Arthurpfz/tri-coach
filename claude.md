@@ -157,7 +157,7 @@ Watch: Late-ride power decay vs fueling
   💪 Workout · 1:58
   ```
 - **Volume nudge (added 2026-06-06):** `Format Stats` appends a day-aware nudge toward the 6–8h goal. From midweek on (dow ≥ 3), if logged hours are <70% of the prorated pace to the 6h floor, it adds `⚡ Xh to go for your 6h floor — N days left.`; once ≥6h it switches to `✅ 6h goal hit — push toward 8h…`. Mon/Tue or on-pace → no nudge. Uses the fixed 6–8h band (not the planner's ramped target).
-- **Run cadence trend (added 2026-07-12):** `Get Sessions` now fetches 56 days (`limit=300`); `Format Stats` filters the running week client-side for the totals and appends `🦵 Run cadence 149 spm (-1 vs prior month · target 175-180)` — duration-weighted avg of runs ≥10min, last 28d vs prior 28d. **`avg_cadence` is stored as half-spm for runs — always ×2** (bike rpm is true as-is). Line omitted when no runs with cadence in the window. Same logic in `/strikes` (`Format Strikes`).
+- **Run cadence trend — REMOVED 2026-07-16** (added 2026-07-12): the `🦵 Run cadence` line was redundant once `/progress` (2026-07-14) reported cadence with proper 28d-vs-28d context; per-run cadence coaching happens in the daily analysis. Session fetch reverted from 56d back to the running week (`date_from = startOf('week')`). Cadence trend now lives in `/progress` + Monthly Review only. Same removal in `/strikes` (`Format Strikes`). Reminder for those consumers: **`avg_cadence` is stored as half-spm for runs — always ×2** (bike rpm is true as-is).
 - **Wired to** `errorWorkflow` (`psyVgPiGJoO5QOa4`)
 
 ### 1e. Coach Tri - Backfill (/refresh) ⭐
@@ -209,7 +209,7 @@ Watch: Late-ride power decay vs fueling
 |---|---|---|
 | `/program` | Ack Program → Call Planner (sub-workflow `lUcAtn2oxCPkNkJ1`) → Program Done | On-demand Sunday Planner run. Acks immediately, fires Sunday Planner via its `When Called` Execute Workflow Trigger; planner sends the plan itself, then "✅ Plan delivered." |
 | `/refresh` | Call Backfill (sub-workflow `rHIyZMIJNAOqZvM2`) → Refresh Done | Last 7 days, idempotent re-analysis of unanalyzed sessions |
-| `/strikes` | Get Strikes Sessions → Format Strikes → Send Strikes | Same Code aggregation as Weekly Stats workflow (`2W0SIHwzyAWJW62Q`) — 🔥 per hour + per-sport breakdown for the running week + 🦵 run cadence trend line (since 2026-07-12) |
+| `/strikes` | Get Strikes Sessions → Format Strikes → Send Strikes | Same Code aggregation as Weekly Stats workflow (`2W0SIHwzyAWJW62Q`) — 🔥 per hour + per-sport breakdown for the running week (🦵 cadence line removed 2026-07-16 — lives in `/progress`) |
 | `/training` | Get Training Plan → Format Training → Send Training | `GET /weekly-plans?athlete_id=1&week_start_date=<this Monday>` then formats sessions JSON as Telegram message |
 | `/progress` | Get Progress Wellness (ICU) → Get Progress Sessions → Format Progress → Progress Verdict (Sonnet 4.6) → Send Progress | 56d fetch → per-discipline scoreboard, last 28d vs prior 28d (duration-weighted): 🚴 EF **Z2-only** (IF≤70, non-Wed — Rapha excluded) + decoupling on **long steady** rides (≥90min non-Wed); 🏃 pace (all) + Speed@HR **Z2-only** (avg_hr≤150) + cadence; 🏊/🌊 Pool + OW split — pace, DPS (m/cycle), SWOLF (pool, lengths derived from `pool_length_m`); 🏁 Durability (longest ride/run vs 90km/21km race demand); 💤 Sleep/HRV/RHR (ICU wellness 28d avgs); 💪 CTL. Subset filters show own counts (`1v2`); zero-match → "none this block". One-line 🧠 LLM verdict. Added 2026-07-14, v2 same day |
 | `!<text>` | Save Feedback flow | Saves user feedback against the latest session (existing flow) |
@@ -672,6 +672,12 @@ This will show:
 
 ## Changelog
 
+### 2026-07-16 (later) — 🦵 run cadence line removed from Weekly Stats + /strikes
+- **Why:** redundant since `/progress` (2026-07-14) reports run cadence with proper 28d-vs-28d context and session counts; per-run cadence coaching already happens in the daily analysis; a daily-repeated monthly metric (±1 spm/day) is noise in a volume snapshot. User-confirmed.
+- **Weekly Stats (`2W0SIHwzyAWJW62Q`) + `/strikes` (`gAnJ0r3x0sFxqWxY`):** cadence block removed from `Format Stats`/`Format Strikes`; `Get Sessions`/`Get Strikes Sessions` `date_from` reverted from 56d back to `startOf('week')` (the wide fetch existed only for the trend). Cadence trend now lives in `/progress` + Monthly Review only.
+- **Verified live:** temp When Called trigger + webhook bridge fired Weekly Stats once — message rendered totals + nudge, no 🦵 line, Telegram delivered; temp pieces deleted (5 nodes confirmed). `/strikes` is the same code — live confirmation = Arthur sends `/strikes` once.
+- Update script archived at [update-remove-cadence-line.js](archive/update-remove-cadence-line.js).
+
 ### 2026-07-16 — 🎓 "Explain & drills" inline button on analysis messages
 - **Why:** the daily analyses are dense (SWOLF/DPS/decoupling jargon) — Arthur was copy-pasting them into a chat to ask "what does this mean and how do I fix it?". Now: tap `🎓 Explain & drills` under any analysis → plain-English decode of that exact session + 3-5 targeted drills, replied to the tapped message. English only, one combined message (both user-confirmed choices).
 - **DB:** new `GET /sessions/:id` in `db/server.js` (mirrors `GET /athletes/:id`). Merged via PR #13, deployed via Relay `tricoach-db-deploy-raw`, curl-verified (200 + 404 paths). NB: that relay op's `localhost:3000` health check hits Hermes, not tricoach-db — verify via `https://coach-db.arthurpfz.com` instead.
@@ -1010,4 +1016,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-07-16 (🎓 Explain & drills inline button on analysis messages)*
+*Last Updated: 2026-07-16 (🦵 cadence line removed from Weekly Stats + /strikes — lives in /progress)*
