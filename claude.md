@@ -201,7 +201,8 @@ Watch: Late-ride power decay vs fueling
 - **Trigger:** Telegram Trigger on CroissantTri bot (cred `9IpAp35yJmIQJpeA`) — listens to all messages
 - **Purpose:** Single Telegram webhook acting as a command router. Inline branches for stateless commands; sub-workflow call for the heavy `/refresh` flow.
 - **Status:** ✅ Active
-- **Routing chain:** Check Auth (chat_id allowlist) → Is /program? → Is /refresh? → Is /strikes? → Is /training? → Is Feedback? → drop
+- **Routing chain:** Is Callback? (🎓 explain button taps — auth built into the gate) → Check Auth (chat_id allowlist) → Is /program? → Is /refresh? → Is /strikes? → Is /training? → Is /progress? → Is Feedback? → drop
+- **Trigger updates:** `["message", "callback_query"]` (since 2026-07-16 — changing this list requires a deactivate/activate cycle so n8n re-registers the Telegram webhook with the new `allowed_updates`)
 
 **Commands:**
 | Command | Branch | What it does |
@@ -212,6 +213,7 @@ Watch: Late-ride power decay vs fueling
 | `/training` | Get Training Plan → Format Training → Send Training | `GET /weekly-plans?athlete_id=1&week_start_date=<this Monday>` then formats sessions JSON as Telegram message |
 | `/progress` | Get Progress Wellness (ICU) → Get Progress Sessions → Format Progress → Progress Verdict (Sonnet 4.6) → Send Progress | 56d fetch → per-discipline scoreboard, last 28d vs prior 28d (duration-weighted): 🚴 EF **Z2-only** (IF≤70, non-Wed — Rapha excluded) + decoupling on **long steady** rides (≥90min non-Wed); 🏃 pace (all) + Speed@HR **Z2-only** (avg_hr≤150) + cadence; 🏊/🌊 Pool + OW split — pace, DPS (m/cycle), SWOLF (pool, lengths derived from `pool_length_m`); 🏁 Durability (longest ride/run vs 90km/21km race demand); 💤 Sleep/HRV/RHR (ICU wellness 28d avgs); 💪 CTL. Subset filters show own counts (`1v2`); zero-match → "none this block". One-line 🧠 LLM verdict. Added 2026-07-14, v2 same day |
 | `!<text>` | Save Feedback flow | Saves user feedback against the latest session (existing flow) |
+| 🎓 button tap | Is Callback? → Answer Callback → Get Explain Session (`GET /sessions/:id`) → Get Explain Athlete → Build Explain Prompt → Session Found? → Explain Coach (Sonnet 4.6) → Send Explanation | Every analysis Telegram (Daily Checkin + Backfill) carries an inline `🎓 Explain & drills` button (`callback_data: explain:<session_id>`). Tap → plain-English explanation of that session + 3-5 targeted drills, replied to the tapped message. English only. Added 2026-07-16 |
 
 - **Note:** This bot has the only active Telegram webhook on CroissantTri — adding more triggers on the same bot would conflict (Telegram allows 1 webhook per bot). Add new commands by extending this workflow's IF chain, not by creating new trigger workflows.
 - **Command menu (added 2026-07-12):** the 5 slash commands are registered with Telegram via BotFather `/setcommands` (done manually — the bot token lives only in the n8n cloud credential, so it can't be automated from here). When adding/renaming a command, update BotFather too or the menu goes stale. `!feedback` is not a slash command and can't be listed.
@@ -287,6 +289,7 @@ Auth: `X-API-Key` header (stored in VPS `.env` and n8n credential `6GNzKYNE1JAz7
 | POST | `/weekly-plans` | upsert plan (Sunday Planner create) |
 | DELETE | `/weekly-plans/:id` | delete a plan row (added 2026-06-10) |
 | GET | `/sessions?athlete_id=&limit=&date_from=&date_to=` | list sessions (`date_to` supported since 2026-06-10; `limit` clamped 1–1000) |
+| GET | `/sessions/:id` | single session (added 2026-07-16 — used by the 🎓 Explain callback branch) |
 | POST | `/sessions` | upsert session on `(athlete_id, intervals_id)`, returns `{id, analyzed_at}`, preserves LLM/user fields on re-upsert |
 | PATCH | `/sessions/:id` | attach `analysis`, `analyzed_at`, `grade`, `plan_session_id`, `rpe`, `notes` (Daily Checkin Save Analysis) |
 
@@ -669,6 +672,15 @@ This will show:
 
 ## Changelog
 
+### 2026-07-16 — 🎓 "Explain & drills" inline button on analysis messages
+- **Why:** the daily analyses are dense (SWOLF/DPS/decoupling jargon) — Arthur was copy-pasting them into a chat to ask "what does this mean and how do I fix it?". Now: tap `🎓 Explain & drills` under any analysis → plain-English decode of that exact session + 3-5 targeted drills, replied to the tapped message. English only, one combined message (both user-confirmed choices).
+- **DB:** new `GET /sessions/:id` in `db/server.js` (mirrors `GET /athletes/:id`). Merged via PR #13, deployed via Relay `tricoach-db-deploy-raw`, curl-verified (200 + 404 paths). NB: that relay op's `localhost:3000` health check hits Hermes, not tricoach-db — verify via `https://coach-db.arthurpfz.com` instead.
+- **Daily Checkin (`hrSGUqoAwkWQ4gKl`) + Backfill (`rHIyZMIJNAOqZvM2`):** `Send Telegram` gains `replyMarkup: inlineKeyboard` with one button, `callback_data: explain:{{ $('Save Session').item.json.id }}`. Rest-day/test-update/ack messages get no button.
+- **Feedback Handler (`gAnJ0r3x0sFxqWxY`):** trigger now receives `callback_query` (required a deactivate/activate cycle to re-register the Telegram webhook's `allowed_updates`); new `Is Callback?` gate ahead of Check Auth (auth folded into the gate: `data.startsWith("explain:") && from.id == allowlist`); Check Auth leftValue made optional-chained so callback updates falling through evaluate false instead of throwing. Branch: Answer Callback (stops spinner) → `GET /sessions/:id` (`neverError`) → `GET /athletes/1` → Build Explain Prompt (Code; compact metrics + stored analysis + Fitness Profile; run cadence ×2) → Session Found? → chainLlm Sonnet 4.6 → Send Explanation (`reply_to_message_id` threads under the tapped message); not-found path sends a static 🤷 reply.
+- **Verified e2e:** temp webhook harness (byte-identical branch copies, session 534 — the Jul 15 SWOLF swim): all nodes success, English explanation + drills delivered to Telegram; harness deleted, zero leftovers, all 7 Coach Tri workflows active. Live-tap test message with a real `explain:534` button sent to Arthur — his tap is the final confirmation of trigger routing + spinner + reply threading (same live-only caveat as `/strikes`/`/progress`).
+- No BotFather change (buttons need no command registration). Old messages (pre-button) can't be tapped — by design.
+- Update script archived at [update-explain-button.js](archive/update-explain-button.js).
+
 ### 2026-07-14 — `/progress` Telegram command (am I improving?)
 - **Feedback Handler (`gAnJ0r3x0sFxqWxY`):** new `Is /progress?` branch inserted after `Is /training?` — `Get Progress Sessions` (56d, limit 300, `alwaysOutputData`) → `Format Progress` (Code) → `Progress Verdict` (chainLlm + `Progress Verdict Model`, OpenRouter Sonnet 4.6) → `Send Progress`.
 - **Scoreboard logic:** last 28d vs prior 28d, duration-weighted per metric, nulls filtered per-metric. Ride: EF (stored `efficiency_factor`, fallback `avg_power/avg_hr`) + decoupling, ≥10min. Run: pace (min/km), Speed@HR (m/min per bpm — DB `efficiency_factor` is null for runs, computed from `avg_speed_ms/avg_hr`), cadence ×2 (half-spm), ≥10min. Swim: pace/100m from `moving_sec`/`distance_m`, **split Pool vs Open water** (mixing them fakes decline when OW volume rises — verified on live data), no min duration. CTL: latest vs last value before the 28d cut. Arrows ▲▼▬ (<1% = flat), session counts per sport (`n vs n`) for small-sample honesty.
@@ -998,4 +1010,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-07-14 (`/progress` command — 4wk-vs-4wk improvement scoreboard + LLM verdict)*
+*Last Updated: 2026-07-16 (🎓 Explain & drills inline button on analysis messages)*
