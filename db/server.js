@@ -241,6 +241,15 @@ app.get('/sessions', (req, res) => {
   res.json(results);
 });
 
+// GET /sessions/:id — single session (used by the 🎓 Explain callback branch)
+app.get('/sessions/:id', (req, res) => {
+  const id = Number(req.params.id);
+  if (!id) return res.status(400).json({ error: 'invalid id' });
+  const row = db.prepare('SELECT * FROM sessions WHERE id = ?').get(id);
+  if (!row) return res.status(404).json({ error: 'not found' });
+  res.json(row);
+});
+
 // Columns settable via POST /sessions (everything except id and created_at).
 const POST_FIELDS = [
   'athlete_id', 'date', 'sport', 'duration_min', 'distance_km', 'avg_hr', 'rpe', 'notes',
