@@ -12,6 +12,9 @@ if (!API_KEY) {
   console.error('API_KEY is not set — refusing to start unauthenticated');
   process.exit(1);
 }
+// Optional second key that can only GET — for read-only consumers (e.g. Claude
+// sessions). Writes require the primary key.
+const READONLY_API_KEY = process.env.READONLY_API_KEY;
 
 // Init DB and run schema
 const db = new Database(DB_PATH);
@@ -81,12 +84,11 @@ function toAthleteRow(row) {
     Goal: row.goal,
     'Health Status': row.health_status,
     'Training Principles': row.training_principles,
-    'Strava Access Token': row.strava_access_token,
-    'Strava Refresh Token': row.strava_refresh_token,
-    'Token Expires At': row.token_expires_at,
+    // Stored credentials (Strava tokens, Intervals.icu API key) are write-only:
+    // n8n authenticates to those services via its own credential store, so they
+    // are never served back out.
     'Last Activity Sync': row.last_activity_sync,
     'Intervals.icu Athlete ID': row.intervals_athlete_id,
-    'Intervals.icu API Key': row.intervals_api_key,
     'Intervals.icu Last Sync': row.intervals_last_sync,
     'Last Coaching Date': row.last_coaching_date,
   };
@@ -117,8 +119,12 @@ function toPlanRow(row) {
 
 function auth(req, res, next) {
   const key = req.headers['x-api-key'];
-  if (key !== API_KEY) return res.status(401).json({ error: 'Unauthorized' });
-  next();
+  if (key === API_KEY) return next();
+  if (READONLY_API_KEY && key === READONLY_API_KEY) {
+    if (req.method === 'GET' || req.method === 'HEAD') return next();
+    return res.status(403).json({ error: 'Read-only key: writes not allowed' });
+  }
+  return res.status(401).json({ error: 'Unauthorized' });
 }
 
 app.use(auth);

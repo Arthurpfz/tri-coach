@@ -6,6 +6,7 @@ services:
       - "3200:3000"
     environment:
       - API_KEY=${TRICOACH_API_KEY}
+      - READONLY_API_KEY=${TRICOACH_READONLY_API_KEY:-}
       - DB_PATH=/data/tricoach.db
     volumes:
       - tricoach-data:/data
