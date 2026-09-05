@@ -1,0 +1,10 @@
+# Verified false positives — reviewed 2026-09-05.
+# Any NEW gitleaks hit on this repo is real and must be treated as a leak.
+#
+# 1. final-redeploy.js:29 — logs an n8n credential *identifier*, not a
+#    credential value. Useless without n8n admin auth.
+# 2. intervals-icu-integration-plan.md:28 — a documentation placeholder in a
+#    sample curl command, never a real key.
+
+964c58f1006d47a1f626ebf385672dcd2521de5c:final-redeploy.js:generic-api-key:29
+964c58f1006d47a1f626ebf385672dcd2521de5c:intervals-icu-integration-plan.md:curl-auth-user:28
