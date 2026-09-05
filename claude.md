@@ -22,7 +22,7 @@ This is an **automated triathlon coaching system** that creates personalized wee
 - **Intervals.icu**: Primary training data source (full FIT metrics)
 - **Strava API**: Legacy fallback, OAuth tokens still stored for compatibility
 - **Claude AI**: Coaching intelligence (via OpenRouter)
-  - Models: Claude Sonnet 4.6 (check-ins), Claude Opus 4.7 (planning)
+  - Models: Claude Sonnet 5 (check-ins), Claude Opus 4.8 (planning)
 - **Telegram**: Communication channel (Chat ID stored in `.env` as `TELEGRAM_CHAT_ID`)
 
 ### Data Flow
@@ -56,7 +56,7 @@ Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI A
 - **Schedule:** Daily at 20:10 (Europe/Berlin)
 - **Purpose:** Advanced technical analysis with full FIT file data
 - **Status:** ✅ Active and Tested (2026-01-25)
-- **AI Model:** Claude Sonnet 4.6 (OpenRouter `anthropic/claude-sonnet-4.6`)
+- **AI Model:** Claude Sonnet 5 (OpenRouter `anthropic/claude-sonnet-5`)
 
 **Idempotency & error handling (added 2026-04-18):**
 - `Already Coached Today?` gate short-circuits if `Last Coaching Date` == today
@@ -165,7 +165,7 @@ Watch: Late-ride power decay vs fueling
 - **Trigger:** Execute Workflow Trigger — invoked from Feedback Handler when user sends `/refresh` on CroissantTri bot
 - **Purpose:** Manual catch-up for late-uploaded activities (e.g. bike computer didn't sync to Intervals.icu in time)
 - **Status:** ✅ Active (deployed 2026-05-01)
-- **AI Model:** Claude Sonnet 4.6 (same prompt as Daily Checkin)
+- **AI Model:** Claude Sonnet 5 (same prompt as Daily Checkin)
 
 **Flow:**
 1. Send "🔄 Catching up last 7 days…" ack to chat
@@ -227,7 +227,7 @@ Watch: Late-ride power decay vs fueling
 - **Schedule:** Weekly on Sunday at 20:45 (Europe/Berlin) — intentionally after the 20:10 daily recap + 20:30 stats so the plan lands last; also on-demand via `/program` (Feedback Handler → `When Called` Execute Workflow Trigger)
 - **Purpose:** Generate personalized weekly training plan for next week
 - **Status:** ✅ Active
-- **AI Model:** Claude Opus 4.7 (OpenRouter `anthropic/claude-opus-4.7`)
+- **AI Model:** Claude Opus 4.8 (OpenRouter `anthropic/claude-opus-4.8`)
 
 **Flow (live — Tricoach DB HTTP nodes, NOT the old Airtable export):**
 1. `Search records` — `GET /athletes/1`
@@ -259,7 +259,7 @@ Watch: Late-ride power decay vs fueling
 - **Schedule:** Sundays 19:30 (Europe/Berlin) with a `First Sunday?` gate (`$now.day <= 7`) — effectively first Sunday of each month; also on-demand via its `When Called` Execute Workflow Trigger (bypasses the gate)
 - **Purpose:** Monthly zoom-out the daily/weekly messages don't give: 8-week volume table, CTL trajectory, run-cadence trend, grade distribution, swim frequency vs 2/wk, sleep/HRV month-over-month, per-discipline trajectory vs Erkner race targets, one focus for the next 4 weeks
 - **Status:** ✅ Active (created 2026-07-12, verified live same day)
-- **AI Model:** Claude Opus 4.7 (OpenRouter `anthropic/claude-opus-4.7`)
+- **AI Model:** Claude Opus 4.8 (OpenRouter `anthropic/claude-opus-4.8`)
 - **Flow:** Schedule Trigger → First Sunday? → `GET /athletes/1` → `GET /sessions` (56d, wrap=1) → `Get Wellness 8wk` (ICU, fullResponse) → `Build Review Context` (Code — aggregates everything into `reviewContext`) → LLM → Telegram (`📆 Monthly Review — <Month>`, plain text, ~12-16 lines)
 - **Wired to** `errorWorkflow` (`psyVgPiGJoO5QOa4`)
 
@@ -688,9 +688,9 @@ This will show:
 - Update script archived at [update-explain-button.js](archive/update-explain-button.js).
 
 ### 2026-07-14 — `/progress` Telegram command (am I improving?)
-- **Feedback Handler (`gAnJ0r3x0sFxqWxY`):** new `Is /progress?` branch inserted after `Is /training?` — `Get Progress Sessions` (56d, limit 300, `alwaysOutputData`) → `Format Progress` (Code) → `Progress Verdict` (chainLlm + `Progress Verdict Model`, OpenRouter Sonnet 4.6) → `Send Progress`.
+- **Feedback Handler (`gAnJ0r3x0sFxqWxY`):** new `Is /progress?` branch inserted after `Is /training?` — `Get Progress Sessions` (56d, limit 300, `alwaysOutputData`) → `Format Progress` (Code) → `Progress Verdict` (chainLlm + `Progress Verdict Model`, OpenRouter Sonnet 5) → `Send Progress`.
 - **Scoreboard logic:** last 28d vs prior 28d, duration-weighted per metric, nulls filtered per-metric. Ride: EF (stored `efficiency_factor`, fallback `avg_power/avg_hr`) + decoupling, ≥10min. Run: pace (min/km), Speed@HR (m/min per bpm — DB `efficiency_factor` is null for runs, computed from `avg_speed_ms/avg_hr`), cadence ×2 (half-spm), ≥10min. Swim: pace/100m from `moving_sec`/`distance_m`, **split Pool vs Open water** (mixing them fakes decline when OW volume rises — verified on live data), no min duration. CTL: latest vs last value before the 28d cut. Arrows ▲▼▬ (<1% = flat), session counts per sport (`n vs n`) for small-sample honesty.
-- **Verdict:** one-sentence Sonnet 4.6 verdict appended as `🧠` line; prompt carries the noise caveats (small n, pool≠OW, group-ride decoupling distorted).
+- **Verdict:** one-sentence Sonnet 5 verdict appended as `🧠` line; prompt carries the noise caveats (small n, pool≠OW, group-ride decoupling distorted).
 - **Verified e2e** via temp webhook harness (byte-identical node copies, chatId hardcoded, deleted after): 31 sessions → scoreboard correct → verdict generated → Telegram delivered. Prod IF-gate routing is pattern-identical to `/strikes`; live confirmation = Arthur sends `/progress` once.
 - **Owed by user:** add `progress` to BotFather `/setcommands` (bot token lives only in n8n credential).
 - **Doc drift found:** `.env` does NOT contain `TELEGRAM_CHAT_ID` (docs claim it does); chat id lives in the Feedback Handler `Check Auth` allowlist.
