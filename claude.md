@@ -672,6 +672,15 @@ This will show:
 
 ## Changelog
 
+### 2026-09-10 — Empty daily analyses after the Sonnet 5 swap (outage, fixed)
+- **Symptom:** Sep 9 20:11 Daily Checkin failed at `Send Telegram` with a blank error; `/refresh` delivered bare `📅 <date>` messages with no body; every post-swap session graded "B".
+- **Root cause:** the Sep 5 model swap to `anthropic/claude-sonnet-5` (commit `9e55030`) hit a `maxTokens: 1000` cap on the `Claude Sonnet 5` node. **Sonnet 5 runs adaptive thinking by default; Sonnet 4.6 did not** — reasoning consumed the whole budget, OpenRouter returned `finish_reason: "length"` / `completionTokens: 1000` / `text: ""`. `Parse Grade` then fell through to its `'B'` default and an empty `message`, and Telegram rejects empty text (hence the blank error). The node itself reported success, so the error handler never fired for the Sep 4/8 backfills.
+- **Blast radius:** Daily Checkin (`hrSGUqoAwkWQ4gKl`) + Backfill (`rHIyZMIJNAOqZvM2`) only. Sunday Planner and Monthly Review run Opus 4.8 (thinking off by default) with no `maxTokens` cap; `/progress` verdict and 🎓 Explain are Sonnet 5 but uncapped — all unaffected, which is why Explain kept working.
+- **Fix:** `maxTokens` 1000 → 8000 on both nodes, `temperature: 0.7` dropped (Sonnet 5 rejects sampling params; OpenRouter had been silently stripping it). Deployed via `PUT /workflows`, both confirmed `active` with `errorWorkflow` intact.
+- **Verified live:** sessions 694 (Sep 9 ride), 706 (Sep 8 swim), 698 (Sep 4 run) had `analysis`/`analyzed_at`/`grade` nulled, `/refresh` re-analysed all three, real analyses delivered to Telegram.
+- **Not a bug:** the Sep 7/8 "🛌 no activity" messages and 🏊 0:00 in weekly stats were correct — the COROS didn't upload to Intervals.icu until Sep 9 22:05 (ICU `created` timestamps confirm). Late device sync, not a pipeline miss.
+- **Lesson (memory `n8n-gotchas.md`):** when moving a node to a reasoning-capable model, raise or remove `maxTokens` and drop sampling params. An empty LLM response fails silently at the node and only surfaces four steps later.
+
 ### 2026-07-16 (later) — 🦵 run cadence line removed from Weekly Stats + /strikes
 - **Why:** redundant since `/progress` (2026-07-14) reports run cadence with proper 28d-vs-28d context and session counts; per-run cadence coaching already happens in the daily analysis; a daily-repeated monthly metric (±1 spm/day) is noise in a volume snapshot. User-confirmed.
 - **Weekly Stats (`2W0SIHwzyAWJW62Q`) + `/strikes` (`gAnJ0r3x0sFxqWxY`):** cadence block removed from `Format Stats`/`Format Strikes`; `Get Sessions`/`Get Strikes Sessions` `date_from` reverted from 56d back to `startOf('week')` (the wide fetch existed only for the trend). Cadence trend now lives in `/progress` + Monthly Review only.
@@ -1016,4 +1025,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-07-16 (🦵 cadence line removed from Weekly Stats + /strikes — lives in /progress)*
+*Last Updated: 2026-09-10 (Sonnet 5 maxTokens starvation fixed — daily analyses restored)*
