@@ -290,6 +290,9 @@ Auth: `X-API-Key` header (stored in VPS `.env` and n8n credential `6GNzKYNE1JAz7
 | DELETE | `/weekly-plans/:id` | delete a plan row (added 2026-06-10) |
 | GET | `/sessions?athlete_id=&limit=&date_from=&date_to=` | list sessions (`date_to` supported since 2026-06-10; `limit` clamped 1–1000) |
 | GET | `/sessions/:id` | single session (added 2026-07-16 — used by the 🎓 Explain callback branch) |
+| GET | `/races?athlete_id=&limit=` | list race results, newest first (added 2026-09-26, ⏳ pending PR #17 merge + deploy) |
+| GET | `/races/:id` | one race result |
+| POST | `/races` | upsert race result on `(athlete_id, race_name, race_date)` |
 | POST | `/sessions` | upsert session on `(athlete_id, intervals_id)`, returns `{id, analyzed_at}`, preserves LLM/user fields on re-upsert |
 | PATCH | `/sessions/:id` | attach `analysis`, `analyzed_at`, `grade`, `plan_session_id`, `rpe`, `notes` (Daily Checkin Save Analysis) |
 
@@ -672,6 +675,17 @@ This will show:
 
 ## Changelog
 
+### 2026-09-26 (later) — Erkner 2026 result captured, 2027 performance targets, `races` table
+- **The race results were never in the DB.** `sessions` held the three device recordings from 2026-09-13 (ids 733/734/735) but nothing official — no finish, transitions, splits or placings. Timing-mat data and device data genuinely disagree, so they need separate homes.
+- **NEW TABLE `races`** (`db/schema.sql` + `db/server.js`): finish/leg/transition seconds, nominal leg distances, overall+gender+category placings, per-leg category ranks, `goal_sec`, JSON `splits` of every on-course timing point, `notes`. Endpoints `GET /races?athlete_id=`, `GET /races/:id`, `POST /races` (upsert on `athlete_id + race_name + race_date`). Response adds formatted `finish_time`/`swim_time`/`bike_time`/`run_time` + `vs_goal_sec`. Validated against `node:sqlite` (two POSTs → 1 row; `hms(19367)` → `5:22:47`). **⏳ PR #17 open — not yet merged, so NOT deployed and the Erkner row is NOT yet inserted.** Deploy op `tricoach-db-deploy-raw` pulls `db/*` from raw `main`, so the merge gates it.
+- **Erkner 70.3, 2026-09-13 — the baseline:** 5:22:47 (goal was sub-5:00, so 22:47 over). Swim 38:52 / 2:03·100m · T1 4:51 · Bike 2:41:48 / 32.88 km/h · T2 4:35 · Run 1:52:42 / 5:20·km. 103rd/231 M30-34, 634th/1294 gender, 734th/1718 overall. Bike was already ON its 33 km/h target; run pacing was even (slow splits align with aid stations, closed last 1.5km at 5:03) so the run gap is fitness, not pacing.
+- **2027 targets (athlete-set):** swim <2:00/100m · bike 36 km/h · run <5:00/km. These sum to 4:53:30 of moving time, leaving a **6:30 transition budget** for sub-5:00 — at Erkner's 9:26 the same three splits give 5:02:56. Transitions are now an explicit fourth target. Written into `goal`, with a COURSE CAVEAT that 36 km/h is a flat-course (Erkner) number and must NOT be applied at Lion, where +1300m makes ~29-31 km/h the equivalent effort.
+- **Bike target is an aero problem, not a watts problem.** Physics model (80kg rider, ~89kg system, Crr .005) calibrated against the actual race: CdA ~0.32 at ~196W predicts 32.9 km/h, he rode 32.88. At FTP 261 (75-80% = 196-209W): current road bike, no aerobars → 36 km/h costs **247W = 95% FTP**, unreachable, realistic ceiling ~33-34 km/h. Clip-ons (CdA .28) → 35.2; **clip-ons + aero helmet (CdA .26, ~350 EUR) → 36.0 km/h at 209W**, a normal 80% race intensity. ~350 EUR of kit ≈ 38W of fitness. Recorded in `goal` + `training_principles` so the coach states this instead of prescribing harder intervals against a target the position cannot deliver.
+- **Constraint change: runs 2/week → up to 3** (athlete's call — the run is the biggest single gap and 2/week was the rate limiter). Third run is easy aerobic volume, never a third hard day; week shape 1 quality + 1 long + 1 easy. Swims stay capped at 2/week (pool access). Run principles reframed around durability — 5K threshold is already 4:47/km but race pace off the bike was 5:20/km, so volume closes it, not intensity.
+- **FTP stays 261** (athlete's call). Intervals.icu's own estimate is 276 and it uses that for `ftp_at_time`/IF/TSS on every recent ride — the divergence is known and 276 is treated as optimistic. Noted in `training_principles` so it isn't silently "fixed" later.
+- **Data-quality flag (not fixed):** session **748** is a duplicate recording of the race bike leg (87.48km, avg_power 65W junk) alongside the real 734 — double-counts ~2.7h/87km in Weekly Stats and `/progress`. There is no `DELETE /sessions/:id` endpoint; adding one is a candidate if this recurs.
+- **Verified:** all athlete-record edits re-read and asserted post-PUT (9/9 checks). The Sunday Planner prompt interpolates Goal + Constraints + Training Principles + Fitness Profile, and the live run earlier today (exec 6289) already proved that path — the Sunday 2026-09-27 20:45 cron regenerates the same week (`week_start 2026-09-28`) and is the live confirmation of the 3-run week shape.
+
 ### 2026-09-26 — 2027 objective: two half-iron A-races, sub-5:00 each
 - **Goal for 2027:** sub-5:00 at half-iron distance, across **two full A-races** (athlete's call — each gets its own Base→Build→Peak→Taper block, not one continuous season):
   1. **Triathlon du Lion — Format L**, 2027-05-22 (Saturday), Lac du Malsaucy, Sermamagny (90). 1.9km lake swim · **86km bike, +1300m D+, includes the Ballon d'Alsace** · 19.5km run around Malsaucy/Véronne.
@@ -1036,4 +1050,4 @@ node check-versions.js         # Compare draft vs active versions
 
 ---
 
-*Last Updated: 2026-09-26 (2027 objective set — Triathlon du Lion L May + Erkner 70.3 Sept, sub-5:00 each)*
+*Last Updated: 2026-09-26 (Erkner 2026 baseline + 2027 targets: swim <2:00/100m · bike 36 km/h · run <5:00/km)*
