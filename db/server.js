@@ -339,5 +339,84 @@ app.patch('/sessions/:id', (req, res) => {
   }
 });
 
+// ── Races ─────────────────────────────────────────────────────────────────────
+
+const RACE_FIELDS = [
+  'race_name', 'race_date', 'distance', 'bib', 'category', 'start_time',
+  'finish_sec', 'goal_sec', 'swim_sec', 't1_sec', 'bike_sec', 't2_sec', 'run_sec',
+  'swim_distance_m', 'bike_distance_m', 'run_distance_m',
+  'overall_rank', 'overall_field', 'gender_rank', 'gender_field',
+  'category_rank', 'category_field',
+  'swim_rank_category', 'bike_rank_category', 'run_rank_category', 'notes',
+];
+
+const hms = (sec) => {
+  if (sec == null) return null;
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return (h ? `${h}:${String(m).padStart(2, '0')}` : `${m}`) + `:${String(s).padStart(2, '0')}`;
+};
+
+function toRaceRow(row) {
+  if (!row) return null;
+  let splits = null;
+  if (row.splits) {
+    try { splits = JSON.parse(row.splits); } catch (_) { splits = null; }
+  }
+  return {
+    ...row,
+    splits,
+    finish_time: hms(row.finish_sec),
+    swim_time: hms(row.swim_sec),
+    bike_time: hms(row.bike_sec),
+    run_time: hms(row.run_sec),
+    vs_goal_sec: (row.finish_sec != null && row.goal_sec != null) ? row.finish_sec - row.goal_sec : null,
+  };
+}
+
+app.get('/races', (req, res) => {
+  const { athlete_id, limit = 50 } = req.query;
+  if (!athlete_id) return res.status(400).json({ error: 'athlete_id required' });
+  const lim = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 1000);
+  const rows = db.prepare('SELECT * FROM races WHERE athlete_id = ? ORDER BY race_date DESC LIMIT ?')
+    .all(athlete_id, lim);
+  res.json(rows.map(toRaceRow));
+});
+
+app.get('/races/:id', (req, res) => {
+  const row = db.prepare('SELECT * FROM races WHERE id = ?').get(req.params.id);
+  if (!row) return res.status(404).json({ error: 'Not found' });
+  res.json(toRaceRow(row));
+});
+
+app.post('/races', (req, res) => {
+  const { athlete_id, race_name, race_date, splits } = req.body;
+  if (!athlete_id || !race_name || !race_date) {
+    return res.status(400).json({ error: 'athlete_id, race_name and race_date required' });
+  }
+
+  const args = { athlete_id, splits: splits == null ? null
+    : (typeof splits === 'string' ? splits : JSON.stringify(splits)) };
+  for (const f of RACE_FIELDS) args[f] = req.body[f] ?? null;
+
+  const cols = ['athlete_id', ...RACE_FIELDS, 'splits'];
+  const updatable = cols.filter(c => !['athlete_id', 'race_name', 'race_date'].includes(c));
+
+  try {
+    db.prepare(`
+      INSERT INTO races (${cols.join(', ')})
+      VALUES (${cols.map(c => '@' + c).join(', ')})
+      ON CONFLICT(athlete_id, race_name, race_date) DO UPDATE SET
+        ${updatable.map(c => `${c} = excluded.${c}`).join(', ')}
+    `).run(args);
+  } catch (e) {
+    console.error('POST /races failed:', e.message);
+    return res.status(400).json({ error: 'invalid request' });
+  }
+
+  const row = db.prepare('SELECT * FROM races WHERE athlete_id = ? AND race_name = ? AND race_date = ?')
+    .get(athlete_id, race_name, race_date);
+  res.status(201).json(toRaceRow(row));
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`tricoach-db listening on :${PORT}`));
