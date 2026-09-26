@@ -113,3 +113,39 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE UNIQUE INDEX IF NOT EXISTS sessions_intervals_unique
   ON sessions(athlete_id, intervals_id)
   WHERE intervals_id IS NOT NULL;
+
+-- Official race results (finish time, leg splits, placings). Distinct from `sessions`,
+-- which holds device recordings — a race produces both, and they disagree slightly.
+CREATE TABLE IF NOT EXISTS races (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  athlete_id INTEGER NOT NULL REFERENCES athletes(id),
+  race_name TEXT NOT NULL,
+  race_date TEXT NOT NULL,
+  distance TEXT,
+  bib TEXT,
+  category TEXT,
+  start_time TEXT,
+  finish_sec INTEGER,
+  goal_sec INTEGER,
+  swim_sec INTEGER,
+  t1_sec INTEGER,
+  bike_sec INTEGER,
+  t2_sec INTEGER,
+  run_sec INTEGER,
+  swim_distance_m REAL,
+  bike_distance_m REAL,
+  run_distance_m REAL,
+  overall_rank INTEGER,
+  overall_field INTEGER,
+  gender_rank INTEGER,
+  gender_field INTEGER,
+  category_rank INTEGER,
+  category_field INTEGER,
+  swim_rank_category INTEGER,
+  bike_rank_category INTEGER,
+  run_rank_category INTEGER,
+  splits TEXT,
+  notes TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(athlete_id, race_name, race_date)
+);
