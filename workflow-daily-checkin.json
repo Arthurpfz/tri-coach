@@ -683,19 +683,19 @@
             {
               "id": "extract-grade",
               "name": "grade",
-              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); return JSON.parse(t).grade || 'B'; } catch(e) { const m = $json.text.match(/Grade:\\s*([ABCF])/); return m ? m[1] : 'B'; } })() }}",
+              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); return JSON.parse(t).grade || 'B'; } catch(e) { const m = $json.text.match(/\"grade\"\\s*:\\s*\"([ABCF])\"/) || $json.text.match(/Grade:\\s*([ABCF])/); return m ? m[1] : 'B'; } })() }}",
               "type": "string"
             },
             {
               "id": "extract-message",
               "name": "message",
-              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); return JSON.parse(t).message || $json.text; } catch(e) { return $json.text; } })() }}",
+              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); return JSON.parse(t).message || $json.text; } catch(e) { const m = $json.text.match(/\"message\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"/); try { return m ? JSON.parse('\"' + m[1] + '\"') : $json.text; } catch(_) { return $json.text; } } })() }}",
               "type": "string"
             },
             {
               "id": "extract-plan-session",
               "name": "plan_session_id",
-              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); const v = JSON.parse(t).plan_session_id; return v == null ? '' : v; } catch(e) { return ''; } })() }}",
+              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); const v = JSON.parse(t).plan_session_id; return v == null ? '' : v; } catch(e) { const m = $json.text.match(/\"plan_session_id\"\\s*:\\s*\"([^\"]*)\"/); return m ? m[1] : ''; } })() }}",
               "type": "string"
             },
             {
