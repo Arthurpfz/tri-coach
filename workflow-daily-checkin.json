@@ -251,9 +251,10 @@
     {
       "parameters": {
         "chatId": "1865798034",
-        "text": "={{ $('Parse Grade').item.json.message }}",
+        "text": "={{ (String($('Parse Grade').item.json.message || '⚠️ Analysis came back empty — tap Explain or re-run /refresh.').slice(0, 3800)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }}",
         "additionalFields": {
-          "appendAttribution": false
+          "appendAttribution": false,
+          "parse_mode": "HTML"
         },
         "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": {
@@ -1014,9 +1015,10 @@
       },
       "parameters": {
         "chatId": "1865798034",
-        "text": "={{ $('Apply Test Update').item.json.note }}",
+        "text": "={{ (String($('Apply Test Update').item.json.note || '📈 Fitness test detected.').slice(0, 3800)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }}",
         "additionalFields": {
-          "appendAttribution": false
+          "appendAttribution": false,
+          "parse_mode": "HTML"
         }
       },
       "id": "81c9ce86-1265-4f1d-90a0-31eba2ebe362",

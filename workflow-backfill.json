@@ -595,9 +595,10 @@
     {
       "parameters": {
         "chatId": "={{ $(\"When Called\").item.json.chat_id || \"1865798034\" }}",
-        "text": "=📅 {{ $('Get Activity Details').item.json.start_date_local.slice(0,10) }}\n\n{{ $('Parse Grade').item.json.message }}",
+        "text": "=📅 {{ $('Get Activity Details').item.json.start_date_local.slice(0,10) }}\n\n{{ (String($('Parse Grade').item.json.message || '⚠️ Analysis came back empty — tap Explain or re-run /refresh.').slice(0, 3800)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }}",
         "additionalFields": {
-          "appendAttribution": false
+          "appendAttribution": false,
+          "parse_mode": "HTML"
         },
         "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": {
@@ -943,9 +944,10 @@
       },
       "parameters": {
         "chatId": "={{ $(\"When Called\").item.json.chat_id || \"1865798034\" }}",
-        "text": "={{ $('Apply Test Update').item.json.note }}",
+        "text": "={{ (String($('Apply Test Update').item.json.note || '📈 Fitness test detected.').slice(0, 3800)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }}",
         "additionalFields": {
-          "appendAttribution": false
+          "appendAttribution": false,
+          "parse_mode": "HTML"
         }
       },
       "id": "89798d78-6956-4234-a9f6-2bce392e3188",
