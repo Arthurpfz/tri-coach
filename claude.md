@@ -79,7 +79,7 @@ Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI A
 
 **IMPORTANT - Data Source Requirements:**
 - Activities must come from **direct device uploads** to Intervals.icu
-- Supported: COROS, Wahoo, Garmin (direct), Zwift (direct connection)
+- Supported: COROS, Wahoo, Garmin (direct), Zwift (direct connection), Croissant Ride (API upload, `VirtualRide`, see `../croissant-ride/CLAUDE.md`)
 - **Strava must be disconnected** from Intervals.icu
 - Reason: Intervals.icu API blocks access to Strava-sourced activities
 - Activities uploaded via Strava will not be analyzed by this workflow
