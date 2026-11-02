@@ -675,6 +675,11 @@ This will show:
 
 ## Changelog
 
+### 2026-10-31 — Daily Checkin Telegram 400 "can't parse entities"
+- **Symptom:** 20:10 run #7678 failed at `Send Telegram` (400, "Can't find end of the entity"); `/refresh` then said "Refresh complete" without sending, because the session was already analyzed.
+- **Root cause:** the LLM returned malformed JSON (trailing `,"}`), so `Parse Grade` fell back to the raw text. That text was the JSON itself, and its keys (`detected_test`, …) contain `_`, which Telegram's legacy Markdown (the n8n Telegram node's default) rejected. The raw JSON was also saved as the analysis, with `plan_session_id` lost.
+- **Fix (Daily Checkin `hrSGUqoAwkWQ4gKl` + Backfill `rHIyZMIJNAOqZvM2`):** `Parse Grade` now pulls `message`/`grade`/`plan_session_id` out of malformed JSON by regex. `Send Telegram`/`Send Test Update` now send HTML-escaped text with `parse_mode: HTML`, cut at 3,800 characters, and an "Analysis came back empty" notice if blank. Deployed via `PUT /workflows`; both still active with `errorWorkflow`. Session 947 reset (`analysis`/`analyzed_at`/`grade` → null) so it gets re-sent.
+
 ### 2026-09-26 (later) — Erkner 2026 result captured, 2027 performance targets, `races` table
 - **The race results were never in the DB.** `sessions` held the three device recordings from 2026-09-13 (ids 733/734/735) but nothing official — no finish, transitions, splits or placings. Timing-mat data and device data genuinely disagree, so they need separate homes.
 - **NEW TABLE `races`** (`db/schema.sql` + `db/server.js`): finish/leg/transition seconds, nominal leg distances, overall+gender+category placings, per-leg category ranks, `goal_sec`, JSON `splits` of every on-course timing point, `notes`. Endpoints `GET /races?athlete_id=`, `GET /races/:id`, `POST /races` (upsert on `athlete_id + race_name + race_date`). Response adds formatted `finish_time`/`swim_time`/`bike_time`/`run_time` + `vs_goal_sec`. Validated against `node:sqlite` (two POSTs → 1 row; `hms(19367)` → `5:22:47`). **Merged as PR #17 (`189076c`) and deployed** via `tricoach-db-deploy-raw` (which pulls `db/*` from raw `main`). Verified live: 400 without `athlete_id`, 404 on a missing id, 201 on insert, re-POST of the identical payload left exactly 1 row, and the record survived a `tricoach-db-restart` with all 29 splits intact. **Erkner 2026 stored as race id 1.**

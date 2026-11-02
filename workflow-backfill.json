@@ -539,19 +539,19 @@
             {
               "id": "extract-grade",
               "name": "grade",
-              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); return JSON.parse(t).grade || 'B'; } catch(e) { const m = $json.text.match(/Grade:\\s*([ABCF])/); return m ? m[1] : 'B'; } })() }}",
+              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); return JSON.parse(t).grade || 'B'; } catch(e) { const m = $json.text.match(/\"grade\"\\s*:\\s*\"([ABCF])\"/) || $json.text.match(/Grade:\\s*([ABCF])/); return m ? m[1] : 'B'; } })() }}",
               "type": "string"
             },
             {
               "id": "extract-message",
               "name": "message",
-              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); return JSON.parse(t).message || $json.text; } catch(e) { return $json.text; } })() }}",
+              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); return JSON.parse(t).message || $json.text; } catch(e) { const m = $json.text.match(/\"message\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"/); try { return m ? JSON.parse('\"' + m[1] + '\"') : $json.text; } catch(_) { return $json.text; } } })() }}",
               "type": "string"
             },
             {
               "id": "extract-plan-session",
               "name": "plan_session_id",
-              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); const v = JSON.parse(t).plan_session_id; return v == null ? '' : v; } catch(e) { return ''; } })() }}",
+              "value": "={{ (() => { try { const t = $json.text.replace(/```json[\\s\\S]*?```/g, s => s.replace(/```json\\s*/,'').replace(/```\\s*/,'')).replace(/```/g,'').trim(); const v = JSON.parse(t).plan_session_id; return v == null ? '' : v; } catch(e) { const m = $json.text.match(/\"plan_session_id\"\\s*:\\s*\"([^\"]*)\"/); return m ? m[1] : ''; } })() }}",
               "type": "string"
             },
             {
@@ -595,9 +595,10 @@
     {
       "parameters": {
         "chatId": "={{ $(\"When Called\").item.json.chat_id || \"1865798034\" }}",
-        "text": "=📅 {{ $('Get Activity Details').item.json.start_date_local.slice(0,10) }}\n\n{{ $('Parse Grade').item.json.message }}",
+        "text": "=📅 {{ $('Get Activity Details').item.json.start_date_local.slice(0,10) }}\n\n{{ (String($('Parse Grade').item.json.message || '⚠️ Analysis came back empty — tap Explain or re-run /refresh.').slice(0, 3800)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }}",
         "additionalFields": {
-          "appendAttribution": false
+          "appendAttribution": false,
+          "parse_mode": "HTML"
         },
         "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": {
@@ -943,9 +944,10 @@
       },
       "parameters": {
         "chatId": "={{ $(\"When Called\").item.json.chat_id || \"1865798034\" }}",
-        "text": "={{ $('Apply Test Update').item.json.note }}",
+        "text": "={{ (String($('Apply Test Update').item.json.note || '📈 Fitness test detected.').slice(0, 3800)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }}",
         "additionalFields": {
-          "appendAttribution": false
+          "appendAttribution": false,
+          "parse_mode": "HTML"
         }
       },
       "id": "89798d78-6956-4234-a9f6-2bce392e3188",
