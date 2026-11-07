@@ -22,7 +22,7 @@ This is an **automated triathlon coaching system** that creates personalized wee
 - **Intervals.icu**: Primary training data source (full FIT metrics)
 - **Strava API**: Legacy fallback, OAuth tokens still stored for compatibility
 - **Claude AI**: Coaching intelligence (via OpenRouter)
-  - Models: Claude Sonnet 5 (check-ins), Claude Opus 4.8 (planning)
+  - Models: Claude Opus 5.5 (daily check-in), Claude Sonnet 5.5 (Sunday Planner), Claude Sonnet 5 (Backfill, Feedback), Claude Opus 4.8 (Monthly Review)
 - **Telegram**: Communication channel (Chat ID stored in `.env` as `TELEGRAM_CHAT_ID`)
 
 ### Data Flow
@@ -56,7 +56,7 @@ Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI A
 - **Schedule:** Daily at 20:10 (Europe/Berlin)
 - **Purpose:** Advanced technical analysis with full FIT file data
 - **Status:** ✅ Active and Tested (2026-01-25)
-- **AI Model:** Claude Sonnet 5 (OpenRouter `anthropic/claude-sonnet-5`)
+- **AI Model:** Claude Opus 5.5 (OpenRouter `anthropic/claude-opus-5.5`, since 2026-11-07; node renamed `Claude Opus 5.5`)
 
 **Idempotency & error handling (added 2026-04-18):**
 - `Already Coached Today?` gate short-circuits if `Last Coaching Date` == today
@@ -227,7 +227,7 @@ Watch: Late-ride power decay vs fueling
 - **Schedule:** Weekly on Sunday at 20:45 (Europe/Berlin) — intentionally after the 20:10 daily recap + 20:30 stats so the plan lands last; also on-demand via `/program` (Feedback Handler → `When Called` Execute Workflow Trigger)
 - **Purpose:** Generate personalized weekly training plan for next week
 - **Status:** ✅ Active
-- **AI Model:** Claude Opus 4.8 (OpenRouter `anthropic/claude-opus-4.8`)
+- **AI Model:** Claude Sonnet 5.5 (OpenRouter `anthropic/claude-sonnet-5.5`, since 2026-11-07). `Parse Json` strips trailing commas before `JSON.parse`.
 
 **Flow (live — Tricoach DB HTTP nodes, NOT the old Airtable export):**
 1. `Search records` — `GET /athletes/1`
@@ -1051,3 +1051,7 @@ node check-versions.js         # Compare draft vs active versions
 ---
 
 *Last Updated: 2026-09-26 (Erkner 2026 baseline + 2027 targets: swim <2:00/100m · bike 36 km/h · run <5:00/km)*
+
+### 2026-11-07 — Model benchmark + lost weekly plan (fixed)
+- **Lost plan:** the 2026-11-01 Sunday Planner run failed at `Create a record` ("undefined is not valid JSON"): Opus 4.8 wrote the plan with trailing commas, `Parse Json` returned `plan: null`, so no plan for the week of 2026-11-02 reached coach-db. Fix: `Parse Json` now does `.replace(/,(\s*[}\]])/g, "$1")` before `JSON.parse` (re-parsed the failed output: 6 sessions, OK).
+- **Benchmark** (real prompts from the last runs, blind-graded by Opus 5.5 and GPT-6.1 Sol Pro): Daily — Opus 5.5 8-9/10 vs Sonnet 5 4-6 (Sonnet 5 invented a group-ride pattern and skipped the torque/cadence rule). Planner — Sonnet 5.5 7-8 and Opus 5.5 7-9 vs Opus 4.8 3-6 (over the 6h ±30min target, long-run HR above Z2). Switched Daily → Opus 5.5 (~$0.056/run), Planner → Sonnet 5.5 (~$0.04/run). Backfill, Feedback Handler and Monthly Review unchanged.
