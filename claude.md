@@ -14,7 +14,7 @@ This is an **automated triathlon coaching system** that creates personalized wee
 
 ### Tech Stack
 
-- **N8N Cloud**: Workflow automation platform (https://apfz.app.n8n.cloud)
+- **N8N Cloud**: Workflow automation platform (https://n8n.arthurpfz.com)
 - **Tricoach DB**: Self-hosted SQLite REST API at https://coach-db.arthurpfz.com
   - Code: `./db/` — Node 20 + Express + `better-sqlite3`
   - Deployed: `/data/tricoach-db/` on Hostinger VPS (IP in `.env` as `VPS_IP`)
@@ -52,7 +52,7 @@ Daily 8:10 PM → GET /athletes → GET /weekly-plans → Intervals.icu → AI A
 
 ### 1b. Coach Tri - Daily Checkin (Intervals.icu) ⭐
 - **ID:** hrSGUqoAwkWQ4gKl
-- **URL:** https://apfz.app.n8n.cloud/workflow/hrSGUqoAwkWQ4gKl
+- **URL:** https://n8n.arthurpfz.com/workflow/hrSGUqoAwkWQ4gKl
 - **Schedule:** Daily at 20:10 (Europe/Berlin)
 - **Purpose:** Advanced technical analysis with full FIT file data
 - **Status:** ✅ Active and Tested (2026-01-25)
@@ -141,7 +141,7 @@ Watch: Late-ride power decay vs fueling
 
 ### 1d. Coach Tri - Weekly Stats
 - **ID:** 2W0SIHwzyAWJW62Q
-- **URL:** https://apfz.app.n8n.cloud/workflow/2W0SIHwzyAWJW62Q
+- **URL:** https://n8n.arthurpfz.com/workflow/2W0SIHwzyAWJW62Q
 - **Schedule:** Daily at 20:30 (Europe/Berlin)
 - **Purpose:** Send a single Telegram with cumulative weekly volume — total hours (one 🔥 per hour) + per-sport breakdown
 - **Status:** ✅ Active (deployed 2026-04-25)
@@ -856,8 +856,8 @@ Five features shipped in one pass (all deployed via `PUT /workflows`, all verifi
   - JSON output schema unchanged (`{plan_session_id, grade, message}`) so Parse Grade → Save Analysis → Send Telegram plumbing works as-is.
 - **Files touched:** [update-prompt-no-plan-grading.js](archive/update-prompt-no-plan-grading.js) (one-off update script), CLAUDE.md (Workflow 1b output style + AI Coaching Logic section), [feedback_no_plan_grading.md](../../../../.claude/projects/-Users-arthurpfalzgraf-Desktop-Projects-TRI-COACH/memory/feedback_no_plan_grading.md) (memory).
 - **Drafts pushed via PUT** — both workflows show `active=true` against the previous version. **Manual activation required** in n8n UI for each (click into workflow → Save) so draft becomes the running version. URLs:
-  - https://apfz.app.n8n.cloud/workflow/hrSGUqoAwkWQ4gKl
-  - https://apfz.app.n8n.cloud/workflow/rHIyZMIJNAOqZvM2
+  - https://n8n.arthurpfz.com/workflow/hrSGUqoAwkWQ4gKl
+  - https://n8n.arthurpfz.com/workflow/rHIyZMIJNAOqZvM2
 - **Verification pending:** manual execution test in n8n UI on a recent session, plus one Daily Checkin scheduled run at 20:10 Berlin.
 
 ### 2026-05-01 (later) — `/strikes` + `/training` Telegram commands
@@ -1005,7 +1005,7 @@ Five features shipped in one pass (all deployed via `PUT /workflows`, all verifi
 ## Quick Reference
 
 ### Important IDs
-- **N8N Base URL:** https://apfz.app.n8n.cloud/api/v1
+- **N8N Base URL:** https://n8n.arthurpfz.com/api/v1
 - **Tricoach DB URL:** https://coach-db.arthurpfz.com
 - **Tricoach DB path on VPS:** /data/tricoach-db
 - ~~**Airtable Base:** appw0Xd3T54okfaXa~~ — migrated to Tricoach DB 2026-04-22

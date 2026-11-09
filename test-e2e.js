@@ -174,7 +174,7 @@ async function testFeedbackHandler() {
   let webhookRegistered = false;
   try {
     await axios.post(
-      'https://apfz.app.n8n.cloud/webhook/feedback-handler-webhook/webhook',
+      'https://n8n.arthurpfz.com/webhook/feedback-handler-webhook/webhook',
       { fake: 'payload' },
       { timeout: 5000 }
     );
