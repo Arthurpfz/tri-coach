@@ -212,6 +212,7 @@ Watch: Late-ride power decay vs fueling
 | `/strikes` | Get Strikes Sessions → Format Strikes → Send Strikes | Same Code aggregation as Weekly Stats workflow (`2W0SIHwzyAWJW62Q`) — 🔥 per hour + per-sport breakdown for the running week (🦵 cadence line removed 2026-07-16 — lives in `/progress`) |
 | `/training` | Get Training Plan → Format Training → Send Training | `GET /weekly-plans?athlete_id=1&week_start_date=<this Monday>` then formats sessions JSON as Telegram message |
 | `/progress` | Get Progress Wellness (ICU) → Get Progress Sessions → Format Progress → Progress Verdict (Sonnet 4.6) → Send Progress | 56d fetch → per-discipline scoreboard, last 28d vs prior 28d (duration-weighted): 🚴 EF **Z2-only** (IF≤70, non-Wed — Rapha excluded) + decoupling on **long steady** rides (≥90min non-Wed); 🏃 pace (all) + Speed@HR **Z2-only** (avg_hr≤150) + cadence; 🏊/🌊 Pool + OW split — pace, DPS (m/cycle), SWOLF (pool, lengths derived from `pool_length_m`); 🏁 Durability (longest ride/run vs **current target race** demand — Lion L 86km/19.5km since 2026-09-26; swap back to 90km/21km at the May 2027 Erkner handoff); 💤 Sleep/HRV/RHR (ICU wellness 28d avgs); 💪 CTL. Subset filters show own counts (`1v2`); zero-match → "none this block". One-line 🧠 LLM verdict. Added 2026-07-14, v2 same day |
+| `/goals`, `/principles` | Is /goals or /principles? → Read Principles Page (SSH `cat` of `vault/wiki/triathlon-principles.md`) → Format Page → Send Page | Plain-text render of the athlete's principles page: `/goals` = sections 1–2 (per-race split budgets + checkpoints), `/principles` = sections 3–6 (constraints, training, fuel/recovery, race day). Tables flattened to bullets, chunked under Telegram's 4096-char cap. No LLM. Added 2026-11-28 |
 | `!<text>` | Save Feedback flow | Saves user feedback against the latest session (existing flow) |
 | 🎓 button tap | Is Callback? → Answer Callback → Get Explain Session (`GET /sessions/:id`) → Get Explain Athlete → Build Explain Prompt → Session Found? → Explain Coach (Sonnet 4.6) → Send Explanation | Every analysis Telegram (Daily Checkin + Backfill) carries an inline `🎓 Explain & drills` button (`callback_data: explain:<session_id>`). Tap → plain-English explanation of that session + 3-5 targeted drills, replied to the tapped message. English only. Added 2026-07-16 |
 
@@ -674,6 +675,20 @@ This will show:
 ---
 
 ## Changelog
+
+### 2026-11-28 (later) — `/goals` and `/principles` commands
+- Feedback Handler (`gAnJ0r3x0sFxqWxY`): new branch between `/progress` and `!feedback` reads the principles page live and sends it as plain text (no LLM, free). Both commands added to the CroissantTriBot menu via `setMyCommands`. Verified with a temp copy (fake trigger → SSH → Format Page, deleted after): `/goals` 2789 chars, `/principles` 3098 chars, one message each.
+
+### 2026-11-28 — Per-race objectives
+- Athlete call: **sub-5:00 is the Erkner 70.3 (2027-09-12) A-goal**; Lion's equivalent is **sub-5:20** (same effort, hilly course). Budget: swim 38:00 · bike ~2:55 (~29.5 km/h, power model 2:54–3:01 at ~80% FTP, ≤90% on the Ballon) · run 1:40:45 (5:10/km) · T 6:30. Written as an `OBJECTIVES` block at the top of DB `goal` and in the principles page (checkpoints Jan → Mar → Lion → Aug).
+
+### 2026-11-27 — Athlete principles page wired into the coach
+- **Why:** the vault held ~480 triathlon learnings and none reached the coach; goals existed but no checkpoints between now and race day.
+- **Source of truth:** `vault/wiki/triathlon-principles.md` — goal worked backwards (per-course split budgets for sub-5:00), checkpoints (Jan/Mar/May), constraints, training / fuel / race-day rules. Sections 4–6 are fed weekly by the `vault-gardener` skill (job 6) with proven, simple, non-outlier learnings only; sections 1–3 are Arthur's.
+- **Sunday Planner + Monthly Review:** new first node `Read Principles` (SSH `cat` of the page, credential `VPS SSH (n8n-runner)`, `onError: continue` so a missing page never blocks a plan). `Build Prompt Context` / `Build Review Context` strip the frontmatter into `principles` (fallback text if empty). Prompts gain an `ATHLETE'S PRINCIPLES` section; DB `Training Principles` is now labelled `SESSION RECIPES` and loses to the principles on conflict. Planner rule 10: max 2 hard sessions/week across sports, weekly 20–30 min strength block, carbs/h in every session >75 min, cadence nudged not forced, shift time to any discipline behind its checkpoint. Monthly Review item 3 now grades against the checkpoints and says whether the finish-time goal is still realistic.
+- **DB `training_principles`:** "Polarized 80/20" line → "~80% Z2, max 2 truly hard sessions/week across all sports"; run cadence line no longer forces 175–180 (nudge ~5 spm per block). Pre-edit record backed up on the VPS at `/root/archive/tricoach-athlete1-20261127.json`.
+- **Verified:** both workflows PUT and still active with `errorWorkflow` intact; temp no-LLM copies (deleted after) rendered both prompts with the full page (6517 chars) and no unresolved expressions. First live run: Sunday Planner 2026-11-29 20:45.
+
 
 ### 2026-09-26 (later) — Erkner 2026 result captured, 2027 performance targets, `races` table
 - **The race results were never in the DB.** `sessions` held the three device recordings from 2026-09-13 (ids 733/734/735) but nothing official — no finish, transitions, splits or placings. Timing-mat data and device data genuinely disagree, so they need separate homes.
