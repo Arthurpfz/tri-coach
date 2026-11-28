@@ -675,6 +675,9 @@ This will show:
 
 ## Changelog
 
+### 2026-11-28 — Per-race objectives
+- Athlete call: **sub-5:00 is the Erkner 70.3 (2027-09-12) A-goal**; Lion's equivalent is **sub-5:20** (same effort, hilly course). Budget: swim 38:00 · bike ~2:55 (~29.5 km/h, power model 2:54–3:01 at ~80% FTP, ≤90% on the Ballon) · run 1:40:45 (5:10/km) · T 6:30. Written as an `OBJECTIVES` block at the top of DB `goal` and in the principles page (checkpoints Jan → Mar → Lion → Aug).
+
 ### 2026-11-27 — Athlete principles page wired into the coach
 - **Why:** the vault held ~480 triathlon learnings and none reached the coach; goals existed but no checkpoints between now and race day.
 - **Source of truth:** `vault/wiki/triathlon-principles.md` — goal worked backwards (per-course split budgets for sub-5:00), checkpoints (Jan/Mar/May), constraints, training / fuel / race-day rules. Sections 4–6 are fed weekly by the `vault-gardener` skill (job 6) with proven, simple, non-outlier learnings only; sections 1–3 are Arthur's.
