@@ -212,6 +212,7 @@ Watch: Late-ride power decay vs fueling
 | `/strikes` | Get Strikes Sessions → Format Strikes → Send Strikes | Same Code aggregation as Weekly Stats workflow (`2W0SIHwzyAWJW62Q`) — 🔥 per hour + per-sport breakdown for the running week (🦵 cadence line removed 2026-07-16 — lives in `/progress`) |
 | `/training` | Get Training Plan → Format Training → Send Training | `GET /weekly-plans?athlete_id=1&week_start_date=<this Monday>` then formats sessions JSON as Telegram message |
 | `/progress` | Get Progress Wellness (ICU) → Get Progress Sessions → Format Progress → Progress Verdict (Sonnet 4.6) → Send Progress | 56d fetch → per-discipline scoreboard, last 28d vs prior 28d (duration-weighted): 🚴 EF **Z2-only** (IF≤70, non-Wed — Rapha excluded) + decoupling on **long steady** rides (≥90min non-Wed); 🏃 pace (all) + Speed@HR **Z2-only** (avg_hr≤150) + cadence; 🏊/🌊 Pool + OW split — pace, DPS (m/cycle), SWOLF (pool, lengths derived from `pool_length_m`); 🏁 Durability (longest ride/run vs **current target race** demand — Lion L 86km/19.5km since 2026-09-26; swap back to 90km/21km at the May 2027 Erkner handoff); 💤 Sleep/HRV/RHR (ICU wellness 28d avgs); 💪 CTL. Subset filters show own counts (`1v2`); zero-match → "none this block". One-line 🧠 LLM verdict. Added 2026-07-14, v2 same day |
+| `/goals`, `/principles` | Is /goals or /principles? → Read Principles Page (SSH `cat` of `vault/wiki/triathlon-principles.md`) → Format Page → Send Page | Plain-text render of the athlete's principles page: `/goals` = sections 1–2 (per-race split budgets + checkpoints), `/principles` = sections 3–6 (constraints, training, fuel/recovery, race day). Tables flattened to bullets, chunked under Telegram's 4096-char cap. No LLM. Added 2026-11-28 |
 | `!<text>` | Save Feedback flow | Saves user feedback against the latest session (existing flow) |
 | 🎓 button tap | Is Callback? → Answer Callback → Get Explain Session (`GET /sessions/:id`) → Get Explain Athlete → Build Explain Prompt → Session Found? → Explain Coach (Sonnet 4.6) → Send Explanation | Every analysis Telegram (Daily Checkin + Backfill) carries an inline `🎓 Explain & drills` button (`callback_data: explain:<session_id>`). Tap → plain-English explanation of that session + 3-5 targeted drills, replied to the tapped message. English only. Added 2026-07-16 |
 
@@ -674,6 +675,9 @@ This will show:
 ---
 
 ## Changelog
+
+### 2026-11-28 (later) — `/goals` and `/principles` commands
+- Feedback Handler (`gAnJ0r3x0sFxqWxY`): new branch between `/progress` and `!feedback` reads the principles page live and sends it as plain text (no LLM, free). Both commands added to the CroissantTriBot menu via `setMyCommands`. Verified with a temp copy (fake trigger → SSH → Format Page, deleted after): `/goals` 2789 chars, `/principles` 3098 chars, one message each.
 
 ### 2026-11-28 — Per-race objectives
 - Athlete call: **sub-5:00 is the Erkner 70.3 (2027-09-12) A-goal**; Lion's equivalent is **sub-5:20** (same effort, hilly course). Budget: swim 38:00 · bike ~2:55 (~29.5 km/h, power model 2:54–3:01 at ~80% FTP, ≤90% on the Ballon) · run 1:40:45 (5:10/km) · T 6:30. Written as an `OBJECTIVES` block at the top of DB `goal` and in the principles page (checkpoints Jan → Mar → Lion → Aug).

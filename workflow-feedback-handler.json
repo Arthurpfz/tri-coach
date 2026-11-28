@@ -1,0 +1,3446 @@
+{
+    "id": "gAnJ0r3x0sFxqWxY",
+    "name": "Coach Tri - Feedback Handler",
+    "description": null,
+    "active": true,
+    "activeVersionId": "86b4e2d2-15d7-4c43-a96b-bf689c6f8bb4",
+    "createdAt": "2026-11-08T07:23:09.166Z",
+    "updatedAt": "2026-11-28T05:54:42.542Z",
+    "isArchived": false,
+    "versionId": "86b4e2d2-15d7-4c43-a96b-bf689c6f8bb4",
+    "versionCounter": 2,
+    "sourceWorkflowId": null,
+    "triggerCount": 1,
+    "nodes": [
+        {
+            "id": "telegram-trigger",
+            "name": "Telegram Trigger",
+            "webhookId": "feedback-handler-webhook",
+            "type": "n8n-nodes-base.telegramTrigger",
+            "typeVersion": 1.1,
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {
+                "updates": [
+                    "message",
+                    "callback_query"
+                ],
+                "additionalFields": {}
+            },
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "id": "check-auth",
+            "name": "Check Auth",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.3,
+            "position": [
+                200,
+                0
+            ],
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "auth-check",
+                            "leftValue": "={{ $json.message?.chat?.id?.toString() || \"\" }}",
+                            "rightValue": "1865798034",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "is-feedback",
+            "name": "Is Feedback?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.3,
+            "position": [
+                400,
+                -100
+            ],
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "feedback-prefix",
+                            "leftValue": "={{ $json.message.text }}",
+                            "rightValue": "!",
+                            "operator": {
+                                "type": "string",
+                                "operation": "startsWith"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "get-latest-session",
+            "name": "Get Latest Session",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                600,
+                -100
+            ],
+            "parameters": {
+                "method": "GET",
+                "url": "https://coach-db.arthurpfz.com/sessions",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "athlete_id",
+                            "value": "1"
+                        },
+                        {
+                            "name": "limit",
+                            "value": "1"
+                        },
+                        {
+                            "name": "wrap",
+                            "value": "1"
+                        },
+                        {
+                            "name": "has_analysis",
+                            "value": "1"
+                        }
+                    ]
+                },
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "options": {}
+            },
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "6GNzKYNE1JAz77RL",
+                    "name": "Tricoach DB"
+                }
+            }
+        },
+        {
+            "id": "check-session-exists",
+            "name": "Session Exists?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.3,
+            "position": [
+                800,
+                -100
+            ],
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "session-check",
+                            "leftValue": "={{ $json.count }}",
+                            "rightValue": 0,
+                            "operator": {
+                                "type": "number",
+                                "operation": "gt"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "save-feedback",
+            "name": "Save Feedback",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                1000,
+                -160
+            ],
+            "parameters": {
+                "method": "PATCH",
+                "url": "=https://coach-db.arthurpfz.com/sessions/{{ $json.sessions[0].id }}",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "contentType": "json",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "user_feedback",
+                            "value": "={{ $('Telegram Trigger').item.json.message.text.replace(/^!\\s*/, '').trim() }}"
+                        },
+                        {
+                            "name": "user_feedback_at",
+                            "value": "={{ $now.toISO() }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "6GNzKYNE1JAz77RL",
+                    "name": "Tricoach DB"
+                }
+            }
+        },
+        {
+            "id": "confirm-saved",
+            "name": "Send Confirmation",
+            "webhookId": "86e1b335-8fd9-4e09-8f89-4a104c4c0744",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                1200,
+                -160
+            ],
+            "parameters": {
+                "chatId": "1865798034",
+                "text": "=Got it \u2014 saved to {{ $('Get Latest Session').item.json.sessions[0].date }} {{ $('Get Latest Session').item.json.sessions[0].sport }} session.",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "id": "no-session-reply",
+            "name": "No Session Reply",
+            "webhookId": "05354f41-4ece-4393-886c-738b55ddfca8",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                1000,
+                -40
+            ],
+            "parameters": {
+                "chatId": "1865798034",
+                "text": "No analyzed session found to attach feedback to.",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "id": "is-refresh",
+            "name": "Is /refresh?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                600,
+                -200
+            ],
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "refresh-check",
+                            "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                            "rightValue": "/refresh",
+                            "operator": {
+                                "type": "string",
+                                "operation": "startsWith"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "call-backfill",
+            "name": "Call Backfill",
+            "type": "n8n-nodes-base.executeWorkflow",
+            "typeVersion": 1,
+            "alwaysOutputData": true,
+            "position": [
+                820,
+                -300
+            ],
+            "parameters": {
+                "source": "database",
+                "workflowId": "rHIyZMIJNAOqZvM2",
+                "mode": "each",
+                "options": {},
+                "workflowInputs": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "chat_id": "={{ $json.message.chat.id.toString() }}"
+                    },
+                    "matchingColumns": [],
+                    "schema": [],
+                    "attemptToConvertTypes": false,
+                    "convertFieldsToString": true
+                }
+            }
+        },
+        {
+            "id": "send-refresh-done",
+            "name": "Refresh Done",
+            "webhookId": "a39f8efc-c461-406f-8c3d-91deaa83bd12",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                1040,
+                -300
+            ],
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+                "text": "\u2705 Refresh complete.",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "id": "is-strikes",
+            "name": "Is /strikes?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                600,
+                0
+            ],
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "strikes-check",
+                            "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                            "rightValue": "/strikes",
+                            "operator": {
+                                "type": "string",
+                                "operation": "startsWith"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "get-strikes-sessions",
+            "name": "Get Strikes Sessions",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                820,
+                -100
+            ],
+            "parameters": {
+                "method": "GET",
+                "url": "https://coach-db.arthurpfz.com/sessions",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "athlete_id",
+                            "value": "1"
+                        },
+                        {
+                            "name": "date_from",
+                            "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}"
+                        },
+                        {
+                            "name": "limit",
+                            "value": "300"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "6GNzKYNE1JAz77RL",
+                    "name": "Tricoach DB"
+                }
+            }
+        },
+        {
+            "id": "format-strikes",
+            "name": "Format Strikes",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1040,
+                -100
+            ],
+            "parameters": {
+                "mode": "runOnceForAllItems",
+                "jsCode": "// Aggregate duration_min by sport for the running week \u2014 same logic as Weekly Stats workflow.\nconst allSessions = $input.all().map(i => i.json);\nconst thisMon = DateTime.now().startOf('week').toFormat('yyyy-MM-dd');\nconst sessions = allSessions.filter(s => (s.date || '') >= thisMon);\nconst totalMin = sessions.reduce((sum, s) => sum + (s.duration_min || 0), 0);\nconst totalH = totalMin / 60;\nconst fires = '\ud83d\udd25'.repeat(Math.floor(totalH)) || '\u00b7';\n\nconst sportEmoji = { Run: '\ud83c\udfc3 Run', Swim: '\ud83c\udfca Swim', Ride: '\ud83d\udeb4 Ride', Workout: '\ud83d\udcaa Workout' };\nconst order = ['Run', 'Swim', 'Ride', 'Workout'];\nconst totals = Object.fromEntries(order.map(s => [s, 0]));\nfor (const s of sessions) {\n  const sp = (s.sport || '').toLowerCase();\n  const k = sp.includes('swim') ? 'Swim'\n    : sp.includes('run') ? 'Run'\n    : (sp.includes('ride') || sp.includes('bike') || sp.includes('cycl') || sp.includes('virtual')) ? 'Ride'\n    : 'Workout';\n  if (totals[k] !== undefined) totals[k] += (s.duration_min || 0);\n}\n\n\nconst fmt = m => `${Math.floor(m / 60)}:${String(Math.round(m % 60)).padStart(2, '0')}`;\n\nconst lines = [\n  '\ud83d\udcca Week to date',\n  `${fires} ${fmt(totalMin)}h total`,\n  '',\n  ...order.map(s => `${sportEmoji[s]} \u00b7 ${fmt(totals[s])}`),\n];\nreturn [{ json: { text: lines.join('\\n') } }];\n"
+            }
+        },
+        {
+            "id": "send-strikes",
+            "name": "Send Strikes",
+            "webhookId": "0cefc31f-f96e-41cf-8d3f-febf72ac01ed",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                1260,
+                -100
+            ],
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+                "text": "={{ $json.text }}",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "id": "is-training",
+            "name": "Is /training?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                820,
+                100
+            ],
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "training-check",
+                            "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                            "rightValue": "/training",
+                            "operator": {
+                                "type": "string",
+                                "operation": "startsWith"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "get-training-plan",
+            "name": "Get Training Plan",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                1040,
+                100
+            ],
+            "parameters": {
+                "method": "GET",
+                "url": "https://coach-db.arthurpfz.com/weekly-plans",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "athlete_id",
+                            "value": "1"
+                        },
+                        {
+                            "name": "week_start_date",
+                            "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "6GNzKYNE1JAz77RL",
+                    "name": "Tricoach DB"
+                }
+            }
+        },
+        {
+            "id": "format-training",
+            "name": "Format Training",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1260,
+                100
+            ],
+            "parameters": {
+                "mode": "runOnceForAllItems",
+                "jsCode": "const plan = $('Get Training Plan').first().json;\nconst arr = Array.isArray(plan) ? plan[0] : plan;\nconst sessions = (arr && arr.sessions) || [];\nconst focus = (arr && arr.Focus) || '';\nconst weekStart = (arr && arr['Week Start Date']) || '';\n\nconst dayOrder = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];\nconst pinned = sessions.filter(s => s.pinned_day);\nconst flex = sessions.filter(s => !s.pinned_day);\npinned.sort((a, b) => dayOrder.indexOf(a.pinned_day) - dayOrder.indexOf(b.pinned_day));\n\nconst fmt = s => '\u2022 ' +\n  (s.pinned_day ? s.pinned_day + ' \u2014 ' : '') +\n  s.label + ' \u00b7 ' + s.sport + ' \u00b7 ' + s.duration_min + 'min \u2014 ' + s.description;\n\nlet out = '\ud83d\udcc5 Training Plan | week of ' + weekStart + '\\n';\nif (focus) out += '\ud83c\udfaf Focus: ' + focus + '\\n';\nout += '\\n';\nif (pinned.length) out += '\ud83d\udccc Pinned\\n' + pinned.map(fmt).join('\\n') + '\\n\\n';\nif (flex.length) out += '\ud83d\udfe6 Flex pool\\n' + flex.map(fmt).join('\\n');\n\nif (sessions.length === 0) {\n  out = '\ud83d\udcc5 No flex plan for this week. Run the Sunday Planner manually.';\n}\n\nreturn [{ json: { text: out.trim() } }];"
+            }
+        },
+        {
+            "id": "send-training",
+            "name": "Send Training",
+            "webhookId": "e983cbf8-75e1-494d-a3f8-25b310638fb9",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                1480,
+                100
+            ],
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+                "text": "={{ $json.text }}",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "id": "limit-refresh-done",
+            "name": "Limit Refresh Done",
+            "type": "n8n-nodes-base.limit",
+            "typeVersion": 1,
+            "position": [
+                1020,
+                -300
+            ],
+            "parameters": {
+                "maxItems": 1,
+                "keep": "firstItems"
+            }
+        },
+        {
+            "id": "de517b8c-1db5-4e12-abd5-b946b86672d4",
+            "name": "Is /program?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                400,
+                200
+            ],
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "program-check",
+                            "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                            "rightValue": "/program",
+                            "operator": {
+                                "type": "string",
+                                "operation": "startsWith"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "0ef6cade-a73f-4e98-95b7-f02974dbc084",
+            "name": "Ack Program",
+            "webhookId": "2e5e8dd3-4dee-4a41-931e-2d15fbd98bff",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                600,
+                100
+            ],
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+                "text": "\ud83e\udde0 Generating your training plan\u2026 give me ~30s.",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "id": "d04e5bbf-b196-4995-ac44-2762b5fea2c3",
+            "name": "Call Planner",
+            "type": "n8n-nodes-base.executeWorkflow",
+            "typeVersion": 1,
+            "alwaysOutputData": true,
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "source": "database",
+                "workflowId": "lUcAtn2oxCPkNkJ1",
+                "mode": "each",
+                "options": {},
+                "workflowInputs": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "chat_id": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}"
+                    },
+                    "matchingColumns": [],
+                    "schema": [],
+                    "attemptToConvertTypes": false,
+                    "convertFieldsToString": true
+                }
+            }
+        },
+        {
+            "id": "f64e3a43-9cf3-459f-a559-46ef7663572a",
+            "name": "Limit Program Done",
+            "type": "n8n-nodes-base.limit",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "maxItems": 1,
+                "keep": "firstItems"
+            }
+        },
+        {
+            "id": "03adfc25-ed53-4f4c-8223-9c6cbaebd6cb",
+            "name": "Program Done",
+            "webhookId": "ca435c88-f6aa-42a4-a5b6-67bf22374d51",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                1200,
+                100
+            ],
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+                "text": "\u2705 Plan delivered.",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "id": "is-progress",
+            "name": "Is /progress?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1040,
+                260
+            ],
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "progress-check",
+                            "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                            "rightValue": "/progress",
+                            "operator": {
+                                "type": "string",
+                                "operation": "startsWith"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "get-progress-sessions",
+            "name": "Get Progress Sessions",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "alwaysOutputData": true,
+            "position": [
+                1260,
+                260
+            ],
+            "parameters": {
+                "method": "GET",
+                "url": "https://coach-db.arthurpfz.com/sessions",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "athlete_id",
+                            "value": "1"
+                        },
+                        {
+                            "name": "date_from",
+                            "value": "={{ $today.minus({ days: 56 }).toFormat('yyyy-MM-dd') }}"
+                        },
+                        {
+                            "name": "limit",
+                            "value": "300"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "6GNzKYNE1JAz77RL",
+                    "name": "Tricoach DB"
+                }
+            }
+        },
+        {
+            "id": "format-progress",
+            "name": "Format Progress",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1480,
+                260
+            ],
+            "parameters": {
+                "mode": "runOnceForAllItems",
+                "jsCode": "// /progress scoreboard v2 \u2014 last 28d vs prior 28d, duration-weighted, intensity-filtered\nconst all = $input.all().map(i => i.json).filter(s => s && s.date);\nconst cut28 = DateTime.now().minus({ days: 28 }).toFormat('yyyy-MM-dd');\nconst recent = all.filter(s => s.date >= cut28);\nconst prior = all.filter(s => s.date < cut28);\n\nconst cat = (s) => {\n  const sp = (s.sport || '').toLowerCase();\n  if (sp.includes('swim')) return sp.includes('open') ? 'OW' : 'Pool';\n  if (sp.includes('run')) return 'Run';\n  if (sp.includes('ride') || sp.includes('bike') || sp.includes('cycl') || sp.includes('virtual')) return 'Ride';\n  return 'Other';\n};\nconst isWed = s => DateTime.fromISO(s.date).weekday === 3; // Rapha day \u2014 sprints distort EF/decoupling\nconst easyRun = s => s.avg_hr > 0 && s.avg_hr <= 150;      // Z2 ceiling ~149bpm\nconst easyRide = s => !isWed(s) && ((s.intensity_factor > 0 && s.intensity_factor <= 70) || (!s.intensity_factor && s.avg_hr > 0 && s.avg_hr <= 145));\nconst longSteadyRide = s => !isWed(s) && (s.duration_min || 0) >= 90;\n\nconst pick = (list, c, minDur, extra) => list.filter(s => cat(s) === c && (s.duration_min || 0) >= (minDur || 0) && (!extra || extra(s)));\n\nconst wAvg = (list, fn) => {\n  const items = list.map(s => ({ v: fn(s), w: s.duration_min || 0 }))\n    .filter(x => x.v != null && isFinite(x.v) && x.v > 0 && x.w > 0);\n  const W = items.reduce((t, x) => t + x.w, 0);\n  return W ? { v: items.reduce((t, x) => t + x.v * x.w, 0) / W, n: items.length } : null;\n};\n\nconst rideEF = s => s.efficiency_factor || (s.avg_power && s.avg_hr ? s.avg_power / s.avg_hr : null);\nconst runPace = s => s.avg_speed_ms ? 1000 / s.avg_speed_ms / 60 : null;\nconst runSpdHR = s => (s.avg_speed_ms && s.avg_hr) ? (s.avg_speed_ms * 60) / s.avg_hr : null;\nconst runCad = s => s.avg_cadence ? s.avg_cadence * 2 : null; // stored half-spm for runs\nconst swimPace = s => (s.distance_m > 0 && s.moving_sec > 0) ? s.moving_sec / (s.distance_m / 100) : null;\nconst swimDPS = s => (s.avg_speed_ms > 0 && s.avg_cadence > 0) ? (s.avg_speed_ms * 60) / s.avg_cadence : null; // m per stroke cycle\nconst poolSwolf = s => { // sec/length + strokes/length, lengths derived from pool_length_m\n  if (!(s.pool_length_m > 0 && s.distance_m > 0 && s.moving_sec > 0 && s.avg_cadence > 0)) return null;\n  const lengths = s.distance_m / s.pool_length_m;\n  return (s.moving_sec / lengths) + ((s.avg_cadence * (s.moving_sec / 60)) / lengths);\n};\n\nconst fmtPace = v => Math.floor(v) + ':' + String(Math.round((v - Math.floor(v)) * 60)).padStart(2, '0');\nconst fmtSwim = v => Math.floor(v / 60) + ':' + String(Math.round(v % 60)).padStart(2, '0');\n\n// \"\u2022 <label> <now> \u00b7 was <prior> (<\u00b1pct>) <arrow>\"; if a subset filter yields nothing recent \u2192 say so\nconst line = (label, rec, pri, fmt, betterUp, suffix) => {\n  if (!rec && !pri) return null;\n  if (!rec) return '\u2022 ' + label + ' \u2014 none this block (was ' + fmt(pri.v) + ')';\n  let out = '\u2022 ' + label + ' ' + fmt(rec.v);\n  if (pri) {\n    const pct = ((rec.v - pri.v) / pri.v) * 100;\n    const arrow = Math.abs(pct) < 1 ? '\u25ac' : ((betterUp ? pct > 0 : pct < 0) ? '\u25b2' : '\u25bc');\n    out += ' \u00b7 was ' + fmt(pri.v) + ' (' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%) ' + arrow;\n  } else out += ' \u00b7 no prior data';\n  if (suffix) out += ' \u00b7 ' + suffix;\n  return out;\n};\n\nconst sections = [];\nconst addSection = (header, c, minDur, metrics) => {\n  const r = pick(recent, c, minDur), p = pick(prior, c, minDur);\n  if (!r.length && !p.length) return;\n  const lines = metrics.map(m => {\n    const rr = m.filter ? r.filter(m.filter) : r;\n    const pp = m.filter ? p.filter(m.filter) : p;\n    const lbl = m.filter ? m.label + ' (' + rr.length + 'v' + pp.length + ')' : m.label;\n    return line(lbl, wAvg(rr, m.fn), wAvg(pp, m.fn), m.fmt, m.betterUp, m.suffix);\n  }).filter(Boolean);\n  if (!lines.length) return;\n  sections.push([header + ' (' + r.length + ' vs ' + p.length + ')', ...lines].join('\\n'));\n};\n\naddSection('\ud83d\udeb4 Ride', 'Ride', 10, [\n  { label: 'EF Z2', filter: easyRide, fn: rideEF, fmt: v => v.toFixed(2) + ' W/bpm', betterUp: true },\n  { label: 'Decoupling long', filter: longSteadyRide, fn: s => s.decoupling, fmt: v => v.toFixed(1) + '%', betterUp: false },\n]);\naddSection('\ud83c\udfc3 Run', 'Run', 10, [\n  { label: 'Pace all', fn: runPace, fmt: v => fmtPace(v) + '/km', betterUp: false },\n  { label: 'Speed@HR Z2', filter: easyRun, fn: runSpdHR, fmt: v => v.toFixed(2), betterUp: true },\n  { label: 'Cadence', fn: runCad, fmt: v => Math.round(v) + ' spm', betterUp: true, suffix: 'target 175-180' },\n]);\naddSection('\ud83c\udfca Pool', 'Pool', 0, [\n  { label: 'Pace', fn: swimPace, fmt: v => fmtSwim(v) + '/100m', betterUp: false },\n  { label: 'DPS', fn: swimDPS, fmt: v => v.toFixed(2) + ' m/cycle', betterUp: true },\n  { label: 'SWOLF', fn: poolSwolf, fmt: v => v.toFixed(1), betterUp: false },\n]);\naddSection('\ud83c\udf0a Open water', 'OW', 0, [\n  { label: 'Pace', fn: swimPace, fmt: v => fmtSwim(v) + '/100m', betterUp: false },\n  { label: 'DPS', fn: swimDPS, fmt: v => v.toFixed(2) + ' m/cycle', betterUp: true },\n]);\n\n// Durability vs current target race demands \u2014 Triathlon du Lion L (86km bike / 19.5km run). Swap back to 90km/21km after the May 2027 race (see vault roadmap).\nconst maxKm = (list, c) => { const d = pick(list, c, 0).map(s => s.distance_m ? s.distance_m / 1000 : 0); return d.length ? Math.max(...d) : null; };\nconst dur = [];\nconst durLine = (label, r, p, race) => {\n  if (r == null && p == null) return null;\n  let out = '\u2022 ' + label + ' ' + (r != null ? r.toFixed(0) + 'km' : 'none');\n  if (p != null) out += ' \u00b7 was ' + p.toFixed(0);\n  out += ' \u00b7 race ' + race;\n  return out;\n};\nconst lr = durLine('Long ride', maxKm(recent, 'Ride'), maxKm(prior, 'Ride'), '86km');\nconst ln = durLine('Long run', maxKm(recent, 'Run'), maxKm(prior, 'Run'), '19.5km');\nif (lr) dur.push(lr);\nif (ln) dur.push(ln);\nif (dur.length) sections.push(['\ud83c\udfc1 Durability', ...dur].join('\\n'));\n\n// Recovery \u2014 ICU wellness (Get Progress Wellness, fullResponse: body = array of daily records)\ntry {\n  const wBody = $('Get Progress Wellness').first().json.body;\n  const wRecs = Array.isArray(wBody) ? wBody : [];\n  const wRecent = wRecs.filter(w => (w.id || '') >= cut28);\n  const wPrior = wRecs.filter(w => (w.id || '') < cut28);\n  const avg = (list, f) => { const v = list.map(f).filter(x => x != null && isFinite(x) && x > 0); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };\n  const wLine = (label, r, p, fmt, betterUp) => {\n    if (r == null) return null;\n    let out = '\u2022 ' + label + ' ' + fmt(r);\n    if (p != null) {\n      const pct = ((r - p) / p) * 100;\n      const arrow = Math.abs(pct) < 1 ? '\u25ac' : ((betterUp ? pct > 0 : pct < 0) ? '\u25b2' : '\u25bc');\n      out += ' \u00b7 was ' + fmt(p) + ' ' + arrow;\n    }\n    return out;\n  };\n  const fmtSleep = v => Math.floor(v / 3600) + 'h' + String(Math.round((v % 3600) / 60)).padStart(2, '0');\n  const rec = [\n    wLine('Sleep', avg(wRecent, w => w.sleepSecs), avg(wPrior, w => w.sleepSecs), fmtSleep, true),\n    wLine('HRV', avg(wRecent, w => w.hrv), avg(wPrior, w => w.hrv), v => Math.round(v), true),\n    wLine('RHR', avg(wRecent, w => w.restingHR), avg(wPrior, w => w.restingHR), v => Math.round(v) + ' bpm', false),\n  ].filter(Boolean);\n  if (rec.length) sections.push(['\ud83d\udca4 Recovery', ...rec].join('\\n'));\n} catch (e) { /* wellness unavailable \u2014 skip section */ }\n\n// CTL: latest vs last value before the 28d cut\nconst withCtl = all.filter(s => s.ctl != null).sort((a, b) => a.date < b.date ? -1 : 1);\nif (withCtl.length) {\n  const nowCtl = withCtl[withCtl.length - 1].ctl;\n  const priCtlArr = withCtl.filter(s => s.date < cut28);\n  const priCtl = priCtlArr.length ? priCtlArr[priCtlArr.length - 1].ctl : null;\n  let l = '\u2022 CTL ' + Math.round(nowCtl);\n  if (priCtl != null) l += ' \u00b7 was ' + Math.round(priCtl) + ' ' + (Math.round(nowCtl) > Math.round(priCtl) ? '\u25b2' : Math.round(nowCtl) < Math.round(priCtl) ? '\u25bc' : '\u25ac');\n  sections.push('\ud83d\udcaa Fitness\\n' + l);\n}\n\nconst scoreboard = sections.length\n  ? '\ud83d\udcc8 Progress \u2014 last 4wk vs prior 4wk\\n\\n' + sections.join('\\n\\n')\n  : '\ud83d\udcc8 Progress \u2014 not enough data yet.';\nreturn [{ json: { scoreboard, hasData: sections.length > 0 } }];\n"
+            }
+        },
+        {
+            "id": "progress-verdict",
+            "name": "Progress Verdict",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.8,
+            "position": [
+                1700,
+                260
+            ],
+            "parameters": {
+                "promptType": "define",
+                "text": "=You are a triathlon coach. Below is your athlete's progress scoreboard: last 4 weeks vs the prior 4 weeks (duration-weighted; session counts in parentheses; Z2 metrics use easy sessions only). Race: Erkner 70.3 on 2026-09-13 \u2014 1.9km swim, 90km bike, 21.1km run.\n\nWrite EXACTLY ONE plain-text sentence (max 30 words): an honest verdict \u2014 what improved, what didn't, and the single focus for the next block. No emoji, no markdown, no preamble, no quotes.\n\nHonesty caveats: small counts are noisy; open-water and pool paces are not comparable; \"Speed@HR Z2 \u2014 none this block\" means zero easy runs were logged (a broken 80/20 polarization, worth calling out); Durability shows longest sessions vs race demands.\n\nSCOREBOARD:\n{{ $json.scoreboard }}",
+                "batching": {}
+            }
+        },
+        {
+            "id": "progress-verdict-model",
+            "name": "Progress Verdict Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+            "typeVersion": 1,
+            "position": [
+                1700,
+                440
+            ],
+            "parameters": {
+                "model": "anthropic/claude-sonnet-5",
+                "options": {}
+            },
+            "credentials": {
+                "openRouterApi": {
+                    "id": "nhbNqmgyP4cAeQ6B",
+                    "name": "OpenRouter account"
+                }
+            }
+        },
+        {
+            "id": "send-progress",
+            "name": "Send Progress",
+            "webhookId": "1e75a76f-c82f-424c-97a3-758974b42652",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                1920,
+                260
+            ],
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+                "text": "={{ $('Format Progress').first().json.scoreboard + '\\n\\n\ud83e\udde0 ' + ($json.text || '').trim() }}",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "id": "get-progress-wellness",
+            "name": "Get Progress Wellness",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "alwaysOutputData": true,
+            "position": [
+                1150,
+                400
+            ],
+            "parameters": {
+                "method": "GET",
+                "url": "https://intervals.icu/api/v1/athlete/i492254/wellness",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpBasicAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "oldest",
+                            "value": "={{ $today.minus({ days: 56 }).toFormat('yyyy-MM-dd') }}"
+                        },
+                        {
+                            "name": "newest",
+                            "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+                        }
+                    ]
+                },
+                "options": {
+                    "response": {
+                        "response": {
+                            "fullResponse": true,
+                            "neverError": true
+                        }
+                    }
+                }
+            },
+            "credentials": {
+                "httpBasicAuth": {
+                    "id": "ms91wbaCvecB3tqQ",
+                    "name": "Intervals.icu API"
+                }
+            }
+        },
+        {
+            "id": "05750124-26c3-4f34-9645-ed66bc34dceb",
+            "name": "Is Callback?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                200,
+                -200
+            ],
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "loose",
+                        "version": 2
+                    },
+                    "conditions": [
+                        {
+                            "id": "is-callback",
+                            "leftValue": "={{ ($json.callback_query?.data || \"\").startsWith(\"explain:\") && ($json.callback_query?.from?.id || \"\").toString() === \"1865798034\" }}",
+                            "rightValue": "",
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "true",
+                                "singleValue": true
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "3694832f-d7d5-4218-bb05-465fc8683f6f",
+            "name": "Answer Callback",
+            "webhookId": "8d594cc0-8b14-4265-9c6a-f2379d304b24",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                420,
+                -300
+            ],
+            "parameters": {
+                "resource": "callback",
+                "operation": "answerQuery",
+                "queryId": "={{ $json.callback_query.id }}",
+                "additionalFields": {}
+            },
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "id": "1faa2474-30e1-494b-91a4-0eb98241954c",
+            "name": "Get Explain Session",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                640,
+                -300
+            ],
+            "parameters": {
+                "method": "GET",
+                "url": "=https://coach-db.arthurpfz.com/sessions/{{ $('Telegram Trigger').item.json.callback_query.data.split(':')[1] }}",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "options": {
+                    "response": {
+                        "response": {
+                            "neverError": true
+                        }
+                    }
+                }
+            },
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "6GNzKYNE1JAz77RL",
+                    "name": "Tricoach DB"
+                }
+            }
+        },
+        {
+            "id": "88f70a82-0b58-4b38-a7fa-ef049f7bb524",
+            "name": "Get Explain Athlete",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                860,
+                -300
+            ],
+            "parameters": {
+                "method": "GET",
+                "url": "https://coach-db.arthurpfz.com/athletes/1",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "options": {}
+            },
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "6GNzKYNE1JAz77RL",
+                    "name": "Tricoach DB"
+                }
+            }
+        },
+        {
+            "id": "64a18247-c5bb-4b0e-bb4b-53845871c3b8",
+            "name": "Build Explain Prompt",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1080,
+                -300
+            ],
+            "parameters": {
+                "jsCode": "const s = $('Get Explain Session').first().json;\nconst athlete = $input.first().json;\nif (!s || s.error || !s.id) return [{ json: { notFound: true } }];\n\nconst isRun = (s.sport || '').toLowerCase().includes('run');\nconst fmt = (v, d = 1) => (v === null || v === undefined) ? null : Number(v).toFixed(d);\nconst met = [];\nif (s.avg_hr) met.push('avg HR ' + s.avg_hr + 'bpm');\nif (s.avg_power) met.push('avg power ' + s.avg_power + 'W');\nif (s.normalized_power) met.push('NP ' + s.normalized_power + 'W');\nif (s.avg_cadence) met.push('avg cadence ' + (isRun ? (s.avg_cadence * 2) + ' spm' : s.avg_cadence + ' rpm'));\nif (s.avg_speed_ms) met.push('avg speed ' + fmt(s.avg_speed_ms, 2) + ' m/s');\nif (s.tss) met.push('TSS ' + s.tss);\nif (s.intensity_factor) met.push('IF ' + s.intensity_factor);\nif (s.decoupling !== null && s.decoupling !== undefined) met.push('decoupling ' + fmt(s.decoupling) + '%');\nif (s.efficiency_factor !== null && s.efficiency_factor !== undefined) met.push('EF ' + fmt(s.efficiency_factor, 2));\nif (s.pool_length_m) met.push('pool ' + s.pool_length_m + 'm');\n\nconst lines = [\n  'Sport: ' + s.sport + ' \u00b7 Date: ' + s.date + ' \u00b7 Grade: ' + (s.grade || '\u2014'),\n  'Duration: ' + (s.duration_min || '\u2014') + 'min \u00b7 Distance: ' + (s.distance_km ?? '\u2014') + 'km',\n];\nif (met.length) lines.push('Metrics: ' + met.join(' \u00b7 '));\nlines.push('', 'COACH ANALYSIS (the message the athlete tapped):', s.analysis || '(no stored analysis \u2014 explain from the metrics alone)');\nlines.push('', 'ATHLETE FITNESS PROFILE:', athlete['Fitness Profile'] || '');\nreturn [{ json: { notFound: false, context: lines.join('\\n') } }];"
+            }
+        },
+        {
+            "id": "21070fd3-7167-42a0-91a5-41592fcd4eb0",
+            "name": "Session Found?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                1300,
+                -300
+            ],
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "loose",
+                        "version": 2
+                    },
+                    "conditions": [
+                        {
+                            "id": "session-found",
+                            "leftValue": "={{ $json.notFound !== true }}",
+                            "rightValue": "",
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "true",
+                                "singleValue": true
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "20f689c1-3f6d-496d-9247-af0fa76cd11f",
+            "name": "Explain Coach",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.8,
+            "position": [
+                1520,
+                -360
+            ],
+            "parameters": {
+                "promptType": "define",
+                "text": "=You are a triathlon coach. Your athlete tapped \"Explain\" under the coaching analysis below and wants it decoded in PLAIN ENGLISH \u2014 they are not a sports scientist. Race: Erkner 70.3 on 2026-09-13 (1.9km swim, 90km bike, 21.1km run).\n\n{{ $json.context }}\n\nWrite the Telegram reply. ENGLISH ONLY. Plain text, no markdown, literal \u2022 bullets and numbered list, max ~20 lines total. Exactly this structure:\n\n\ud83e\udde0 What it means\n2-4 \u2022 bullets translating the analysis for a non-expert: decode every metric it names (what it measures, what their number says vs the target), then the single limiter and why it matters for their race.\n\n\ud83d\udcaa Best exercises to improve\n3-5 numbered drills/exercises that most directly fix the limiter, highest-leverage first. Each: name \u2014 what it fixes, how to do it (max 2 lines). Sport-appropriate: swim \u2192 stroke/technique drills; run \u2192 cadence, strides, form work; ride \u2192 pacing, cadence, durability work. Use the fitness profile numbers for targets.\n\nDo: one closing line telling them exactly how to fold this into their next session.\n\nNo preamble, no sign-off, simple words, never French.",
+                "batching": {}
+            }
+        },
+        {
+            "id": "2bc0f25b-fa69-4013-b85b-1c783869887c",
+            "name": "Explain Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+            "typeVersion": 1,
+            "position": [
+                1560,
+                -180
+            ],
+            "parameters": {
+                "model": "anthropic/claude-sonnet-5",
+                "options": {}
+            },
+            "credentials": {
+                "openRouterApi": {
+                    "id": "nhbNqmgyP4cAeQ6B",
+                    "name": "OpenRouter account"
+                }
+            }
+        },
+        {
+            "id": "3f3b9c45-0247-4523-be83-944072233065",
+            "name": "Send Explanation",
+            "webhookId": "13f02c89-d85c-42ae-8809-d967cd605ef8",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                1880,
+                -360
+            ],
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.callback_query.message.chat.id.toString() }}",
+                "text": "={{ ($json.text || '').trim() }}",
+                "additionalFields": {
+                    "appendAttribution": false,
+                    "reply_to_message_id": "={{ $('Telegram Trigger').item.json.callback_query.message.message_id }}"
+                }
+            },
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "id": "da5a22e2-1bbd-4ff8-a7fe-2a14362887e0",
+            "name": "Explain Not Found",
+            "webhookId": "7a38ed44-022c-4672-9882-ae0fd0c34712",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                1520,
+                -120
+            ],
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').item.json.callback_query.message.chat.id.toString() }}",
+                "text": "\ud83e\udd37 Couldn't find that session in the DB.",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "id": "is-page-cmd",
+            "name": "Is /goals or /principles?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                820,
+                500
+            ],
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "goals-check",
+                            "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                            "rightValue": "/goals",
+                            "operator": {
+                                "type": "string",
+                                "operation": "startsWith"
+                            }
+                        },
+                        {
+                            "id": "principles-check",
+                            "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                            "rightValue": "/principles",
+                            "operator": {
+                                "type": "string",
+                                "operation": "startsWith"
+                            }
+                        }
+                    ],
+                    "combinator": "or"
+                },
+                "options": {}
+            }
+        },
+        {
+            "id": "read-principles-page",
+            "name": "Read Principles Page",
+            "type": "n8n-nodes-base.ssh",
+            "typeVersion": 1,
+            "alwaysOutputData": true,
+            "onError": "continueRegularOutput",
+            "position": [
+                1040,
+                500
+            ],
+            "parameters": {
+                "command": "cat /opt/vault/wiki/triathlon-principles.md",
+                "cwd": "/",
+                "authentication": "privateKey"
+            },
+            "credentials": {
+                "sshPrivateKey": {
+                    "id": "FsZHqVr40gzGCz9I",
+                    "name": "VPS SSH (n8n-runner)"
+                }
+            }
+        },
+        {
+            "id": "format-page",
+            "name": "Format Page",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1260,
+                500
+            ],
+            "parameters": {
+                "mode": "runOnceForAllItems",
+                "jsCode": "// /goals \u2192 sections 1-2 of the principles page, /principles \u2192 sections 3-6. Plain-text Telegram.\nconst cmd = ($('Telegram Trigger').first().json.message.text || '').trim().toLowerCase();\nconst isGoals = cmd.startsWith('/goals');\nconst raw = String($('Read Principles Page').first().json.stdout || '');\nconst updated = (raw.match(/^updated:\\s*'?([\\d-]+)/m) || [])[1] || '?';\nconst body = raw.replace(/^---[\\s\\S]*?\\n---\\n/, '');\nconst wanted = isGoals ? ['1', '2'] : ['3', '4', '5', '6'];\nconst sections = body.split(/^## /m).slice(1).filter(s => wanted.includes(s.split('.')[0]));\n\nconst clean = s => s.replace(/\\*\\*/g, '').replace(/\\[\\[[^\\]|]*\\|([^\\]]+)\\]\\]/g, '$1').replace(/\\[\\[([^\\]]+)\\]\\]/g, '$1');\nconst render = sec => {\n  const lines = clean(sec).split('\\n');\n  const out = ['\u25aa\ufe0f ' + lines.shift().replace(/^\\d+\\.\\s*/, '').toUpperCase()];\n  let header = null;\n  for (const l of lines) {\n    if (/^\\|[-\\s|]+\\|$/.test(l)) continue;                 // table separator\n    if (l.startsWith('|')) {\n      const cells = l.split('|').slice(1, -1).map(c => c.trim());\n      if (!header) { header = cells; continue; }\n      out.push('\u2022 ' + cells[0] + ': ' + cells.slice(1).map((c, i) => header[i + 1] + ' ' + c).join(' / '));\n      continue;\n    }\n    header = null;\n    if (l.startsWith('### ')) out.push('', l.slice(4) + ':');\n    else if (l.startsWith('- ')) out.push('\u2022 ' + l.slice(2));\n    else out.push(l);\n  }\n  return out.join('\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n};\n\nif (!sections.length) {\n  return [{ json: { text: '\u26a0\ufe0f Could not read the principles page (vault \u203a triathlon-principles).' } }];\n}\nconst title = isGoals ? '\ud83c\udfaf My goals' : '\ud83d\udcdc My principles';\nconst parts = [title + ' (updated ' + updated + ')', ...sections.map(render), 'Edit in Obsidian: triathlon-principles'];\n\n// Telegram caps a message at 4096 chars: pack sections into chunks, split long ones by paragraph\nconst chunks = [];\nlet cur = '';\nfor (const p of parts.flatMap(p => p.length > 3800 ? p.split('\\n\\n') : [p])) {\n  if (cur && (cur + '\\n\\n' + p).length > 3800) { chunks.push(cur); cur = p; }\n  else cur = cur ? cur + '\\n\\n' + p : p;\n}\nif (cur) chunks.push(cur);\nreturn chunks.map(text => ({ json: { text } }));\n"
+            }
+        },
+        {
+            "id": "send-page",
+            "name": "Send Page",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                1480,
+                500
+            ],
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id.toString() }}",
+                "text": "={{ $json.text }}",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "credentials": {
+                "telegramApi": {
+                    "id": "9IpAp35yJmIQJpeA",
+                    "name": "Telegram account"
+                }
+            },
+            "webhookId": "06934d91-c2a3-48db-b6ca-08e3c2380438"
+        }
+    ],
+    "connections": {
+        "Telegram Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Is Callback?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Auth": {
+            "main": [
+                [
+                    {
+                        "node": "Is /program?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Is Feedback?": {
+            "main": [
+                [
+                    {
+                        "node": "Get Latest Session",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Get Latest Session": {
+            "main": [
+                [
+                    {
+                        "node": "Session Exists?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Session Exists?": {
+            "main": [
+                [
+                    {
+                        "node": "Save Feedback",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "No Session Reply",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Save Feedback": {
+            "main": [
+                [
+                    {
+                        "node": "Send Confirmation",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is /refresh?": {
+            "main": [
+                [
+                    {
+                        "node": "Call Backfill",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Is /strikes?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Call Backfill": {
+            "main": [
+                [
+                    {
+                        "node": "Limit Refresh Done",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is /strikes?": {
+            "main": [
+                [
+                    {
+                        "node": "Get Strikes Sessions",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Is /training?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Strikes Sessions": {
+            "main": [
+                [
+                    {
+                        "node": "Format Strikes",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Strikes": {
+            "main": [
+                [
+                    {
+                        "node": "Send Strikes",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Strikes": {
+            "main": [
+                []
+            ]
+        },
+        "Is /training?": {
+            "main": [
+                [
+                    {
+                        "node": "Get Training Plan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Is /progress?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Training Plan": {
+            "main": [
+                [
+                    {
+                        "node": "Format Training",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Training": {
+            "main": [
+                [
+                    {
+                        "node": "Send Training",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Training": {
+            "main": [
+                []
+            ]
+        },
+        "Limit Refresh Done": {
+            "main": [
+                [
+                    {
+                        "node": "Refresh Done",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is /program?": {
+            "main": [
+                [
+                    {
+                        "node": "Ack Program",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Is /refresh?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Ack Program": {
+            "main": [
+                [
+                    {
+                        "node": "Call Planner",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Call Planner": {
+            "main": [
+                [
+                    {
+                        "node": "Limit Program Done",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Limit Program Done": {
+            "main": [
+                [
+                    {
+                        "node": "Program Done",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is /progress?": {
+            "main": [
+                [
+                    {
+                        "node": "Get Progress Wellness",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Is /goals or /principles?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Progress Sessions": {
+            "main": [
+                [
+                    {
+                        "node": "Format Progress",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Progress": {
+            "main": [
+                [
+                    {
+                        "node": "Progress Verdict",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Progress Verdict": {
+            "main": [
+                [
+                    {
+                        "node": "Send Progress",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Progress Verdict Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Progress Verdict",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Progress Wellness": {
+            "main": [
+                [
+                    {
+                        "node": "Get Progress Sessions",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Callback?": {
+            "main": [
+                [
+                    {
+                        "node": "Answer Callback",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Check Auth",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Answer Callback": {
+            "main": [
+                [
+                    {
+                        "node": "Get Explain Session",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Explain Session": {
+            "main": [
+                [
+                    {
+                        "node": "Get Explain Athlete",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Explain Athlete": {
+            "main": [
+                [
+                    {
+                        "node": "Build Explain Prompt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Build Explain Prompt": {
+            "main": [
+                [
+                    {
+                        "node": "Session Found?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Session Found?": {
+            "main": [
+                [
+                    {
+                        "node": "Explain Coach",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Explain Not Found",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Explain Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Explain Coach",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Explain Coach": {
+            "main": [
+                [
+                    {
+                        "node": "Send Explanation",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is /goals or /principles?": {
+            "main": [
+                [
+                    {
+                        "node": "Read Principles Page",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Is Feedback?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read Principles Page": {
+            "main": [
+                [
+                    {
+                        "node": "Format Page",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Page": {
+            "main": [
+                [
+                    {
+                        "node": "Send Page",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "nodeGroups": [],
+    "settings": {
+        "executionOrder": "v1",
+        "errorWorkflow": "psyVgPiGJoO5QOa4",
+        "availableInMCP": true
+    },
+    "staticData": null,
+    "pinData": null,
+    "meta": null,
+    "tags": [],
+    "shared": [
+        {
+            "role": "workflow:owner",
+            "workflowId": "gAnJ0r3x0sFxqWxY",
+            "projectId": "ivZBfby3SUIPsNYy",
+            "project": {
+                "id": "ivZBfby3SUIPsNYy",
+                "name": "Arthur Pfalzgraf <arthur.pfalzgraf@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "customTelemetryTags": [],
+                "creatorId": "1eeb5302-877c-44fb-b514-cfbfc6605d51",
+                "createdAt": "2026-11-08T07:17:48.574Z",
+                "updatedAt": "2026-11-08T07:19:43.443Z"
+            },
+            "createdAt": "2026-11-08T07:23:09.168Z",
+            "updatedAt": "2026-11-08T07:23:09.168Z"
+        }
+    ],
+    "activeVersion": {
+        "versionId": "86b4e2d2-15d7-4c43-a96b-bf689c6f8bb4",
+        "workflowId": "gAnJ0r3x0sFxqWxY",
+        "nodes": [
+            {
+                "id": "telegram-trigger",
+                "name": "Telegram Trigger",
+                "webhookId": "feedback-handler-webhook",
+                "type": "n8n-nodes-base.telegramTrigger",
+                "typeVersion": 1.1,
+                "position": [
+                    0,
+                    0
+                ],
+                "parameters": {
+                    "updates": [
+                        "message",
+                        "callback_query"
+                    ],
+                    "additionalFields": {}
+                },
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "id": "check-auth",
+                "name": "Check Auth",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2.3,
+                "position": [
+                    200,
+                    0
+                ],
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict"
+                        },
+                        "conditions": [
+                            {
+                                "id": "auth-check",
+                                "leftValue": "={{ $json.message?.chat?.id?.toString() || \"\" }}",
+                                "rightValue": "1865798034",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "equals"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                }
+            },
+            {
+                "id": "is-feedback",
+                "name": "Is Feedback?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2.3,
+                "position": [
+                    400,
+                    -100
+                ],
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict"
+                        },
+                        "conditions": [
+                            {
+                                "id": "feedback-prefix",
+                                "leftValue": "={{ $json.message.text }}",
+                                "rightValue": "!",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "startsWith"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                }
+            },
+            {
+                "id": "get-latest-session",
+                "name": "Get Latest Session",
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.3,
+                "position": [
+                    600,
+                    -100
+                ],
+                "parameters": {
+                    "method": "GET",
+                    "url": "https://coach-db.arthurpfz.com/sessions",
+                    "sendQuery": true,
+                    "queryParameters": {
+                        "parameters": [
+                            {
+                                "name": "athlete_id",
+                                "value": "1"
+                            },
+                            {
+                                "name": "limit",
+                                "value": "1"
+                            },
+                            {
+                                "name": "wrap",
+                                "value": "1"
+                            },
+                            {
+                                "name": "has_analysis",
+                                "value": "1"
+                            }
+                        ]
+                    },
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpHeaderAuth",
+                    "options": {}
+                },
+                "credentials": {
+                    "httpHeaderAuth": {
+                        "id": "6GNzKYNE1JAz77RL",
+                        "name": "Tricoach DB"
+                    }
+                }
+            },
+            {
+                "id": "check-session-exists",
+                "name": "Session Exists?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2.3,
+                "position": [
+                    800,
+                    -100
+                ],
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict"
+                        },
+                        "conditions": [
+                            {
+                                "id": "session-check",
+                                "leftValue": "={{ $json.count }}",
+                                "rightValue": 0,
+                                "operator": {
+                                    "type": "number",
+                                    "operation": "gt"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                }
+            },
+            {
+                "id": "save-feedback",
+                "name": "Save Feedback",
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.3,
+                "position": [
+                    1000,
+                    -160
+                ],
+                "parameters": {
+                    "method": "PATCH",
+                    "url": "=https://coach-db.arthurpfz.com/sessions/{{ $json.sessions[0].id }}",
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpHeaderAuth",
+                    "sendBody": true,
+                    "contentType": "json",
+                    "bodyParameters": {
+                        "parameters": [
+                            {
+                                "name": "user_feedback",
+                                "value": "={{ $('Telegram Trigger').item.json.message.text.replace(/^!\\s*/, '').trim() }}"
+                            },
+                            {
+                                "name": "user_feedback_at",
+                                "value": "={{ $now.toISO() }}"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "credentials": {
+                    "httpHeaderAuth": {
+                        "id": "6GNzKYNE1JAz77RL",
+                        "name": "Tricoach DB"
+                    }
+                }
+            },
+            {
+                "id": "confirm-saved",
+                "name": "Send Confirmation",
+                "webhookId": "86e1b335-8fd9-4e09-8f89-4a104c4c0744",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    1200,
+                    -160
+                ],
+                "parameters": {
+                    "chatId": "1865798034",
+                    "text": "=Got it \u2014 saved to {{ $('Get Latest Session').item.json.sessions[0].date }} {{ $('Get Latest Session').item.json.sessions[0].sport }} session.",
+                    "additionalFields": {
+                        "appendAttribution": false
+                    }
+                },
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "id": "no-session-reply",
+                "name": "No Session Reply",
+                "webhookId": "05354f41-4ece-4393-886c-738b55ddfca8",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    1000,
+                    -40
+                ],
+                "parameters": {
+                    "chatId": "1865798034",
+                    "text": "No analyzed session found to attach feedback to.",
+                    "additionalFields": {
+                        "appendAttribution": false
+                    }
+                },
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "id": "is-refresh",
+                "name": "Is /refresh?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    600,
+                    -200
+                ],
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict"
+                        },
+                        "conditions": [
+                            {
+                                "id": "refresh-check",
+                                "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                                "rightValue": "/refresh",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "startsWith"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                }
+            },
+            {
+                "id": "call-backfill",
+                "name": "Call Backfill",
+                "type": "n8n-nodes-base.executeWorkflow",
+                "typeVersion": 1,
+                "alwaysOutputData": true,
+                "position": [
+                    820,
+                    -300
+                ],
+                "parameters": {
+                    "source": "database",
+                    "workflowId": "rHIyZMIJNAOqZvM2",
+                    "mode": "each",
+                    "options": {},
+                    "workflowInputs": {
+                        "mappingMode": "defineBelow",
+                        "value": {
+                            "chat_id": "={{ $json.message.chat.id.toString() }}"
+                        },
+                        "matchingColumns": [],
+                        "schema": [],
+                        "attemptToConvertTypes": false,
+                        "convertFieldsToString": true
+                    }
+                }
+            },
+            {
+                "id": "send-refresh-done",
+                "name": "Refresh Done",
+                "webhookId": "a39f8efc-c461-406f-8c3d-91deaa83bd12",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    1040,
+                    -300
+                ],
+                "parameters": {
+                    "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+                    "text": "\u2705 Refresh complete.",
+                    "additionalFields": {
+                        "appendAttribution": false
+                    }
+                },
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "id": "is-strikes",
+                "name": "Is /strikes?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    600,
+                    0
+                ],
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict"
+                        },
+                        "conditions": [
+                            {
+                                "id": "strikes-check",
+                                "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                                "rightValue": "/strikes",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "startsWith"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                }
+            },
+            {
+                "id": "get-strikes-sessions",
+                "name": "Get Strikes Sessions",
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    820,
+                    -100
+                ],
+                "parameters": {
+                    "method": "GET",
+                    "url": "https://coach-db.arthurpfz.com/sessions",
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpHeaderAuth",
+                    "sendQuery": true,
+                    "queryParameters": {
+                        "parameters": [
+                            {
+                                "name": "athlete_id",
+                                "value": "1"
+                            },
+                            {
+                                "name": "date_from",
+                                "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}"
+                            },
+                            {
+                                "name": "limit",
+                                "value": "300"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "credentials": {
+                    "httpHeaderAuth": {
+                        "id": "6GNzKYNE1JAz77RL",
+                        "name": "Tricoach DB"
+                    }
+                }
+            },
+            {
+                "id": "format-strikes",
+                "name": "Format Strikes",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    1040,
+                    -100
+                ],
+                "parameters": {
+                    "mode": "runOnceForAllItems",
+                    "jsCode": "// Aggregate duration_min by sport for the running week \u2014 same logic as Weekly Stats workflow.\nconst allSessions = $input.all().map(i => i.json);\nconst thisMon = DateTime.now().startOf('week').toFormat('yyyy-MM-dd');\nconst sessions = allSessions.filter(s => (s.date || '') >= thisMon);\nconst totalMin = sessions.reduce((sum, s) => sum + (s.duration_min || 0), 0);\nconst totalH = totalMin / 60;\nconst fires = '\ud83d\udd25'.repeat(Math.floor(totalH)) || '\u00b7';\n\nconst sportEmoji = { Run: '\ud83c\udfc3 Run', Swim: '\ud83c\udfca Swim', Ride: '\ud83d\udeb4 Ride', Workout: '\ud83d\udcaa Workout' };\nconst order = ['Run', 'Swim', 'Ride', 'Workout'];\nconst totals = Object.fromEntries(order.map(s => [s, 0]));\nfor (const s of sessions) {\n  const sp = (s.sport || '').toLowerCase();\n  const k = sp.includes('swim') ? 'Swim'\n    : sp.includes('run') ? 'Run'\n    : (sp.includes('ride') || sp.includes('bike') || sp.includes('cycl') || sp.includes('virtual')) ? 'Ride'\n    : 'Workout';\n  if (totals[k] !== undefined) totals[k] += (s.duration_min || 0);\n}\n\n\nconst fmt = m => `${Math.floor(m / 60)}:${String(Math.round(m % 60)).padStart(2, '0')}`;\n\nconst lines = [\n  '\ud83d\udcca Week to date',\n  `${fires} ${fmt(totalMin)}h total`,\n  '',\n  ...order.map(s => `${sportEmoji[s]} \u00b7 ${fmt(totals[s])}`),\n];\nreturn [{ json: { text: lines.join('\\n') } }];\n"
+                }
+            },
+            {
+                "id": "send-strikes",
+                "name": "Send Strikes",
+                "webhookId": "0cefc31f-f96e-41cf-8d3f-febf72ac01ed",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    1260,
+                    -100
+                ],
+                "parameters": {
+                    "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+                    "text": "={{ $json.text }}",
+                    "additionalFields": {
+                        "appendAttribution": false
+                    }
+                },
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "id": "is-training",
+                "name": "Is /training?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    820,
+                    100
+                ],
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict"
+                        },
+                        "conditions": [
+                            {
+                                "id": "training-check",
+                                "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                                "rightValue": "/training",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "startsWith"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                }
+            },
+            {
+                "id": "get-training-plan",
+                "name": "Get Training Plan",
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    1040,
+                    100
+                ],
+                "parameters": {
+                    "method": "GET",
+                    "url": "https://coach-db.arthurpfz.com/weekly-plans",
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpHeaderAuth",
+                    "sendQuery": true,
+                    "queryParameters": {
+                        "parameters": [
+                            {
+                                "name": "athlete_id",
+                                "value": "1"
+                            },
+                            {
+                                "name": "week_start_date",
+                                "value": "={{ $today.startOf('week').toFormat('yyyy-MM-dd') }}"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "credentials": {
+                    "httpHeaderAuth": {
+                        "id": "6GNzKYNE1JAz77RL",
+                        "name": "Tricoach DB"
+                    }
+                }
+            },
+            {
+                "id": "format-training",
+                "name": "Format Training",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    1260,
+                    100
+                ],
+                "parameters": {
+                    "mode": "runOnceForAllItems",
+                    "jsCode": "const plan = $('Get Training Plan').first().json;\nconst arr = Array.isArray(plan) ? plan[0] : plan;\nconst sessions = (arr && arr.sessions) || [];\nconst focus = (arr && arr.Focus) || '';\nconst weekStart = (arr && arr['Week Start Date']) || '';\n\nconst dayOrder = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];\nconst pinned = sessions.filter(s => s.pinned_day);\nconst flex = sessions.filter(s => !s.pinned_day);\npinned.sort((a, b) => dayOrder.indexOf(a.pinned_day) - dayOrder.indexOf(b.pinned_day));\n\nconst fmt = s => '\u2022 ' +\n  (s.pinned_day ? s.pinned_day + ' \u2014 ' : '') +\n  s.label + ' \u00b7 ' + s.sport + ' \u00b7 ' + s.duration_min + 'min \u2014 ' + s.description;\n\nlet out = '\ud83d\udcc5 Training Plan | week of ' + weekStart + '\\n';\nif (focus) out += '\ud83c\udfaf Focus: ' + focus + '\\n';\nout += '\\n';\nif (pinned.length) out += '\ud83d\udccc Pinned\\n' + pinned.map(fmt).join('\\n') + '\\n\\n';\nif (flex.length) out += '\ud83d\udfe6 Flex pool\\n' + flex.map(fmt).join('\\n');\n\nif (sessions.length === 0) {\n  out = '\ud83d\udcc5 No flex plan for this week. Run the Sunday Planner manually.';\n}\n\nreturn [{ json: { text: out.trim() } }];"
+                }
+            },
+            {
+                "id": "send-training",
+                "name": "Send Training",
+                "webhookId": "e983cbf8-75e1-494d-a3f8-25b310638fb9",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    1480,
+                    100
+                ],
+                "parameters": {
+                    "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+                    "text": "={{ $json.text }}",
+                    "additionalFields": {
+                        "appendAttribution": false
+                    }
+                },
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "id": "limit-refresh-done",
+                "name": "Limit Refresh Done",
+                "type": "n8n-nodes-base.limit",
+                "typeVersion": 1,
+                "position": [
+                    1020,
+                    -300
+                ],
+                "parameters": {
+                    "maxItems": 1,
+                    "keep": "firstItems"
+                }
+            },
+            {
+                "id": "de517b8c-1db5-4e12-abd5-b946b86672d4",
+                "name": "Is /program?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    400,
+                    200
+                ],
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict"
+                        },
+                        "conditions": [
+                            {
+                                "id": "program-check",
+                                "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                                "rightValue": "/program",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "startsWith"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                }
+            },
+            {
+                "id": "0ef6cade-a73f-4e98-95b7-f02974dbc084",
+                "name": "Ack Program",
+                "webhookId": "2e5e8dd3-4dee-4a41-931e-2d15fbd98bff",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    600,
+                    100
+                ],
+                "parameters": {
+                    "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+                    "text": "\ud83e\udde0 Generating your training plan\u2026 give me ~30s.",
+                    "additionalFields": {
+                        "appendAttribution": false
+                    }
+                },
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "id": "d04e5bbf-b196-4995-ac44-2762b5fea2c3",
+                "name": "Call Planner",
+                "type": "n8n-nodes-base.executeWorkflow",
+                "typeVersion": 1,
+                "alwaysOutputData": true,
+                "position": [
+                    800,
+                    100
+                ],
+                "parameters": {
+                    "source": "database",
+                    "workflowId": "lUcAtn2oxCPkNkJ1",
+                    "mode": "each",
+                    "options": {},
+                    "workflowInputs": {
+                        "mappingMode": "defineBelow",
+                        "value": {
+                            "chat_id": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}"
+                        },
+                        "matchingColumns": [],
+                        "schema": [],
+                        "attemptToConvertTypes": false,
+                        "convertFieldsToString": true
+                    }
+                }
+            },
+            {
+                "id": "f64e3a43-9cf3-459f-a559-46ef7663572a",
+                "name": "Limit Program Done",
+                "type": "n8n-nodes-base.limit",
+                "typeVersion": 1,
+                "position": [
+                    1000,
+                    100
+                ],
+                "parameters": {
+                    "maxItems": 1,
+                    "keep": "firstItems"
+                }
+            },
+            {
+                "id": "03adfc25-ed53-4f4c-8223-9c6cbaebd6cb",
+                "name": "Program Done",
+                "webhookId": "ca435c88-f6aa-42a4-a5b6-67bf22374d51",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    1200,
+                    100
+                ],
+                "parameters": {
+                    "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+                    "text": "\u2705 Plan delivered.",
+                    "additionalFields": {
+                        "appendAttribution": false
+                    }
+                },
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "id": "is-progress",
+                "name": "Is /progress?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    1040,
+                    260
+                ],
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict"
+                        },
+                        "conditions": [
+                            {
+                                "id": "progress-check",
+                                "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                                "rightValue": "/progress",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "startsWith"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                }
+            },
+            {
+                "id": "get-progress-sessions",
+                "name": "Get Progress Sessions",
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "alwaysOutputData": true,
+                "position": [
+                    1260,
+                    260
+                ],
+                "parameters": {
+                    "method": "GET",
+                    "url": "https://coach-db.arthurpfz.com/sessions",
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpHeaderAuth",
+                    "sendQuery": true,
+                    "queryParameters": {
+                        "parameters": [
+                            {
+                                "name": "athlete_id",
+                                "value": "1"
+                            },
+                            {
+                                "name": "date_from",
+                                "value": "={{ $today.minus({ days: 56 }).toFormat('yyyy-MM-dd') }}"
+                            },
+                            {
+                                "name": "limit",
+                                "value": "300"
+                            }
+                        ]
+                    },
+                    "options": {}
+                },
+                "credentials": {
+                    "httpHeaderAuth": {
+                        "id": "6GNzKYNE1JAz77RL",
+                        "name": "Tricoach DB"
+                    }
+                }
+            },
+            {
+                "id": "format-progress",
+                "name": "Format Progress",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    1480,
+                    260
+                ],
+                "parameters": {
+                    "mode": "runOnceForAllItems",
+                    "jsCode": "// /progress scoreboard v2 \u2014 last 28d vs prior 28d, duration-weighted, intensity-filtered\nconst all = $input.all().map(i => i.json).filter(s => s && s.date);\nconst cut28 = DateTime.now().minus({ days: 28 }).toFormat('yyyy-MM-dd');\nconst recent = all.filter(s => s.date >= cut28);\nconst prior = all.filter(s => s.date < cut28);\n\nconst cat = (s) => {\n  const sp = (s.sport || '').toLowerCase();\n  if (sp.includes('swim')) return sp.includes('open') ? 'OW' : 'Pool';\n  if (sp.includes('run')) return 'Run';\n  if (sp.includes('ride') || sp.includes('bike') || sp.includes('cycl') || sp.includes('virtual')) return 'Ride';\n  return 'Other';\n};\nconst isWed = s => DateTime.fromISO(s.date).weekday === 3; // Rapha day \u2014 sprints distort EF/decoupling\nconst easyRun = s => s.avg_hr > 0 && s.avg_hr <= 150;      // Z2 ceiling ~149bpm\nconst easyRide = s => !isWed(s) && ((s.intensity_factor > 0 && s.intensity_factor <= 70) || (!s.intensity_factor && s.avg_hr > 0 && s.avg_hr <= 145));\nconst longSteadyRide = s => !isWed(s) && (s.duration_min || 0) >= 90;\n\nconst pick = (list, c, minDur, extra) => list.filter(s => cat(s) === c && (s.duration_min || 0) >= (minDur || 0) && (!extra || extra(s)));\n\nconst wAvg = (list, fn) => {\n  const items = list.map(s => ({ v: fn(s), w: s.duration_min || 0 }))\n    .filter(x => x.v != null && isFinite(x.v) && x.v > 0 && x.w > 0);\n  const W = items.reduce((t, x) => t + x.w, 0);\n  return W ? { v: items.reduce((t, x) => t + x.v * x.w, 0) / W, n: items.length } : null;\n};\n\nconst rideEF = s => s.efficiency_factor || (s.avg_power && s.avg_hr ? s.avg_power / s.avg_hr : null);\nconst runPace = s => s.avg_speed_ms ? 1000 / s.avg_speed_ms / 60 : null;\nconst runSpdHR = s => (s.avg_speed_ms && s.avg_hr) ? (s.avg_speed_ms * 60) / s.avg_hr : null;\nconst runCad = s => s.avg_cadence ? s.avg_cadence * 2 : null; // stored half-spm for runs\nconst swimPace = s => (s.distance_m > 0 && s.moving_sec > 0) ? s.moving_sec / (s.distance_m / 100) : null;\nconst swimDPS = s => (s.avg_speed_ms > 0 && s.avg_cadence > 0) ? (s.avg_speed_ms * 60) / s.avg_cadence : null; // m per stroke cycle\nconst poolSwolf = s => { // sec/length + strokes/length, lengths derived from pool_length_m\n  if (!(s.pool_length_m > 0 && s.distance_m > 0 && s.moving_sec > 0 && s.avg_cadence > 0)) return null;\n  const lengths = s.distance_m / s.pool_length_m;\n  return (s.moving_sec / lengths) + ((s.avg_cadence * (s.moving_sec / 60)) / lengths);\n};\n\nconst fmtPace = v => Math.floor(v) + ':' + String(Math.round((v - Math.floor(v)) * 60)).padStart(2, '0');\nconst fmtSwim = v => Math.floor(v / 60) + ':' + String(Math.round(v % 60)).padStart(2, '0');\n\n// \"\u2022 <label> <now> \u00b7 was <prior> (<\u00b1pct>) <arrow>\"; if a subset filter yields nothing recent \u2192 say so\nconst line = (label, rec, pri, fmt, betterUp, suffix) => {\n  if (!rec && !pri) return null;\n  if (!rec) return '\u2022 ' + label + ' \u2014 none this block (was ' + fmt(pri.v) + ')';\n  let out = '\u2022 ' + label + ' ' + fmt(rec.v);\n  if (pri) {\n    const pct = ((rec.v - pri.v) / pri.v) * 100;\n    const arrow = Math.abs(pct) < 1 ? '\u25ac' : ((betterUp ? pct > 0 : pct < 0) ? '\u25b2' : '\u25bc');\n    out += ' \u00b7 was ' + fmt(pri.v) + ' (' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%) ' + arrow;\n  } else out += ' \u00b7 no prior data';\n  if (suffix) out += ' \u00b7 ' + suffix;\n  return out;\n};\n\nconst sections = [];\nconst addSection = (header, c, minDur, metrics) => {\n  const r = pick(recent, c, minDur), p = pick(prior, c, minDur);\n  if (!r.length && !p.length) return;\n  const lines = metrics.map(m => {\n    const rr = m.filter ? r.filter(m.filter) : r;\n    const pp = m.filter ? p.filter(m.filter) : p;\n    const lbl = m.filter ? m.label + ' (' + rr.length + 'v' + pp.length + ')' : m.label;\n    return line(lbl, wAvg(rr, m.fn), wAvg(pp, m.fn), m.fmt, m.betterUp, m.suffix);\n  }).filter(Boolean);\n  if (!lines.length) return;\n  sections.push([header + ' (' + r.length + ' vs ' + p.length + ')', ...lines].join('\\n'));\n};\n\naddSection('\ud83d\udeb4 Ride', 'Ride', 10, [\n  { label: 'EF Z2', filter: easyRide, fn: rideEF, fmt: v => v.toFixed(2) + ' W/bpm', betterUp: true },\n  { label: 'Decoupling long', filter: longSteadyRide, fn: s => s.decoupling, fmt: v => v.toFixed(1) + '%', betterUp: false },\n]);\naddSection('\ud83c\udfc3 Run', 'Run', 10, [\n  { label: 'Pace all', fn: runPace, fmt: v => fmtPace(v) + '/km', betterUp: false },\n  { label: 'Speed@HR Z2', filter: easyRun, fn: runSpdHR, fmt: v => v.toFixed(2), betterUp: true },\n  { label: 'Cadence', fn: runCad, fmt: v => Math.round(v) + ' spm', betterUp: true, suffix: 'target 175-180' },\n]);\naddSection('\ud83c\udfca Pool', 'Pool', 0, [\n  { label: 'Pace', fn: swimPace, fmt: v => fmtSwim(v) + '/100m', betterUp: false },\n  { label: 'DPS', fn: swimDPS, fmt: v => v.toFixed(2) + ' m/cycle', betterUp: true },\n  { label: 'SWOLF', fn: poolSwolf, fmt: v => v.toFixed(1), betterUp: false },\n]);\naddSection('\ud83c\udf0a Open water', 'OW', 0, [\n  { label: 'Pace', fn: swimPace, fmt: v => fmtSwim(v) + '/100m', betterUp: false },\n  { label: 'DPS', fn: swimDPS, fmt: v => v.toFixed(2) + ' m/cycle', betterUp: true },\n]);\n\n// Durability vs current target race demands \u2014 Triathlon du Lion L (86km bike / 19.5km run). Swap back to 90km/21km after the May 2027 race (see vault roadmap).\nconst maxKm = (list, c) => { const d = pick(list, c, 0).map(s => s.distance_m ? s.distance_m / 1000 : 0); return d.length ? Math.max(...d) : null; };\nconst dur = [];\nconst durLine = (label, r, p, race) => {\n  if (r == null && p == null) return null;\n  let out = '\u2022 ' + label + ' ' + (r != null ? r.toFixed(0) + 'km' : 'none');\n  if (p != null) out += ' \u00b7 was ' + p.toFixed(0);\n  out += ' \u00b7 race ' + race;\n  return out;\n};\nconst lr = durLine('Long ride', maxKm(recent, 'Ride'), maxKm(prior, 'Ride'), '86km');\nconst ln = durLine('Long run', maxKm(recent, 'Run'), maxKm(prior, 'Run'), '19.5km');\nif (lr) dur.push(lr);\nif (ln) dur.push(ln);\nif (dur.length) sections.push(['\ud83c\udfc1 Durability', ...dur].join('\\n'));\n\n// Recovery \u2014 ICU wellness (Get Progress Wellness, fullResponse: body = array of daily records)\ntry {\n  const wBody = $('Get Progress Wellness').first().json.body;\n  const wRecs = Array.isArray(wBody) ? wBody : [];\n  const wRecent = wRecs.filter(w => (w.id || '') >= cut28);\n  const wPrior = wRecs.filter(w => (w.id || '') < cut28);\n  const avg = (list, f) => { const v = list.map(f).filter(x => x != null && isFinite(x) && x > 0); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };\n  const wLine = (label, r, p, fmt, betterUp) => {\n    if (r == null) return null;\n    let out = '\u2022 ' + label + ' ' + fmt(r);\n    if (p != null) {\n      const pct = ((r - p) / p) * 100;\n      const arrow = Math.abs(pct) < 1 ? '\u25ac' : ((betterUp ? pct > 0 : pct < 0) ? '\u25b2' : '\u25bc');\n      out += ' \u00b7 was ' + fmt(p) + ' ' + arrow;\n    }\n    return out;\n  };\n  const fmtSleep = v => Math.floor(v / 3600) + 'h' + String(Math.round((v % 3600) / 60)).padStart(2, '0');\n  const rec = [\n    wLine('Sleep', avg(wRecent, w => w.sleepSecs), avg(wPrior, w => w.sleepSecs), fmtSleep, true),\n    wLine('HRV', avg(wRecent, w => w.hrv), avg(wPrior, w => w.hrv), v => Math.round(v), true),\n    wLine('RHR', avg(wRecent, w => w.restingHR), avg(wPrior, w => w.restingHR), v => Math.round(v) + ' bpm', false),\n  ].filter(Boolean);\n  if (rec.length) sections.push(['\ud83d\udca4 Recovery', ...rec].join('\\n'));\n} catch (e) { /* wellness unavailable \u2014 skip section */ }\n\n// CTL: latest vs last value before the 28d cut\nconst withCtl = all.filter(s => s.ctl != null).sort((a, b) => a.date < b.date ? -1 : 1);\nif (withCtl.length) {\n  const nowCtl = withCtl[withCtl.length - 1].ctl;\n  const priCtlArr = withCtl.filter(s => s.date < cut28);\n  const priCtl = priCtlArr.length ? priCtlArr[priCtlArr.length - 1].ctl : null;\n  let l = '\u2022 CTL ' + Math.round(nowCtl);\n  if (priCtl != null) l += ' \u00b7 was ' + Math.round(priCtl) + ' ' + (Math.round(nowCtl) > Math.round(priCtl) ? '\u25b2' : Math.round(nowCtl) < Math.round(priCtl) ? '\u25bc' : '\u25ac');\n  sections.push('\ud83d\udcaa Fitness\\n' + l);\n}\n\nconst scoreboard = sections.length\n  ? '\ud83d\udcc8 Progress \u2014 last 4wk vs prior 4wk\\n\\n' + sections.join('\\n\\n')\n  : '\ud83d\udcc8 Progress \u2014 not enough data yet.';\nreturn [{ json: { scoreboard, hasData: sections.length > 0 } }];\n"
+                }
+            },
+            {
+                "id": "progress-verdict",
+                "name": "Progress Verdict",
+                "type": "@n8n/n8n-nodes-langchain.chainLlm",
+                "typeVersion": 1.8,
+                "position": [
+                    1700,
+                    260
+                ],
+                "parameters": {
+                    "promptType": "define",
+                    "text": "=You are a triathlon coach. Below is your athlete's progress scoreboard: last 4 weeks vs the prior 4 weeks (duration-weighted; session counts in parentheses; Z2 metrics use easy sessions only). Race: Erkner 70.3 on 2026-09-13 \u2014 1.9km swim, 90km bike, 21.1km run.\n\nWrite EXACTLY ONE plain-text sentence (max 30 words): an honest verdict \u2014 what improved, what didn't, and the single focus for the next block. No emoji, no markdown, no preamble, no quotes.\n\nHonesty caveats: small counts are noisy; open-water and pool paces are not comparable; \"Speed@HR Z2 \u2014 none this block\" means zero easy runs were logged (a broken 80/20 polarization, worth calling out); Durability shows longest sessions vs race demands.\n\nSCOREBOARD:\n{{ $json.scoreboard }}",
+                    "batching": {}
+                }
+            },
+            {
+                "id": "progress-verdict-model",
+                "name": "Progress Verdict Model",
+                "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+                "typeVersion": 1,
+                "position": [
+                    1700,
+                    440
+                ],
+                "parameters": {
+                    "model": "anthropic/claude-sonnet-5",
+                    "options": {}
+                },
+                "credentials": {
+                    "openRouterApi": {
+                        "id": "nhbNqmgyP4cAeQ6B",
+                        "name": "OpenRouter account"
+                    }
+                }
+            },
+            {
+                "id": "send-progress",
+                "name": "Send Progress",
+                "webhookId": "1e75a76f-c82f-424c-97a3-758974b42652",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    1920,
+                    260
+                ],
+                "parameters": {
+                    "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id.toString() }}",
+                    "text": "={{ $('Format Progress').first().json.scoreboard + '\\n\\n\ud83e\udde0 ' + ($json.text || '').trim() }}",
+                    "additionalFields": {
+                        "appendAttribution": false
+                    }
+                },
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "id": "get-progress-wellness",
+                "name": "Get Progress Wellness",
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "alwaysOutputData": true,
+                "position": [
+                    1150,
+                    400
+                ],
+                "parameters": {
+                    "method": "GET",
+                    "url": "https://intervals.icu/api/v1/athlete/i492254/wellness",
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpBasicAuth",
+                    "sendQuery": true,
+                    "queryParameters": {
+                        "parameters": [
+                            {
+                                "name": "oldest",
+                                "value": "={{ $today.minus({ days: 56 }).toFormat('yyyy-MM-dd') }}"
+                            },
+                            {
+                                "name": "newest",
+                                "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+                            }
+                        ]
+                    },
+                    "options": {
+                        "response": {
+                            "response": {
+                                "fullResponse": true,
+                                "neverError": true
+                            }
+                        }
+                    }
+                },
+                "credentials": {
+                    "httpBasicAuth": {
+                        "id": "ms91wbaCvecB3tqQ",
+                        "name": "Intervals.icu API"
+                    }
+                }
+            },
+            {
+                "id": "05750124-26c3-4f34-9645-ed66bc34dceb",
+                "name": "Is Callback?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    200,
+                    -200
+                ],
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "loose",
+                            "version": 2
+                        },
+                        "conditions": [
+                            {
+                                "id": "is-callback",
+                                "leftValue": "={{ ($json.callback_query?.data || \"\").startsWith(\"explain:\") && ($json.callback_query?.from?.id || \"\").toString() === \"1865798034\" }}",
+                                "rightValue": "",
+                                "operator": {
+                                    "type": "boolean",
+                                    "operation": "true",
+                                    "singleValue": true
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                }
+            },
+            {
+                "id": "3694832f-d7d5-4218-bb05-465fc8683f6f",
+                "name": "Answer Callback",
+                "webhookId": "8d594cc0-8b14-4265-9c6a-f2379d304b24",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    420,
+                    -300
+                ],
+                "parameters": {
+                    "resource": "callback",
+                    "operation": "answerQuery",
+                    "queryId": "={{ $json.callback_query.id }}",
+                    "additionalFields": {}
+                },
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "id": "1faa2474-30e1-494b-91a4-0eb98241954c",
+                "name": "Get Explain Session",
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    640,
+                    -300
+                ],
+                "parameters": {
+                    "method": "GET",
+                    "url": "=https://coach-db.arthurpfz.com/sessions/{{ $('Telegram Trigger').item.json.callback_query.data.split(':')[1] }}",
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpHeaderAuth",
+                    "options": {
+                        "response": {
+                            "response": {
+                                "neverError": true
+                            }
+                        }
+                    }
+                },
+                "credentials": {
+                    "httpHeaderAuth": {
+                        "id": "6GNzKYNE1JAz77RL",
+                        "name": "Tricoach DB"
+                    }
+                }
+            },
+            {
+                "id": "88f70a82-0b58-4b38-a7fa-ef049f7bb524",
+                "name": "Get Explain Athlete",
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.2,
+                "position": [
+                    860,
+                    -300
+                ],
+                "parameters": {
+                    "method": "GET",
+                    "url": "https://coach-db.arthurpfz.com/athletes/1",
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpHeaderAuth",
+                    "options": {}
+                },
+                "credentials": {
+                    "httpHeaderAuth": {
+                        "id": "6GNzKYNE1JAz77RL",
+                        "name": "Tricoach DB"
+                    }
+                }
+            },
+            {
+                "id": "64a18247-c5bb-4b0e-bb4b-53845871c3b8",
+                "name": "Build Explain Prompt",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    1080,
+                    -300
+                ],
+                "parameters": {
+                    "jsCode": "const s = $('Get Explain Session').first().json;\nconst athlete = $input.first().json;\nif (!s || s.error || !s.id) return [{ json: { notFound: true } }];\n\nconst isRun = (s.sport || '').toLowerCase().includes('run');\nconst fmt = (v, d = 1) => (v === null || v === undefined) ? null : Number(v).toFixed(d);\nconst met = [];\nif (s.avg_hr) met.push('avg HR ' + s.avg_hr + 'bpm');\nif (s.avg_power) met.push('avg power ' + s.avg_power + 'W');\nif (s.normalized_power) met.push('NP ' + s.normalized_power + 'W');\nif (s.avg_cadence) met.push('avg cadence ' + (isRun ? (s.avg_cadence * 2) + ' spm' : s.avg_cadence + ' rpm'));\nif (s.avg_speed_ms) met.push('avg speed ' + fmt(s.avg_speed_ms, 2) + ' m/s');\nif (s.tss) met.push('TSS ' + s.tss);\nif (s.intensity_factor) met.push('IF ' + s.intensity_factor);\nif (s.decoupling !== null && s.decoupling !== undefined) met.push('decoupling ' + fmt(s.decoupling) + '%');\nif (s.efficiency_factor !== null && s.efficiency_factor !== undefined) met.push('EF ' + fmt(s.efficiency_factor, 2));\nif (s.pool_length_m) met.push('pool ' + s.pool_length_m + 'm');\n\nconst lines = [\n  'Sport: ' + s.sport + ' \u00b7 Date: ' + s.date + ' \u00b7 Grade: ' + (s.grade || '\u2014'),\n  'Duration: ' + (s.duration_min || '\u2014') + 'min \u00b7 Distance: ' + (s.distance_km ?? '\u2014') + 'km',\n];\nif (met.length) lines.push('Metrics: ' + met.join(' \u00b7 '));\nlines.push('', 'COACH ANALYSIS (the message the athlete tapped):', s.analysis || '(no stored analysis \u2014 explain from the metrics alone)');\nlines.push('', 'ATHLETE FITNESS PROFILE:', athlete['Fitness Profile'] || '');\nreturn [{ json: { notFound: false, context: lines.join('\\n') } }];"
+                }
+            },
+            {
+                "id": "21070fd3-7167-42a0-91a5-41592fcd4eb0",
+                "name": "Session Found?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    1300,
+                    -300
+                ],
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "loose",
+                            "version": 2
+                        },
+                        "conditions": [
+                            {
+                                "id": "session-found",
+                                "leftValue": "={{ $json.notFound !== true }}",
+                                "rightValue": "",
+                                "operator": {
+                                    "type": "boolean",
+                                    "operation": "true",
+                                    "singleValue": true
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                }
+            },
+            {
+                "id": "20f689c1-3f6d-496d-9247-af0fa76cd11f",
+                "name": "Explain Coach",
+                "type": "@n8n/n8n-nodes-langchain.chainLlm",
+                "typeVersion": 1.8,
+                "position": [
+                    1520,
+                    -360
+                ],
+                "parameters": {
+                    "promptType": "define",
+                    "text": "=You are a triathlon coach. Your athlete tapped \"Explain\" under the coaching analysis below and wants it decoded in PLAIN ENGLISH \u2014 they are not a sports scientist. Race: Erkner 70.3 on 2026-09-13 (1.9km swim, 90km bike, 21.1km run).\n\n{{ $json.context }}\n\nWrite the Telegram reply. ENGLISH ONLY. Plain text, no markdown, literal \u2022 bullets and numbered list, max ~20 lines total. Exactly this structure:\n\n\ud83e\udde0 What it means\n2-4 \u2022 bullets translating the analysis for a non-expert: decode every metric it names (what it measures, what their number says vs the target), then the single limiter and why it matters for their race.\n\n\ud83d\udcaa Best exercises to improve\n3-5 numbered drills/exercises that most directly fix the limiter, highest-leverage first. Each: name \u2014 what it fixes, how to do it (max 2 lines). Sport-appropriate: swim \u2192 stroke/technique drills; run \u2192 cadence, strides, form work; ride \u2192 pacing, cadence, durability work. Use the fitness profile numbers for targets.\n\nDo: one closing line telling them exactly how to fold this into their next session.\n\nNo preamble, no sign-off, simple words, never French.",
+                    "batching": {}
+                }
+            },
+            {
+                "id": "2bc0f25b-fa69-4013-b85b-1c783869887c",
+                "name": "Explain Model",
+                "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+                "typeVersion": 1,
+                "position": [
+                    1560,
+                    -180
+                ],
+                "parameters": {
+                    "model": "anthropic/claude-sonnet-5",
+                    "options": {}
+                },
+                "credentials": {
+                    "openRouterApi": {
+                        "id": "nhbNqmgyP4cAeQ6B",
+                        "name": "OpenRouter account"
+                    }
+                }
+            },
+            {
+                "id": "3f3b9c45-0247-4523-be83-944072233065",
+                "name": "Send Explanation",
+                "webhookId": "13f02c89-d85c-42ae-8809-d967cd605ef8",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    1880,
+                    -360
+                ],
+                "parameters": {
+                    "chatId": "={{ $('Telegram Trigger').item.json.callback_query.message.chat.id.toString() }}",
+                    "text": "={{ ($json.text || '').trim() }}",
+                    "additionalFields": {
+                        "appendAttribution": false,
+                        "reply_to_message_id": "={{ $('Telegram Trigger').item.json.callback_query.message.message_id }}"
+                    }
+                },
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "id": "da5a22e2-1bbd-4ff8-a7fe-2a14362887e0",
+                "name": "Explain Not Found",
+                "webhookId": "7a38ed44-022c-4672-9882-ae0fd0c34712",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    1520,
+                    -120
+                ],
+                "parameters": {
+                    "chatId": "={{ $('Telegram Trigger').item.json.callback_query.message.chat.id.toString() }}",
+                    "text": "\ud83e\udd37 Couldn't find that session in the DB.",
+                    "additionalFields": {
+                        "appendAttribution": false
+                    }
+                },
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "id": "is-page-cmd",
+                "name": "Is /goals or /principles?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2,
+                "position": [
+                    820,
+                    500
+                ],
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict"
+                        },
+                        "conditions": [
+                            {
+                                "id": "goals-check",
+                                "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                                "rightValue": "/goals",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "startsWith"
+                                }
+                            },
+                            {
+                                "id": "principles-check",
+                                "leftValue": "={{ ($json.message.text || \"\").trim() }}",
+                                "rightValue": "/principles",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "startsWith"
+                                }
+                            }
+                        ],
+                        "combinator": "or"
+                    },
+                    "options": {}
+                }
+            },
+            {
+                "id": "read-principles-page",
+                "name": "Read Principles Page",
+                "type": "n8n-nodes-base.ssh",
+                "typeVersion": 1,
+                "alwaysOutputData": true,
+                "onError": "continueRegularOutput",
+                "position": [
+                    1040,
+                    500
+                ],
+                "parameters": {
+                    "command": "cat /opt/vault/wiki/triathlon-principles.md",
+                    "cwd": "/",
+                    "authentication": "privateKey"
+                },
+                "credentials": {
+                    "sshPrivateKey": {
+                        "id": "FsZHqVr40gzGCz9I",
+                        "name": "VPS SSH (n8n-runner)"
+                    }
+                }
+            },
+            {
+                "id": "format-page",
+                "name": "Format Page",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    1260,
+                    500
+                ],
+                "parameters": {
+                    "mode": "runOnceForAllItems",
+                    "jsCode": "// /goals \u2192 sections 1-2 of the principles page, /principles \u2192 sections 3-6. Plain-text Telegram.\nconst cmd = ($('Telegram Trigger').first().json.message.text || '').trim().toLowerCase();\nconst isGoals = cmd.startsWith('/goals');\nconst raw = String($('Read Principles Page').first().json.stdout || '');\nconst updated = (raw.match(/^updated:\\s*'?([\\d-]+)/m) || [])[1] || '?';\nconst body = raw.replace(/^---[\\s\\S]*?\\n---\\n/, '');\nconst wanted = isGoals ? ['1', '2'] : ['3', '4', '5', '6'];\nconst sections = body.split(/^## /m).slice(1).filter(s => wanted.includes(s.split('.')[0]));\n\nconst clean = s => s.replace(/\\*\\*/g, '').replace(/\\[\\[[^\\]|]*\\|([^\\]]+)\\]\\]/g, '$1').replace(/\\[\\[([^\\]]+)\\]\\]/g, '$1');\nconst render = sec => {\n  const lines = clean(sec).split('\\n');\n  const out = ['\u25aa\ufe0f ' + lines.shift().replace(/^\\d+\\.\\s*/, '').toUpperCase()];\n  let header = null;\n  for (const l of lines) {\n    if (/^\\|[-\\s|]+\\|$/.test(l)) continue;                 // table separator\n    if (l.startsWith('|')) {\n      const cells = l.split('|').slice(1, -1).map(c => c.trim());\n      if (!header) { header = cells; continue; }\n      out.push('\u2022 ' + cells[0] + ': ' + cells.slice(1).map((c, i) => header[i + 1] + ' ' + c).join(' / '));\n      continue;\n    }\n    header = null;\n    if (l.startsWith('### ')) out.push('', l.slice(4) + ':');\n    else if (l.startsWith('- ')) out.push('\u2022 ' + l.slice(2));\n    else out.push(l);\n  }\n  return out.join('\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n};\n\nif (!sections.length) {\n  return [{ json: { text: '\u26a0\ufe0f Could not read the principles page (vault \u203a triathlon-principles).' } }];\n}\nconst title = isGoals ? '\ud83c\udfaf My goals' : '\ud83d\udcdc My principles';\nconst parts = [title + ' (updated ' + updated + ')', ...sections.map(render), 'Edit in Obsidian: triathlon-principles'];\n\n// Telegram caps a message at 4096 chars: pack sections into chunks, split long ones by paragraph\nconst chunks = [];\nlet cur = '';\nfor (const p of parts.flatMap(p => p.length > 3800 ? p.split('\\n\\n') : [p])) {\n  if (cur && (cur + '\\n\\n' + p).length > 3800) { chunks.push(cur); cur = p; }\n  else cur = cur ? cur + '\\n\\n' + p : p;\n}\nif (cur) chunks.push(cur);\nreturn chunks.map(text => ({ json: { text } }));\n"
+                }
+            },
+            {
+                "id": "send-page",
+                "name": "Send Page",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    1480,
+                    500
+                ],
+                "parameters": {
+                    "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id.toString() }}",
+                    "text": "={{ $json.text }}",
+                    "additionalFields": {
+                        "appendAttribution": false
+                    }
+                },
+                "credentials": {
+                    "telegramApi": {
+                        "id": "9IpAp35yJmIQJpeA",
+                        "name": "Telegram account"
+                    }
+                },
+                "webhookId": "06934d91-c2a3-48db-b6ca-08e3c2380438"
+            }
+        ],
+        "connections": {
+            "Telegram Trigger": {
+                "main": [
+                    [
+                        {
+                            "node": "Is Callback?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Check Auth": {
+                "main": [
+                    [
+                        {
+                            "node": "Is /program?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    []
+                ]
+            },
+            "Is Feedback?": {
+                "main": [
+                    [
+                        {
+                            "node": "Get Latest Session",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    []
+                ]
+            },
+            "Get Latest Session": {
+                "main": [
+                    [
+                        {
+                            "node": "Session Exists?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Session Exists?": {
+                "main": [
+                    [
+                        {
+                            "node": "Save Feedback",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "No Session Reply",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Save Feedback": {
+                "main": [
+                    [
+                        {
+                            "node": "Send Confirmation",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Is /refresh?": {
+                "main": [
+                    [
+                        {
+                            "node": "Call Backfill",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Is /strikes?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Call Backfill": {
+                "main": [
+                    [
+                        {
+                            "node": "Limit Refresh Done",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Is /strikes?": {
+                "main": [
+                    [
+                        {
+                            "node": "Get Strikes Sessions",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Is /training?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Get Strikes Sessions": {
+                "main": [
+                    [
+                        {
+                            "node": "Format Strikes",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Format Strikes": {
+                "main": [
+                    [
+                        {
+                            "node": "Send Strikes",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Send Strikes": {
+                "main": [
+                    []
+                ]
+            },
+            "Is /training?": {
+                "main": [
+                    [
+                        {
+                            "node": "Get Training Plan",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Is /progress?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Get Training Plan": {
+                "main": [
+                    [
+                        {
+                            "node": "Format Training",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Format Training": {
+                "main": [
+                    [
+                        {
+                            "node": "Send Training",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Send Training": {
+                "main": [
+                    []
+                ]
+            },
+            "Limit Refresh Done": {
+                "main": [
+                    [
+                        {
+                            "node": "Refresh Done",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Is /program?": {
+                "main": [
+                    [
+                        {
+                            "node": "Ack Program",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Is /refresh?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Ack Program": {
+                "main": [
+                    [
+                        {
+                            "node": "Call Planner",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Call Planner": {
+                "main": [
+                    [
+                        {
+                            "node": "Limit Program Done",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Limit Program Done": {
+                "main": [
+                    [
+                        {
+                            "node": "Program Done",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Is /progress?": {
+                "main": [
+                    [
+                        {
+                            "node": "Get Progress Wellness",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Is /goals or /principles?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Get Progress Sessions": {
+                "main": [
+                    [
+                        {
+                            "node": "Format Progress",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Format Progress": {
+                "main": [
+                    [
+                        {
+                            "node": "Progress Verdict",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Progress Verdict": {
+                "main": [
+                    [
+                        {
+                            "node": "Send Progress",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Progress Verdict Model": {
+                "ai_languageModel": [
+                    [
+                        {
+                            "node": "Progress Verdict",
+                            "type": "ai_languageModel",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Get Progress Wellness": {
+                "main": [
+                    [
+                        {
+                            "node": "Get Progress Sessions",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Is Callback?": {
+                "main": [
+                    [
+                        {
+                            "node": "Answer Callback",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Check Auth",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Answer Callback": {
+                "main": [
+                    [
+                        {
+                            "node": "Get Explain Session",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Get Explain Session": {
+                "main": [
+                    [
+                        {
+                            "node": "Get Explain Athlete",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Get Explain Athlete": {
+                "main": [
+                    [
+                        {
+                            "node": "Build Explain Prompt",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Build Explain Prompt": {
+                "main": [
+                    [
+                        {
+                            "node": "Session Found?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Session Found?": {
+                "main": [
+                    [
+                        {
+                            "node": "Explain Coach",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Explain Not Found",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Explain Model": {
+                "ai_languageModel": [
+                    [
+                        {
+                            "node": "Explain Coach",
+                            "type": "ai_languageModel",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Explain Coach": {
+                "main": [
+                    [
+                        {
+                            "node": "Send Explanation",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Is /goals or /principles?": {
+                "main": [
+                    [
+                        {
+                            "node": "Read Principles Page",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Is Feedback?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Read Principles Page": {
+                "main": [
+                    [
+                        {
+                            "node": "Format Page",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Format Page": {
+                "main": [
+                    [
+                        {
+                            "node": "Send Page",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            }
+        },
+        "nodeGroups": [],
+        "authors": "Arthur Pfalzgraf",
+        "name": null,
+        "description": null,
+        "autosaved": false,
+        "createdAt": "2026-11-28T05:54:42.546Z",
+        "updatedAt": "2026-11-28T05:54:42.546Z",
+        "workflowPublishHistory": [
+            {
+                "id": 176,
+                "workflowId": "gAnJ0r3x0sFxqWxY",
+                "versionId": "86b4e2d2-15d7-4c43-a96b-bf689c6f8bb4",
+                "event": "activated",
+                "userId": "1eeb5302-877c-44fb-b514-cfbfc6605d51",
+                "createdAt": "2026-11-28T05:54:42.735Z"
+            }
+        ]
+    },
+    "parentFolder": null
+}
